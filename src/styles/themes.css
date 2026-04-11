@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════
+   MAnalista — Sistema de Temas
+   Tema 1: dark   → Ethereal Glass (OLED Black)
+   Tema 2: clinic → MyClinicSoft Design System
+   ═══════════════════════════════════════════════════ */
+
+/* ── TEMA DARK (Ethereal Glass) ─────────────────── */
+[data-theme="dark"],
+.theme-dark {
+  --bg-base:           #050508;
+  --bg-card:           rgba(10, 10, 14, 0.85);
+  --bg-glass:          rgba(255, 255, 255, 0.04);
+  --bg-input:          rgba(255, 255, 255, 0.05);
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --border-input:      rgba(255, 255, 255, 0.10);
+  --text-primary:      #F0EEF6;
+  --text-secondary:    rgba(255, 255, 255, 0.55);
+  --text-muted:        rgba(255, 255, 255, 0.30);
+  --text-label:        rgba(255, 255, 255, 0.35);
+  --accent-brand:      #7C5CFC;
+  --accent-brand-soft: rgba(124, 92, 252, 0.15);
+  --shadow-card:       0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  --shadow-button:     0 4px 24px rgba(124,92,252,0.3);
+  --radius-card:       1.5rem;
+  --radius-input:      0.75rem;
+  --nav-bg:            rgba(10,10,14,0.75);
+}
+
+/* ── TEMA CLINIC (MyClinicSoft DS) ──────────────── */
+[data-theme="clinic"],
+.theme-clinic {
+  --bg-base:           #F4F6F9;
+  --bg-card:           #FFFFFF;
+  --bg-glass:          rgba(0, 0, 0, 0.03);
+  --bg-input:          #FFFFFF;
+  --border-subtle:     #E2E8F0;
+  --border-input:      #CBD5E1;
+  --text-primary:      #1A2332;
+  --text-secondary:    #4A5568;
+  --text-muted:        #8A96A3;
+  --text-label:        #64748B;
+  --accent-brand:      #2D6AFF;
+  --accent-brand-soft: rgba(45, 106, 255, 0.10);
+  --shadow-card:       0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-button:     0 4px 12px rgba(45,106,255,0.25);
+  --radius-card:       1rem;
+  --radius-input:      0.75rem;
+  --nav-bg:            #FFFFFF;
+}
