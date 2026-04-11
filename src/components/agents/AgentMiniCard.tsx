@@ -106,33 +106,34 @@ export function AgentMiniCard({ agent, lang, status, dialogText, isStreaming, on
         )}
 
         {/* Avatar + Name row */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-          {/* Avatar */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+          {/* Avatar — graphite portrait style */}
           <div style={{
-            width: 32, height: 32, borderRadius: "0.6rem", overflow: "hidden", flexShrink: 0,
-            background: agent.colorLight, border: `1px solid ${agent.color}33`,
+            width: 72, height: 72, borderRadius: "1rem", overflow: "hidden", flexShrink: 0,
+            background: "#111", border: `1.5px solid ${agent.color}40`,
             display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: `0 2px 12px ${agent.color}15`,
           }}>
             {!imgError ? (
               <Image
                 src={`/avatars/${agent.id}.svg`}
                 alt={pt ? agent.namePt : agent.nameEn}
-                width={32} height={32}
+                width={72} height={72}
                 style={{ objectFit: "cover" }}
                 onError={() => setImgError(true)}
               />
             ) : (
-              <span style={{ fontSize: "1rem" }}>{agent.emoji}</span>
+              <span style={{ fontSize: "1.5rem" }}>{agent.emoji}</span>
             )}
           </div>
           {/* Name + role */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3 }}>
               {pt ? agent.namePt : agent.nameEn}
             </div>
-            <div style={{ fontSize: "0.6rem", color: agent.color, fontWeight: 600, display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <div style={{ fontSize: "0.62rem", color: agent.color, fontWeight: 600, display: "flex", alignItems: "center", gap: "0.3rem", marginTop: "0.15rem" }}>
               <span style={{
-                width: 5, height: 5, borderRadius: "50%", background: dot.bg, flexShrink: 0,
+                width: 6, height: 6, borderRadius: "50%", background: dot.bg, flexShrink: 0,
                 ...(dot.animate ? { animation: "pulse-slow 1.5s ease-in-out infinite" } : {}),
               }} />
               {pt ? agent.rolePt : agent.roleEn}

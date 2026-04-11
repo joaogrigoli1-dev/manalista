@@ -1,36 +1,76 @@
-<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Coord. Atlas — Male, 50s, wise, glasses, salt-pepper hair, serious -->
   <defs>
-    <linearGradient id="skinM" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#D4A574;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#C89868;stop-opacity:1" />
-    </linearGradient>
-    <radialGradient id="bgM" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:0.2" />
-      <stop offset="100%" style="stop-color:#0A0A0E;stop-opacity:1" />
+    <filter id="grain-m" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feBlend in="SourceGraphic" mode="multiply" result="noisy"/>
+      <feComposite in="SourceGraphic" in2="noisy" operator="in"/>
+    </filter>
+    <radialGradient id="bg-m" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
     </radialGradient>
-    <linearGradient id="hairM" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#5A5A6E;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2A2A3E;stop-opacity:1" />
-    </linearGradient>
   </defs>
-  <circle cx="60" cy="60" r="60" fill="url(#bgM)"/>
-  <path d="M 28 40 Q 28 28 60 28 Q 92 28 92 40 L 92 58 Q 75 52 60 52 Q 45 52 28 58 Z" fill="url(#hairM)"/>
-  <ellipse cx="60" cy="68" rx="26" ry="30" fill="url(#skinM)"/>
-  <ellipse cx="33" cy="62" rx="5.5" ry="11" fill="url(#skinM)"/>
-  <ellipse cx="87" cy="62" rx="5.5" ry="11" fill="url(#skinM)"/>
-  <ellipse cx="50" cy="62" rx="4.5" ry="5.5" fill="#1a1a2e"/>
-  <ellipse cx="70" cy="62" rx="4.5" ry="5.5" fill="#1a1a2e"/>
-  <circle cx="51" cy="60" r="1.2" fill="#ffffff"/>
-  <circle cx="71" cy="60" r="1.2" fill="#ffffff"/>
-  <path d="M 45 54 Q 50 52 55 54" stroke="#3A3A4A" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-  <path d="M 65 54 Q 70 52 75 54" stroke="#3A3A4A" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-  <rect x="43" y="57" width="11" height="9" rx="1.5" fill="none" stroke="#666677" stroke-width="1"/>
-  <rect x="66" y="57" width="11" height="9" rx="1.5" fill="none" stroke="#666677" stroke-width="1"/>
-  <line x1="54" y1="61.5" x2="66" y2="61.5" stroke="#666677" stroke-width="0.8"/>
-  <path d="M 60 64 L 60 76" stroke="#B8926A" stroke-width="1.2" fill="none"/>
-  <path d="M 50 81 Q 60 85 70 81" stroke="#A67C5C" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-  <path d="M 28 92 L 30 86 L 38 82 L 60 80 L 82 82 L 90 86 L 92 92 L 92 120 L 28 120 Z" fill="#1a1a28"/>
-  <rect x="48" y="86" width="24" height="18" fill="#2a2a3e"/>
-  <path d="M 55 90 L 60 86 L 65 90" fill="#8B5CF6" opacity="0.3"/>
-  <rect x="56" y="92" width="8" height="10" fill="#8B5CF6" opacity="0.5" rx="0.5"/>
+  <rect width="200" height="200" fill="url(#bg-m)" rx="16"/>
+  <g opacity="0.95">
+    <!-- Neck -->
+    <path d="M 85 148 L 85 170 Q 85 175 90 178 L 110 178 Q 115 175 115 170 L 115 148" fill="none" stroke="#888" stroke-width="1.2"/>
+    <!-- Shirt/collar -->
+    <path d="M 62 200 Q 65 180 90 178 L 100 186 L 110 178 Q 135 180 138 200" fill="none" stroke="#777" stroke-width="1.5"/>
+    <line x1="100" y1="186" x2="100" y2="200" stroke="#777" stroke-width="0.8"/>
+    <!-- Head shape -->
+    <ellipse cx="100" cy="105" rx="42" ry="50" fill="none" stroke="#999" stroke-width="1.8"/>
+    <!-- Jaw definition -->
+    <path d="M 62 115 Q 70 145 100 155 Q 130 145 138 115" fill="none" stroke="#888" stroke-width="1.2"/>
+    <!-- Hair — salt and pepper, swept back -->
+    <path d="M 58 90 Q 55 65 70 55 Q 85 48 100 47 Q 115 48 130 55 Q 145 65 142 90" fill="none" stroke="#aaa" stroke-width="2"/>
+    <path d="M 62 88 Q 65 60 80 54" fill="none" stroke="#999" stroke-width="0.8"/>
+    <path d="M 68 85 Q 72 58 90 52" fill="none" stroke="#888" stroke-width="0.7"/>
+    <path d="M 75 82 Q 80 56 100 50" fill="none" stroke="#999" stroke-width="0.6"/>
+    <path d="M 125 82 Q 120 56 100 50" fill="none" stroke="#888" stroke-width="0.6"/>
+    <path d="M 132 85 Q 128 58 110 52" fill="none" stroke="#999" stroke-width="0.7"/>
+    <path d="M 138 88 Q 135 60 120 54" fill="none" stroke="#888" stroke-width="0.8"/>
+    <!-- Temple graying -->
+    <path d="M 60 92 Q 58 98 60 105" stroke="#bbb" stroke-width="0.6" fill="none"/>
+    <path d="M 140 92 Q 142 98 140 105" stroke="#bbb" stroke-width="0.6" fill="none"/>
+    <!-- Ears -->
+    <path d="M 58 95 Q 50 100 50 110 Q 50 120 58 122" fill="none" stroke="#999" stroke-width="1"/>
+    <path d="M 142 95 Q 150 100 150 110 Q 150 120 142 122" fill="none" stroke="#999" stroke-width="1"/>
+    <!-- Eyes -->
+    <ellipse cx="82" cy="102" rx="10" ry="5.5" fill="none" stroke="#aaa" stroke-width="1.2"/>
+    <ellipse cx="118" cy="102" rx="10" ry="5.5" fill="none" stroke="#aaa" stroke-width="1.2"/>
+    <circle cx="82" cy="102" r="3.5" fill="#333"/>
+    <circle cx="118" cy="102" r="3.5" fill="#333"/>
+    <circle cx="83.5" cy="100.5" r="1" fill="#888"/>
+    <circle cx="119.5" cy="100.5" r="1" fill="#888"/>
+    <!-- Glasses -->
+    <rect x="69" y="95" width="26" height="16" rx="3" fill="none" stroke="#bbb" stroke-width="1.5"/>
+    <rect x="105" y="95" width="26" height="16" rx="3" fill="none" stroke="#bbb" stroke-width="1.5"/>
+    <line x1="95" y1="102" x2="105" y2="102" stroke="#bbb" stroke-width="1.2"/>
+    <line x1="69" y1="100" x2="58" y2="97" stroke="#bbb" stroke-width="1"/>
+    <line x1="131" y1="100" x2="142" y2="97" stroke="#bbb" stroke-width="1"/>
+    <!-- Eyebrows -->
+    <path d="M 72 90 Q 82 86 94 90" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 106 90 Q 118 86 128 90" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Nose -->
+    <path d="M 100 98 L 98 120 Q 95 126 92 124" fill="none" stroke="#999" stroke-width="1"/>
+    <path d="M 100 120 Q 105 126 108 124" fill="none" stroke="#888" stroke-width="0.8"/>
+    <!-- Mouth -->
+    <path d="M 86 136 Q 93 140 100 139 Q 107 140 114 136" fill="none" stroke="#999" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M 90 136 Q 100 132 110 136" fill="none" stroke="#888" stroke-width="0.6"/>
+    <!-- Cheek lines / expression wrinkles -->
+    <path d="M 72 120 Q 75 128 80 132" fill="none" stroke="#888" stroke-width="0.5"/>
+    <path d="M 128 120 Q 125 128 120 132" fill="none" stroke="#888" stroke-width="0.5"/>
+    <!-- Forehead lines -->
+    <path d="M 75 80 Q 100 77 125 80" fill="none" stroke="#888" stroke-width="0.4"/>
+    <path d="M 78 84 Q 100 81 122 84" fill="none" stroke="#888" stroke-width="0.4"/>
+    <!-- Cross-hatching shading -->
+    <g opacity="0.15" stroke="#fff" stroke-width="0.3">
+      <line x1="65" y1="95" x2="75" y2="85"/>
+      <line x1="125" y1="85" x2="135" y2="95"/>
+      <line x1="80" y1="145" x2="90" y2="140"/>
+      <line x1="110" y1="140" x2="120" y2="145"/>
+    </g>
+  </g>
 </svg>
