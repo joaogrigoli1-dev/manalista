@@ -1,1 +1,14 @@
-²ø/‰ì£
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+<defs><clipPath id="cd"><circle cx="60" cy="60" r="58"/></clipPath></defs>
+<circle cx="60" cy="60" r="58" fill="#10B981"/>
+<g clip-path="url(#cd)">
+<circle cx="60" cy="45" r="22" fill="#E8D5B7"/>
+<rect x="30" y="72" width="60" height="50" rx="8" fill="#fff"/>
+<path d="M50 82 Q60 90 70 82" stroke="#10B981" stroke-width="3" fill="none"/>
+<circle cx="60" cy="86" r="4" fill="#10B981"/>
+<circle cx="50" cy="40" r="3.5" fill="#2D2D2D"/>
+<circle cx="70" cy="40" r="3.5" fill="#2D2D2D"/>
+<path d="M54 50 Q60 55 66 50" stroke="#C4956A" stroke-width="2" fill="none"/>
+<path d="M28 26 Q60 6 92 26 Q88 16 60 12 Q32 16 28 26Z" fill="#2C1810"/>
+</g>
+</svg>

@@ -2,14 +2,14 @@
 import { KPIGauge } from "./KPIGauge";
 import type { Lang } from "@/types";
 
-interface DetectedPathology {
+export interface DetectedPathology {
   name: string;
   percentage: number;
   color: string;
   evidence: string[];
 }
 
-interface SpecialistRecommendation {
+export interface SpecialistRecommendation {
   specialty: string;
   reason: string;
   urgency: "normal" | "prioritario" | "urgente";
