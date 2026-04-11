@@ -15,8 +15,32 @@ import type { ChildData, DebateMessage, DiagnosticSuggestion, Lang, AgentId } fr
 import type { DetectedPathology, SpecialistRecommendation } from "@/components/results/CentralPanel";
 import { v4 as uuid } from "uuid";
 
+const CLINICAL_SEPARATOR = "---DADOS-CLINICOS---";
+
 type Phase = "form" | "consent" | "analyzing" | "debating" | "consolidating" | "complete";
 type AgentStatus = "idle" | "analyzing" | "ready" | "debating";
+
+function extractFriendlyText(fullText: string): string {
+  const sepIdx = fullText.indexOf(CLINICAL_SEPARATOR);
+  if (sepIdx >= 0) {
+    return fullText.substring(0, sepIdx).trim();
+  }
+  // Fallback: try to parse as JSON and extract parentFriendlyText
+  try {
+    const parsed = JSON.parse(fullText.trim());
+    if (parsed.parentFriendlyText) return parsed.parentFriendlyText;
+  } catch { /* not JSON */ }
+  return fullText;
+}
+
+function extractTechnicalJSON(fullText: string): Record<string, unknown> | null {
+  const sepIdx = fullText.indexOf(CLINICAL_SEPARATOR);
+  if (sepIdx >= 0) {
+    const jsonPart = fullText.substring(sepIdx + CLINICAL_SEPARATOR.length).trim();
+    try { return JSON.parse(jsonPart); } catch { return null; }
+  }
+  try { return JSON.parse(fullText.trim()); } catch { return null; }
+}
 
 async function streamAgent(
   agentId: AgentId,
@@ -103,8 +127,15 @@ export default function AnalisePage() {
       try {
         const result = await streamAgent(agent.id, data, "analyze", lang, [], (chunk) => {
           setStreamingContent(prev => prev + chunk);
-          updateAgentDialogText(agent.id, prev => prev + chunk);
+          updateAgentDialogText(agent.id, prev => {
+            const full = prev + chunk;
+            const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
+            return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
+          });
         });
+        // Final cleanup to remove separator from display
+        const displayText = extractFriendlyText(result);
+        updateAgentDialogText(agent.id, displayText);
         addMessage(agent.id, result, "analysis");
         history.push({ role: "assistant", content: `[${agent.id}] ${result}` });
         setStatus(agent.id, "ready");
@@ -127,8 +158,15 @@ export default function AnalisePage() {
       try {
         const result = await streamAgent(agent.id, data, "debate", lang, history, (chunk) => {
           setStreamingContent(prev => prev + chunk);
-          updateAgentDialogText(agent.id, prev => prev + chunk);
+          updateAgentDialogText(agent.id, prev => {
+            const full = prev + chunk;
+            const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
+            return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
+          });
         });
+        // Final cleanup to remove separator from display
+        const displayText = extractFriendlyText(result);
+        updateAgentDialogText(agent.id, displayText);
         addMessage(agent.id, result, "debate");
         history.push({ role: "assistant", content: `[${agent.id}-debate] ${result}` });
       } catch (e) {
@@ -146,8 +184,15 @@ export default function AnalisePage() {
     try {
       const consolidation = await streamAgent("mediator", data, "consolidate", lang, history, (chunk) => {
         setStreamingContent(prev => prev + chunk);
-        updateAgentDialogText("mediator", prev => prev + chunk);
+        updateAgentDialogText("mediator", prev => {
+          const full = prev + chunk;
+          const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
+          return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
+        });
       });
+      // Final cleanup to remove separator from display
+      const displayText = extractFriendlyText(consolidation);
+      updateAgentDialogText("mediator", displayText);
       addMessage("mediator", consolidation, "summary");
 
       // Parse consolidation into structured result (best-effort)
@@ -309,39 +354,46 @@ export default function AnalisePage() {
               })}
             </div>
 
-            {/* Agent mini cards grid (3x2) */}
+            {/* Split layout: Agent cards (60%) + Central Panel (40%) */}
             {(phase === "analyzing" || phase === "debating" || phase === "consolidating" || phase === "complete") && (
-              <div style={{
+              <div className="analise-grid" style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gridTemplateColumns: "1fr 380px",
                 gap: "1rem",
-                marginBottom: "1.5rem",
+                alignItems: "start",
               }}>
-                {AGENT_PROFILES.map(agent => (
-                  <AgentMiniCard
-                    key={agent.id}
-                    agent={agent}
-                    lang={lang}
-                    status={agentStatuses[agent.id]}
-                    dialogText={agentDialogTexts[agent.id]}
-                    isStreaming={streamingId === agent.id}
-                    onInfoClick={() => setSelectedCharacter(agent.id)}
-                  />
-                ))}
-              </div>
-            )}
+                {/* Left: Agent cards in 2-column grid */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "0.65rem",
+                }}>
+                  {AGENT_PROFILES.map(agent => (
+                    <AgentMiniCard
+                      key={agent.id}
+                      agent={agent}
+                      lang={lang}
+                      status={agentStatuses[agent.id]}
+                      dialogText={agentDialogTexts[agent.id]}
+                      isStreaming={streamingId === agent.id}
+                      onInfoClick={() => setSelectedCharacter(agent.id)}
+                    />
+                  ))}
+                </div>
 
-            {/* Central KPI Panel */}
-            {(phase === "analyzing" || phase === "debating" || phase === "consolidating" || phase === "complete") && (
-              <CentralPanel
-                lang={lang}
-                pathologies={detectedPathologies}
-                recommendations={specialistRecs}
-                isAnalyzing={phase === "analyzing" || phase === "debating" || phase === "consolidating"}
-                qualityScore={qualityScore}
-                needsMoreInfo={needsMoreInfo}
-                pendingQuestions={pendingQuestions}
-              />
+                {/* Right: Central Panel (sticky) */}
+                <div style={{ position: "sticky", top: "5.5rem" }}>
+                  <CentralPanel
+                    lang={lang}
+                    pathologies={detectedPathologies}
+                    recommendations={specialistRecs}
+                    isAnalyzing={phase === "analyzing" || phase === "debating" || phase === "consolidating"}
+                    qualityScore={qualityScore}
+                    needsMoreInfo={needsMoreInfo}
+                    pendingQuestions={pendingQuestions}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Error display */}

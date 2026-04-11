@@ -10,7 +10,22 @@ interface NavbarProps {
 
 export function Navbar({ lang, onLangChange }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
-  const isClinic = theme === "clinic";
+
+  const getThemeLabel = () => {
+    switch(theme) {
+      case "aurora": return "✨ Aurora";
+      case "clinic": return "🏥 Clinic";
+      default: return "🌙 Dark";
+    }
+  };
+
+  const getThemeTitle = () => {
+    switch(theme) {
+      case "aurora": return "Próximo tema: Dark";
+      case "clinic": return "Próximo tema: Aurora";
+      default: return "Próximo tema: Clinic";
+    }
+  };
 
   return (
     <nav
@@ -47,10 +62,10 @@ export function Navbar({ lang, onLangChange }: NavbarProps) {
       {/* Separator */}
       <div style={{ width: 1, height: 20, background: "var(--border-subtle)", margin: "0 0.2rem" }} />
 
-      {/* Theme toggle */}
+      {/* Theme toggle (cycles: dark -> clinic -> aurora -> dark) */}
       <button
         type="button" onClick={toggleTheme}
-        title={isClinic ? "Tema Escuro" : "Tema Clínico"}
+        title={getThemeTitle()}
         className="nav-btn"
         style={{
           padding: "0.35rem 0.7rem", borderRadius: "9999px",
@@ -63,7 +78,7 @@ export function Navbar({ lang, onLangChange }: NavbarProps) {
           display: "flex", alignItems: "center", gap: "0.35rem",
         }}
       >
-        {isClinic ? "🌙 Dark" : "🏥 Clinic"}
+        {getThemeLabel()}
       </button>
 
       {/* Lang toggle */}

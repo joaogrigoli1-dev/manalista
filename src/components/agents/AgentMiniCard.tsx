@@ -57,35 +57,42 @@ export function AgentMiniCard({ agent, lang, status, dialogText, isStreaming, on
   return (
     // Outer shell (Double-Bezel)
     <div style={{
-      padding: "0.375rem",
-      borderRadius: "1.25rem",
+      padding: "0.25rem",
+      borderRadius: "1rem",
       background: "rgba(255,255,255,0.03)",
       border: "1px solid rgba(255,255,255,0.06)",
+      borderLeft: `3px solid ${agent.color}88`,
       transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)",
-      ...(isStreaming ? { 
+      ...(isStreaming ? {
         borderColor: `${agent.color}44`,
         boxShadow: `0 0 20px ${agent.color}15`,
       } : {}),
     }}>
       {/* Inner core */}
       <div style={{
-        borderRadius: "calc(1.25rem - 0.375rem)",
-        padding: "1rem",
+        borderRadius: "calc(1rem - 0.25rem)",
+        padding: "0.65rem",
         background: "rgba(10,10,14,0.85)",
         boxShadow: "inset 0 1px 1px rgba(255,255,255,0.06)",
         position: "relative",
       }}>
-        {/* Info button */}
+        {/* Profile button */}
         {onInfoClick && (
           <button
             onClick={(e) => { e.stopPropagation(); onInfoClick(); }}
             style={{
-              position: "absolute", top: "0.6rem", right: "0.6rem",
-              width: 22, height: 22, borderRadius: "50%",
-              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-              color: "var(--text-muted)", fontSize: "0.6rem", fontWeight: 700,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", transition: "all 0.3s cubic-bezier(0.32,0.72,0,1)",
+              position: "absolute", top: "0.5rem", right: "0.5rem",
+              padding: "0.15rem 0.45rem",
+              borderRadius: "9999px",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "var(--text-muted)",
+              fontSize: "0.55rem",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              cursor: "pointer",
+              transition: "all 0.3s cubic-bezier(0.32,0.72,0,1)",
+              fontFamily: "inherit",
             }}
             onMouseEnter={(e) => {
               (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.12)";
@@ -95,37 +102,37 @@ export function AgentMiniCard({ agent, lang, status, dialogText, isStreaming, on
               (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
               (e.target as HTMLButtonElement).style.color = "var(--text-muted)";
             }}
-          >ⓘ</button>
+          >{pt ? "PERFIL" : "PROFILE"}</button>
         )}
 
         {/* Avatar + Name row */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", marginBottom: "0.65rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
           {/* Avatar */}
           <div style={{
-            width: 40, height: 40, borderRadius: "0.7rem", overflow: "hidden", flexShrink: 0,
+            width: 32, height: 32, borderRadius: "0.6rem", overflow: "hidden", flexShrink: 0,
             background: agent.colorLight, border: `1px solid ${agent.color}33`,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             {!imgError ? (
               <Image
-                src={`/avatars/${agent.id}.png`}
+                src={`/avatars/${agent.id}.svg`}
                 alt={pt ? agent.namePt : agent.nameEn}
-                width={40} height={40}
+                width={32} height={32}
                 style={{ objectFit: "cover" }}
                 onError={() => setImgError(true)}
               />
             ) : (
-              <span style={{ fontSize: "1.2rem" }}>{agent.emoji}</span>
+              <span style={{ fontSize: "1rem" }}>{agent.emoji}</span>
             )}
           </div>
           {/* Name + role */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {pt ? agent.namePt : agent.nameEn}
             </div>
-            <div style={{ fontSize: "0.62rem", color: agent.color, fontWeight: 600, display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <div style={{ fontSize: "0.6rem", color: agent.color, fontWeight: 600, display: "flex", alignItems: "center", gap: "0.3rem" }}>
               <span style={{
-                width: 6, height: 6, borderRadius: "50%", background: dot.bg, flexShrink: 0,
+                width: 5, height: 5, borderRadius: "50%", background: dot.bg, flexShrink: 0,
                 ...(dot.animate ? { animation: "pulse-slow 1.5s ease-in-out infinite" } : {}),
               }} />
               {pt ? agent.rolePt : agent.roleEn}
@@ -137,9 +144,9 @@ export function AgentMiniCard({ agent, lang, status, dialogText, isStreaming, on
         <div
           ref={scrollRef}
           style={{
-            maxHeight: 150, overflowY: "auto",
-            padding: dialogText ? "0.65rem 0.8rem" : "0.4rem 0.6rem",
-            borderRadius: "0.65rem",
+            maxHeight: 180, overflowY: "auto",
+            padding: dialogText ? "0.55rem 0.7rem" : "0.35rem 0.5rem",
+            borderRadius: "0.6rem",
             background: dialogText ? "rgba(255,255,255,0.03)" : "transparent",
             border: dialogText ? "1px solid rgba(255,255,255,0.05)" : "1px dashed rgba(255,255,255,0.08)",
             borderLeft: dialogText ? `2px solid ${agent.color}55` : undefined,
@@ -153,7 +160,7 @@ export function AgentMiniCard({ agent, lang, status, dialogText, isStreaming, on
                 <button
                   onClick={() => setExpanded(!expanded)}
                   style={{
-                    marginTop: "0.3rem", fontSize: "0.65rem", color: agent.color,
+                    marginTop: "0.3rem", fontSize: "0.62rem", color: agent.color,
                     background: "none", border: "none", cursor: "pointer",
                     fontFamily: "inherit", fontWeight: 600,
                   }}
@@ -170,7 +177,7 @@ export function AgentMiniCard({ agent, lang, status, dialogText, isStreaming, on
               )}
             </>
           ) : (
-            <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", textAlign: "center", padding: "0.5rem 0" }}>
+            <p style={{ fontSize: "0.7rem", color: "var(--text-muted)", textAlign: "center", padding: "0.4rem 0" }}>
               {status === "idle" ? (pt ? "Aguardando..." : "Waiting...") : (pt ? "Analisando..." : "Analyzing...")}
             </p>
           )}

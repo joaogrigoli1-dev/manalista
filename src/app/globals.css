@@ -105,6 +105,14 @@ label {
     radial-gradient(ellipse 50% 40% at 80% 70%, rgba(59,155,245,0.06), transparent);
 }
 
+/* ── Mesh gradient for aurora theme ────────────── */
+[data-theme="aurora"] .bg-mesh {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(108,142,255,0.1), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(168,85,247,0.08), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(59,130,246,0.06), transparent);
+}
+
 /* ── Streaming cursor blink ──────────────────────── */
 @keyframes blink-cursor {
   0%, 100% { opacity: 1; }
@@ -159,12 +167,29 @@ label {
   transform: translateY(-2px) scale(1.02) !important;
   box-shadow: 0 8px 32px rgba(124,92,252,0.45) !important;
 }
+
+/* ── Mobile responsive layout (max 768px) ─────── */
+@media (max-width: 768px) {
+  .analise-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analise-grid > div:first-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analise-grid > div:last-child {
+    position: static !important;
+  }
+}
 .cta-btn:active { transform: scale(0.98) !important; }
 
-/* ── Mobile grid fix ─────────────────────────────── */
-@media (max-width: 768px) {
-  .analise-grid { grid-template-columns: 1fr !important; }
-  .analise-grid > :first-child { position: static !important; }
+/* ── Aurora theme mesh gradient ─────────────────── */
+[data-theme="aurora"] .bg-mesh {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(108,142,255,0.1), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(168,85,247,0.08), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(59,130,246,0.06), transparent);
 }
 
 /* ── FormSection accent bars (clinic theme) ──────── */

@@ -47,3 +47,25 @@
   --radius-input:      0.75rem;
   --nav-bg:            #FFFFFF;
 }
+
+/* ── TEMA AURORA (Premium Light+Dark Hybrid) ──── */
+[data-theme="aurora"],
+.theme-aurora {
+  --bg-base:           #0C0F1A;
+  --bg-card:           rgba(15, 18, 35, 0.9);
+  --bg-glass:          rgba(100, 130, 255, 0.04);
+  --bg-input:          rgba(100, 130, 255, 0.06);
+  --border-subtle:     rgba(100, 130, 255, 0.08);
+  --border-input:      rgba(100, 130, 255, 0.15);
+  --text-primary:      #E8ECF8;
+  --text-secondary:    rgba(200, 210, 240, 0.6);
+  --text-muted:        rgba(200, 210, 240, 0.3);
+  --text-label:        rgba(200, 210, 240, 0.4);
+  --accent-brand:      #6C8EFF;
+  --accent-brand-soft: rgba(108, 142, 255, 0.15);
+  --shadow-card:       0 4px 32px rgba(0,0,20,0.6), inset 0 1px 0 rgba(100,130,255,0.06);
+  --shadow-button:     0 4px 24px rgba(108,142,255,0.3);
+  --radius-card:       1.25rem;
+  --radius-input:      0.75rem;
+  --nav-bg:            rgba(12,15,26,0.8);
+}

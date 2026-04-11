@@ -10,7 +10,7 @@ export type AgentId =
   | "neuropediatra"
   | "bcba";
 
-export type Theme = "dark" | "clinic";
+export type Theme = "dark" | "clinic" | "aurora";
 export type Lang  = "pt" | "en";
 
 export interface AgentProfile {

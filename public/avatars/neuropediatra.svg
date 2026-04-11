@@ -1,14 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-<defs><clipPath id="cd"><circle cx="60" cy="60" r="58"/></clipPath></defs>
-<circle cx="60" cy="60" r="58" fill="#10B981"/>
-<g clip-path="url(#cd)">
-<circle cx="60" cy="45" r="22" fill="#E8D5B7"/>
-<rect x="30" y="72" width="60" height="50" rx="8" fill="#fff"/>
-<path d="M50 82 Q60 90 70 82" stroke="#10B981" stroke-width="3" fill="none"/>
-<circle cx="60" cy="86" r="4" fill="#10B981"/>
-<circle cx="50" cy="40" r="3.5" fill="#2D2D2D"/>
-<circle cx="70" cy="40" r="3.5" fill="#2D2D2D"/>
-<path d="M54 50 Q60 55 66 50" stroke="#C4956A" stroke-width="2" fill="none"/>
-<path d="M28 26 Q60 6 92 26 Q88 16 60 12 Q32 16 28 26Z" fill="#2C1810"/>
-</g>
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skinM2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4A574;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C89868;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="bgM2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#0A0A0E;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="hairM2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2A2A3E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A1A2E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bgM2)"/>
+  <!-- Hair dark -->
+  <path d="M 28 35 Q 28 25 60 25 Q 92 25 92 35 L 92 55 Q 75 50 60 50 Q 45 50 28 55 Z" fill="url(#hairM2)"/>
+  <!-- Face -->
+  <ellipse cx="60" cy="68" rx="27" ry="31" fill="url(#skinM2)"/>
+  <!-- Ears -->
+  <ellipse cx="33" cy="63" rx="5.5" ry="12" fill="url(#skinM2)"/>
+  <ellipse cx="87" cy="63" rx="5.5" ry="12" fill="url(#skinM2)"/>
+  <!-- Eyes confident technical -->
+  <ellipse cx="50" cy="62" rx="5" ry="6" fill="#1a1a2e"/>
+  <ellipse cx="70" cy="62" rx="5" ry="6" fill="#1a1a2e"/>
+  <circle cx="51" cy="60" r="1.5" fill="#ffffff"/>
+  <circle cx="71" cy="60" r="1.5" fill="#ffffff"/>
+  <!-- Eyebrows focused -->
+  <path d="M 44 54 Q 50 52 56 54" stroke="#3A3A4A" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M 64 54 Q 70 52 76 54" stroke="#3A3A4A" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Nose -->
+  <path d="M 60 64 L 60 76" stroke="#B8926A" stroke-width="1.2" fill="none"/>
+  <!-- Mouth confident expression -->
+  <path d="M 50 81 Q 60 84 70 81" stroke="#A67C5C" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Lab coat -->
+  <path d="M 28 92 L 30 86 L 40 82 L 60 80 L 80 82 L 90 86 L 92 92 L 92 120 L 28 120 Z" fill="#F5F5F5"/>
+  <!-- Lab coat buttons -->
+  <circle cx="55" cy="92" r="1.5" fill="#999999"/>
+  <circle cx="60" cy="100" r="1.5" fill="#999999"/>
+  <circle cx="65" cy="108" r="1.5" fill="#999999"/>
+  <!-- Stethoscope around neck -->
+  <path d="M 48 86 Q 50 88 54 90" stroke="#E8A87C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 72 86 Q 70 88 66 90" stroke="#E8A87C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="56" cy="92" rx="2" ry="2.5" fill="#E8A87C"/>
+  <ellipse cx="64" cy="92" rx="2" ry="2.5" fill="#E8A87C"/>
+  <!-- Stethoscope chest piece -->
+  <circle cx="60" cy="102" r="2.2" fill="#999999"/>
+  <circle cx="60" cy="102" r="1.5" fill="#E8A87C"/>
+  <!-- Green accent -->
+  <rect x="48" y="88" width="24" height="1.5" fill="#10B981" opacity="0.3" rx="0.5"/>
 </svg>

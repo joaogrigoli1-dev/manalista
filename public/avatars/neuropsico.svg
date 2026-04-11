@@ -1,13 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-<defs><clipPath id="cn"><circle cx="60" cy="60" r="58"/></clipPath></defs>
-<circle cx="60" cy="60" r="58" fill="#8B5CF6"/>
-<g clip-path="url(#cn)">
-<circle cx="60" cy="45" r="22" fill="#F0D5C0"/>
-<rect x="30" y="72" width="60" height="50" rx="8" fill="#EDE9FE"/>
-<circle cx="50" cy="40" r="3.5" fill="#2D1B3D"/>
-<circle cx="70" cy="40" r="3.5" fill="#2D1B3D"/>
-<path d="M54 50 Q60 55 66 50" stroke="#C4956A" stroke-width="2" fill="none"/>
-<path d="M30 32 Q40 10 60 14 Q80 10 90 32 L88 28 Q78 16 60 18 Q42 16 32 28Z" fill="#1E1225"/>
-<path d="M88 32 Q92 36 88 42" fill="#1E1225"/>
-</g>
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skinH" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D8B89F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C8A88F;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="bgH" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#3B9BF5;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#0A0A0E;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="hairH" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#6A7A8E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3A4A5E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bgH)"/>
+  <!-- Hair bob cut short gray -->
+  <path d="M 32 38 Q 32 28 60 27 Q 88 28 88 38 Q 88 48 82 52 Q 75 55 60 56 Q 45 55 38 52 Q 32 48 32 38 Z" fill="url(#hairH)"/>
+  <path d="M 35 48 Q 40 54 50 55 Q 55 55 60 55 Q 65 55 70 55 Q 80 54 85 48" fill="url(#hairH)" opacity="0.8"/>
+  <!-- Face -->
+  <ellipse cx="60" cy="68" rx="26" ry="30" fill="url(#skinH)"/>
+  <!-- Ears -->
+  <ellipse cx="34" cy="64" rx="5" ry="11" fill="url(#skinH)"/>
+  <ellipse cx="86" cy="64" rx="5" ry="11" fill="url(#skinH)"/>
+  <!-- Glasses round analytical -->
+  <circle cx="48" cy="61" r="6.5" fill="none" stroke="#4A5A6E" stroke-width="1.1"/>
+  <circle cx="72" cy="61" r="6.5" fill="none" stroke="#4A5A6E" stroke-width="1.1"/>
+  <line x1="54.5" y1="61" x2="65.5" y2="61" stroke="#4A5A6E" stroke-width="1"/>
+  <!-- Eyes analytical -->
+  <ellipse cx="48" cy="61" rx="4" ry="5.5" fill="#1a1a2e"/>
+  <ellipse cx="72" cy="61" rx="4" ry="5.5" fill="#1a1a2e"/>
+  <circle cx="48.5" cy="59" r="1.2" fill="#ffffff"/>
+  <circle cx="72.5" cy="59" r="1.2" fill="#ffffff"/>
+  <!-- Eyebrows precise -->
+  <path d="M 42 54 Q 48 52 54 54" stroke="#3A3A4A" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M 66 54 Q 72 52 78 54" stroke="#3A3A4A" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Nose -->
+  <path d="M 60 63 L 60 75" stroke="#B8978C" stroke-width="1.2" fill="none"/>
+  <!-- Mouth slight precise smile -->
+  <path d="M 50 80 Q 60 83 70 80" stroke="#A68878" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Professional attire -->
+  <path d="M 28 92 L 30 86 L 40 82 L 60 80 L 80 82 L 90 86 L 92 92 L 92 120 L 28 120 Z" fill="#2a2a3e"/>
+  <!-- Blouse detail -->
+  <rect x="48" y="85" width="24" height="20" fill="#3a4a5e" opacity="0.5" rx="2"/>
+  <!-- Blue accent -->
+  <circle cx="60" cy="91" r="1.8" fill="#3B9BF5" opacity="0.6"/>
+  <path d="M 55 88 L 65 88" stroke="#3B9BF5" stroke-width="0.8" opacity="0.4"/>
 </svg>
