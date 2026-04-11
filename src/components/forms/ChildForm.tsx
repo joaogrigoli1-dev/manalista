@@ -38,8 +38,13 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
     setShowErrors(false);
   }
 
+  const MIN_CHARS = 1000;
+  const charCount = data.mainComplaints.trim().length;
+  const charPct = Math.min(100, Math.round((charCount / MIN_CHARS) * 100));
+  const hasEnoughChars = charCount >= MIN_CHARS;
+
   function handleSubmit() {
-    if (!data.name.trim() || !data.birthdate || !data.mainComplaints.trim()) {
+    if (!data.name.trim() || !data.birthdate || !data.mainComplaints.trim() || !hasEnoughChars) {
       setShowErrors(true);
       return;
     }
@@ -153,9 +158,56 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
                   minHeight: "200px",
                 }}
               />
+              {/* Character counter bar */}
+              <div style={{ marginTop: "0.5rem" }}>
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  marginBottom: "0.3rem",
+                }}>
+                  <span style={{
+                    fontSize: "0.68rem", fontWeight: 600,
+                    color: hasEnoughChars ? "#10B981" : "var(--text-muted)",
+                    transition: "color 0.3s ease",
+                  }}>
+                    {hasEnoughChars
+                      ? (pt ? "✓ Informações suficientes" : "✓ Enough information")
+                      : (pt ? `Mínimo ${MIN_CHARS} caracteres` : `Minimum ${MIN_CHARS} characters`)}
+                  </span>
+                  <span style={{
+                    fontSize: "0.68rem", fontWeight: 700,
+                    fontVariantNumeric: "tabular-nums",
+                    color: hasEnoughChars ? "#10B981" : charCount > 0 ? "var(--accent-brand)" : "var(--text-muted)",
+                    transition: "color 0.3s ease",
+                  }}>
+                    {charCount}/{MIN_CHARS}
+                  </span>
+                </div>
+                <div style={{
+                  height: 4, borderRadius: 99, overflow: "hidden",
+                  background: "var(--border-subtle)",
+                }}>
+                  <div style={{
+                    height: "100%", borderRadius: 99,
+                    width: `${charPct}%`,
+                    background: hasEnoughChars
+                      ? "#10B981"
+                      : charPct > 50
+                        ? "var(--accent-brand)"
+                        : "rgba(245,158,11,0.7)",
+                    transition: "width 0.4s cubic-bezier(0.32,0.72,0,1), background 0.4s ease",
+                  }} />
+                </div>
+              </div>
               {showErrors && !data.mainComplaints.trim() && (
                 <p style={errorStyle}>
                   {pt ? "⚠ Por favor, descreva a situação da criança" : "⚠ Please describe the child's situation"}
+                </p>
+              )}
+              {showErrors && data.mainComplaints.trim() && !hasEnoughChars && (
+                <p style={errorStyle}>
+                  {pt
+                    ? `⚠ Descreva com mais detalhes — faltam ${MIN_CHARS - charCount} caracteres para uma análise segura`
+                    : `⚠ Please provide more detail — ${MIN_CHARS - charCount} more characters needed for a safe analysis`}
                 </p>
               )}
             </div>
@@ -167,21 +219,25 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
             <button
               type="button"
               onClick={handleSubmit}
+              disabled={!hasEnoughChars}
               style={{
                 padding: "0.75rem 2rem",
                 borderRadius: "9999px",
                 border: "none",
-                background: "var(--accent-brand)",
-                color: "#fff",
+                background: hasEnoughChars ? "var(--accent-brand)" : "var(--border-subtle)",
+                color: hasEnoughChars ? "#fff" : "var(--text-muted)",
                 fontFamily: "inherit",
                 fontWeight: 700,
                 fontSize: "0.95rem",
-                cursor: "pointer",
-                boxShadow: "var(--shadow-button)",
-                transition: "all 0.3s ease",
+                cursor: hasEnoughChars ? "pointer" : "not-allowed",
+                boxShadow: hasEnoughChars ? "var(--shadow-button)" : "none",
+                transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)",
+                opacity: hasEnoughChars ? 1 : 0.6,
               }}
             >
-              {pt ? "Enviar para Análise →" : "Submit for Analysis →"}
+              {hasEnoughChars
+                ? (pt ? "Enviar para Análise →" : "Submit for Analysis →")
+                : (pt ? `Mais ${MIN_CHARS - charCount} caracteres...` : `${MIN_CHARS - charCount} more chars...`)}
             </button>
           </div>
 
