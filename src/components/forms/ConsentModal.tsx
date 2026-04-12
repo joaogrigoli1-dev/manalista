@@ -49,7 +49,7 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
       background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)",
       display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
     }}>
-      <div className="card" style={{ maxWidth: 560, width: "100%", padding: "0.375rem" }}>
+      <div className="card" style={{ maxWidth: 560, width: "calc(100% - 1rem)", padding: "0.375rem" }}>
         <div style={{
           borderRadius: "calc(var(--radius-card) - 0.375rem)",
           padding: "2rem", background: "var(--bg-card)",

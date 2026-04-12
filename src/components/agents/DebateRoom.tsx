@@ -29,6 +29,7 @@ function MdText({ text, color }: { text: string; color?: string }): ReactNode {
   const lines = text.split("\n");
   const nodes: ReactNode[] = [];
   let listBuf: string[] = [];
+  let tableBuf: string[] = [];
   let key = 0;
 
   function flushList() {
@@ -45,8 +46,60 @@ function MdText({ text, color }: { text: string; color?: string }): ReactNode {
     listBuf = [];
   }
 
+  function flushTable() {
+    if (!tableBuf.length) return;
+    const rows = tableBuf.map(r =>
+      r.split("|").map(c => c.trim()).filter((_, i, a) => i > 0 && i < a.length - (r.endsWith("|") ? 1 : 0))
+    );
+    // Detect separator row (---|---|---)
+    const sepIdx = rows.findIndex(r => r.every(c => /^[-:]+$/.test(c)));
+    const headerRows = sepIdx > 0 ? rows.slice(0, sepIdx) : [];
+    const bodyRows = sepIdx >= 0 ? rows.slice(sepIdx + 1) : rows;
+
+    nodes.push(
+      <div key={key++} style={{ overflowX: "auto", margin: "0.5rem 0", WebkitOverflowScrolling: "touch" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem", lineHeight: 1.6 }}>
+          {headerRows.length > 0 && (
+            <thead>
+              {headerRows.map((row, ri) => (
+                <tr key={ri}>
+                  {row.map((cell, ci) => (
+                    <th key={ci} style={{ padding: "0.4rem 0.6rem", borderBottom: `2px solid ${color ?? "var(--border-subtle)"}66`, fontWeight: 700, color: color ?? "var(--text-primary)", textAlign: "left", whiteSpace: "nowrap" }}>
+                      {renderInline(cell)}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+          )}
+          <tbody>
+            {bodyRows.map((row, ri) => (
+              <tr key={ri} style={{ background: ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)" }}>
+                {row.map((cell, ci) => (
+                  <td key={ci} style={{ padding: "0.35rem 0.6rem", borderBottom: "1px solid var(--border-subtle)33", color: "var(--text-primary)" }}>
+                    {renderInline(cell)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+    tableBuf = [];
+  }
+
   for (const raw of lines) {
     const line = raw.trimEnd();
+
+    // Table row detection (starts with |)
+    if (line.trim().startsWith("|")) {
+      flushList();
+      tableBuf.push(line.trim());
+      continue;
+    } else if (tableBuf.length) {
+      flushTable();
+    }
 
     // Blank line — flush list and add spacing
     if (!line.trim()) {
@@ -95,6 +148,23 @@ function MdText({ text, color }: { text: string; color?: string }): ReactNode {
       continue;
     }
 
+    // H1 #
+    if (line.startsWith("# ")) {
+      flushList();
+      nodes.push(
+        <p key={key++} style={{ fontSize: "1.1rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1.2rem 0 0.5rem", borderBottom: `2px solid ${color ?? "var(--border-subtle)"}44`, paddingBottom: "0.35rem" }}>
+          {renderInline(line.slice(2))}
+        </p>
+      );
+      continue;
+    }
+
+    // Numbered list item (1. 2. 3.)
+    if (/^\d+\.\s/.test(line)) {
+      listBuf.push(line.replace(/^\d+\.\s/, ""));
+      continue;
+    }
+
     // Bullet item
     if (/^[-•]\s/.test(line)) {
       listBuf.push(line.slice(2));
@@ -111,6 +181,7 @@ function MdText({ text, color }: { text: string; color?: string }): ReactNode {
   }
 
   flushList();
+  flushTable();
   return <div style={{ display: "flex", flexDirection: "column" }}>{nodes}</div>;
 }
 
@@ -294,9 +365,10 @@ export function DebateRoom({
     <div
       ref={containerRef}
       style={{
-        height: 520,
+        height: "clamp(320px, 60vh, 520px)",
         overflowY: "auto",
-        padding: "1.25rem",
+        WebkitOverflowScrolling: "touch",
+        padding: "clamp(0.75rem, 2vw, 1.25rem)",
         display: "flex",
         flexDirection: "column",
         gap: "1rem",

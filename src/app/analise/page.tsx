@@ -635,7 +635,7 @@ export default function AnalisePage() {
         />
       )}
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "7rem 1.5rem 4rem", position: "relative", zIndex: 1 }}>
+      <div className="analise-main-container" style={{ maxWidth: 1400, margin: "0 auto", padding: "7rem 1.5rem 4rem", position: "relative", zIndex: 1 }}>
 
         {/* ── FORM PHASE ── */}
         {phase === "form" && (
