@@ -9,6 +9,7 @@ import { CharacterModal, type AgentBackstory } from "@/components/agents/Charact
 import { DebateRoom } from "@/components/agents/DebateRoom";
 import { DiagnosticReport } from "@/components/results/DiagnosticReport";
 import { CentralPanel } from "@/components/results/CentralPanel";
+import { KPIGauge } from "@/components/results/KPIGauge";
 import { AGENT_PROFILES, SPECIALISTS } from "@/lib/agents/profiles";
 import { AGENT_BACKSTORIES } from "@/lib/agents/backstories";
 import type { ChildData, DebateMessage, DiagnosticSuggestion, Lang, AgentId } from "@/types";
@@ -73,6 +74,121 @@ async function streamAgent(
     }
   }
   return full;
+}
+
+// ── KPI panel: sequentially reveals gauges as debate progresses ──
+const KPI_SLOTS_PT = [
+  { label: "TEA", color: "#7C6FE8" },
+  { label: "TDAH", color: "#4A9EFF" },
+  { label: "Ansiedade", color: "#F59E0B" },
+  { label: "Atraso Dev.", color: "#10B981" },
+];
+const KPI_SLOTS_EN = [
+  { label: "ASD", color: "#7C6FE8" },
+  { label: "ADHD", color: "#4A9EFF" },
+  { label: "Anxiety", color: "#F59E0B" },
+  { label: "Dev. Delay", color: "#10B981" },
+];
+const REVEAL_AT = [1, 3, 5, 7]; // reveal gauge N after this many messages
+
+function DebateKPIPanel({ lang, messages, pathologies }: {
+  lang: Lang;
+  messages: DebateMessage[];
+  pathologies: DetectedPathology[];
+}) {
+  const pt = lang === "pt";
+  const slots = pt ? KPI_SLOTS_PT : KPI_SLOTS_EN;
+  const msgCount = messages.length;
+
+  const gauges = slots.map((slot, i) => {
+    const visible = msgCount >= REVEAL_AT[i];
+    const match = pathologies.find(p =>
+      p.name.toLowerCase().includes(slot.label.toLowerCase().split(" ")[0])
+    );
+    return {
+      ...slot,
+      value: match ? match.percentage : visible ? Math.min(28 + i * 14, 68) : 0,
+      color: match?.color ?? slot.color,
+      visible,
+    };
+  });
+
+  const anyVisible = gauges.some(g => g.visible);
+
+  return (
+    <div style={{
+      padding: "0.5rem",
+      borderRadius: "1.75rem",
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.06)",
+    }}>
+      <div style={{
+        borderRadius: "calc(1.75rem - 0.5rem)",
+        padding: "1.25rem",
+        background: "rgba(10,10,14,0.9)",
+        boxShadow: "inset 0 1px 1px rgba(255,255,255,0.06)",
+        minHeight: 300,
+      }}>
+        {/* Header */}
+        <div style={{ marginBottom: "1rem" }}>
+          <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.3rem" }}>
+            {pt ? "Padrões Diagnósticos" : "Diagnostic Patterns"}
+          </p>
+          <div style={{ width: 24, height: 2, background: "var(--accent-brand)", borderRadius: 1 }} />
+        </div>
+
+        {!anyVisible ? (
+          <div style={{ textAlign: "center", padding: "2.5rem 1rem" }}>
+            <div style={{ fontSize: "1.6rem", marginBottom: "0.6rem", opacity: 0.3 }}>🔬</div>
+            <p style={{ fontSize: "0.7rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+              {pt
+                ? "Aguardando identificação de padrões diagnósticos..."
+                : "Waiting for diagnostic pattern identification..."}
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", justifyItems: "center" }}>
+            {gauges.map((g, i) => (
+              <div key={i} style={{
+                opacity: g.visible ? 1 : 0,
+                transform: g.visible ? "scale(1) translateY(0)" : "scale(0.85) translateY(10px)",
+                transition: `opacity 0.7s ease ${i * 0.1}s, transform 0.7s cubic-bezier(0.32,0.72,0,1) ${i * 0.1}s`,
+                pointerEvents: g.visible ? "auto" : "none",
+              }}>
+                <KPIGauge label={g.label} value={g.value} color={g.color} size={72} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Progress indicator */}
+        {anyVisible && (
+          <div style={{ marginTop: "1.1rem", paddingTop: "0.85rem", borderTop: "1px solid var(--border-subtle)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <span style={{
+                width: 5, height: 5, borderRadius: "50%",
+                background: "var(--accent-brand)", display: "inline-block",
+                animation: "pulse-slow 2s ease-in-out infinite",
+              }} />
+              <p style={{ fontSize: "0.65rem", color: "var(--text-muted)" }}>
+                {pt ? "Análise em progresso..." : "Analysis in progress..."}
+              </p>
+            </div>
+            <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.25rem" }}>
+              {gauges.map((g, i) => (
+                <div key={i} style={{
+                  flex: 1, height: 2, borderRadius: 1,
+                  background: g.visible ? g.color : "var(--border-subtle)",
+                  transition: "background 0.5s ease",
+                  opacity: g.visible ? 0.8 : 0.3,
+                }} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function AnalisePage() {
@@ -354,19 +470,21 @@ export default function AnalisePage() {
               })}
             </div>
 
-            {/* Split layout: Agent cards (60%) + Central Panel (40%) */}
+            {/* ── 3-column debate layout: sidebar | chat | kpi ── */}
             {(phase === "analyzing" || phase === "debating" || phase === "consolidating" || phase === "complete") && (
-              <div className="analise-grid" style={{
+              <div className="analise-grid-3col" style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 380px",
+                gridTemplateColumns: "240px 1fr 280px",
                 gap: "1rem",
                 alignItems: "start",
               }}>
-                {/* Left: Agent cards in 2-column grid */}
+                {/* LEFT: Specialist sidebar — stacked vertically */}
                 <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
+                  display: "flex",
+                  flexDirection: "column",
                   gap: "0.65rem",
+                  position: "sticky",
+                  top: "5.5rem",
                 }}>
                   {AGENT_PROFILES.map(agent => (
                     <AgentMiniCard
@@ -381,57 +499,65 @@ export default function AnalisePage() {
                   ))}
                 </div>
 
-                {/* Right: Central Panel (sticky) */}
+                {/* CENTER: Error banner + Debate Room */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {error && (
+                    <div style={{ padding: "0.85rem", borderRadius: "0.65rem", background: "rgba(229,114,92,0.1)", border: "1px solid rgba(229,114,92,0.2)" }}>
+                      <p style={{ fontSize: "0.78rem", color: "#E5725C" }}>⚠️ {error}</p>
+                    </div>
+                  )}
+                  <div className="card" style={{ padding: "0.375rem" }}>
+                    <div style={{ borderRadius: "calc(var(--radius-card) - 0.375rem)", background: "var(--bg-card)", overflow: "hidden" }}>
+                      {/* Header */}
+                      <div style={{ padding: "0.85rem 1.25rem", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span style={{ fontSize: "0.9rem" }}>💬</span>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                          {pt ? "Sala de Debate Multiprofissional" : "Multiprofessional Debate Room"}
+                        </span>
+                        {streamingId && (() => {
+                          const a = AGENT_PROFILES.find(p => p.id === streamingId);
+                          return a ? (
+                            <span style={{ marginLeft: "auto", fontSize: "0.72rem", color: a.color, fontWeight: 600, display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: a.color, display: "inline-block", animation: "pulse-slow 1.5s ease-in-out infinite" }} />
+                              {pt ? `${a.namePt} escrevendo...` : `${a.nameEn} writing...`}
+                            </span>
+                          ) : null;
+                        })()}
+                      </div>
+                      {/* DebateRoom owns its own scroll */}
+                      <DebateRoom
+                        messages={messages}
+                        lang={lang}
+                        isStreaming={!!streamingId}
+                        streamingAgentId={streamingId}
+                        streamingContent={streamingContent}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT: KPI panel (sequential during debate → CentralPanel after complete) */}
                 <div style={{ position: "sticky", top: "5.5rem" }}>
-                  <CentralPanel
-                    lang={lang}
-                    pathologies={detectedPathologies}
-                    recommendations={specialistRecs}
-                    isAnalyzing={phase === "analyzing" || phase === "debating" || phase === "consolidating"}
-                    qualityScore={qualityScore}
-                    needsMoreInfo={needsMoreInfo}
-                    pendingQuestions={pendingQuestions}
-                  />
+                  {phase === "complete" ? (
+                    <CentralPanel
+                      lang={lang}
+                      pathologies={detectedPathologies}
+                      recommendations={specialistRecs}
+                      isAnalyzing={false}
+                      qualityScore={qualityScore}
+                      needsMoreInfo={needsMoreInfo}
+                      pendingQuestions={pendingQuestions}
+                    />
+                  ) : (
+                    <DebateKPIPanel
+                      lang={lang}
+                      messages={messages}
+                      pathologies={detectedPathologies}
+                    />
+                  )}
                 </div>
               </div>
             )}
-
-            {/* Error display */}
-            {error && (
-              <div style={{ padding: "0.85rem", borderRadius: "0.65rem", background: "rgba(229,114,92,0.1)", border: "1px solid rgba(229,114,92,0.2)" }}>
-                <p style={{ fontSize: "0.78rem", color: "#E5725C" }}>⚠️ {error}</p>
-              </div>
-            )}
-
-            {/* Debate room */}
-            <div className="card" style={{ padding: "0.375rem" }}>
-              <div style={{ borderRadius: "calc(var(--radius-card) - 0.375rem)", background: "var(--bg-card)", overflow: "hidden" }}>
-                {/* Header */}
-                <div style={{ padding: "0.85rem 1.25rem", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <span style={{ fontSize: "0.9rem" }}>💬</span>
-                  <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                    {pt ? "Sala de Debate Multiprofissional" : "Multiprofessional Debate Room"}
-                  </span>
-                  {streamingId && (() => {
-                    const a = AGENT_PROFILES.find(p => p.id === streamingId);
-                    return a ? (
-                      <span style={{ marginLeft: "auto", fontSize: "0.72rem", color: a.color, fontWeight: 600, display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: a.color, display: "inline-block", animation: "pulse-slow 1.5s ease-in-out infinite" }} />
-                        {pt ? `${a.namePt} escrevendo...` : `${a.nameEn} writing...`}
-                      </span>
-                    ) : null;
-                  })()}
-                </div>
-                {/* DebateRoom owns its own scroll */}
-                <DebateRoom
-                  messages={messages}
-                  lang={lang}
-                  isStreaming={!!streamingId}
-                  streamingAgentId={streamingId}
-                  streamingContent={streamingContent}
-                />
-              </div>
-            </div>
 
             {/* Diagnostic report */}
             {phase === "complete" && results.length > 0 && (

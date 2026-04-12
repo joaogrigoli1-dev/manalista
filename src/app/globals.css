@@ -181,6 +181,32 @@ label {
   .analise-grid > div:last-child {
     position: static !important;
   }
+
+  .analise-grid-3col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analise-grid-3col > div:first-child {
+    position: static !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+  }
+
+  .analise-grid-3col > div:last-child {
+    position: static !important;
+  }
+}
+
+/* ── Tablet responsive layout (769px - 1100px) ── */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .analise-grid-3col {
+    grid-template-columns: 200px 1fr !important;
+  }
+
+  .analise-grid-3col > div:last-child {
+    grid-column: 1 / -1 !important;
+    position: static !important;
+  }
 }
 .cta-btn:active { transform: scale(0.98) !important; }
 
