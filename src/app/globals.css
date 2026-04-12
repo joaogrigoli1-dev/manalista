@@ -1,0 +1,199 @@
+@import "../styles/themes.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ── Base Reset ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  min-height: 100dvh;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ── Page Container (Clinic theme) ─────────────── */
+.page-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+@media (max-width: 768px) {
+  .page-container { padding: 16px; }
+}
+
+/* ── Cards ──────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: all 0.5s cubic-bezier(0.32,0.72,0,1);
+}
+[data-theme="dark"] .card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.10);
+}
+
+/* ── Inputs ─────────────────────────────────────── */
+input, textarea, select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-input) !important;
+  color: var(--text-primary);
+  min-height: 40px;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-brand);
+  box-shadow: 0 0 0 3px var(--accent-brand-soft);
+}
+
+/* ── Labels ─────────────────────────────────────── */
+label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 99px; }
+
+/* ── Typing Indicator ───────────────────────────── */
+.typing-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent-brand);
+  display: inline-block;
+  animation: typing 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%,100% { opacity: 0.3; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
+}
+
+/* ── Noise Overlay (dark theme only) ───────────── */
+[data-theme="dark"]::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 50;
+  pointer-events: none; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Gradiente de fundo mesh (dark only) ─────────── */
+[data-theme="dark"] .bg-mesh {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(124,92,252,0.08), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(59,155,245,0.06), transparent);
+}
+
+/* ── Mesh gradient for aurora theme ────────────── */
+[data-theme="aurora"] .bg-mesh {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(108,142,255,0.1), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(168,85,247,0.08), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(59,130,246,0.06), transparent);
+}
+
+/* ── Streaming cursor blink ──────────────────────── */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Typing bounce dots ──────────────────────────── */
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ── Pulse slow (agent card status dot) ─────────── */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ── Spin (download button loader) ──────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Fade-in-up (sections entering view) ────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fade-in-up 0.4s cubic-bezier(0.32,0.72,0,1) both; }
+
+/* ── Navbar button hover ─────────────────────────── */
+.nav-btn:hover {
+  background: var(--accent-brand-soft) !important;
+  border-color: var(--accent-brand) !important;
+  color: var(--accent-brand) !important;
+}
+
+/* ── Card hover glow accent ──────────────────────── */
+.card-agent:hover {
+  border-color: rgba(124,92,252,0.25) !important;
+  box-shadow: 0 0 0 1px rgba(124,92,252,0.12), var(--shadow-card) !important;
+}
+
+/* ── Select dark-mode arrow ──────────────────────── */
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  appearance: none; -webkit-appearance: none;
+}
+
+/* ── CTA button hover ────────────────────────────── */
+.cta-btn:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 32px rgba(124,92,252,0.45) !important;
+}
+
+/* ── Mobile responsive layout (max 768px) ─────── */
+@media (max-width: 768px) {
+  .analise-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analise-grid > div:first-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analise-grid > div:last-child {
+    position: static !important;
+  }
+}
+.cta-btn:active { transform: scale(0.98) !important; }
+
+/* ── Aurora theme mesh gradient ─────────────────── */
+[data-theme="aurora"] .bg-mesh {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(108,142,255,0.1), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(168,85,247,0.08), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(59,130,246,0.06), transparent);
+}
+
+/* ── FormSection accent bars (clinic theme) ──────── */
+[data-theme="clinic"] .form-section-accent-personal { border-left: 3px solid #2D6AFF; }
+[data-theme="clinic"] .form-section-accent-clinical  { border-left: 3px solid #10B981; }
+[data-theme="clinic"] .form-section-accent-behavior  { border-left: 3px solid #F59E0B; }
+[data-theme="clinic"] .form-section-accent-family    { border-left: 3px solid #E5725C; }

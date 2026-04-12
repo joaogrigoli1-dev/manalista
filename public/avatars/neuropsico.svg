@@ -1,0 +1,70 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dra. Helena Luria — Female, 45, intellectual, hair up in bun, elegant -->
+  <defs>
+    <radialGradient id="bg-h" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#bg-h)" rx="16"/>
+  <g opacity="0.95">
+    <!-- Neck -->
+    <path d="M 88 150 L 88 166 Q 88 172 93 174 L 107 174 Q 112 172 112 166 L 112 150" fill="none" stroke="#888" stroke-width="1"/>
+    <!-- Turtleneck/collar -->
+    <path d="M 55 200 Q 62 180 88 174 L 112 174 Q 138 180 145 200" fill="none" stroke="#777" stroke-width="1.3"/>
+    <path d="M 86 168 L 86 174" stroke="#888" stroke-width="0.5"/>
+    <path d="M 90 168 L 90 174" stroke="#888" stroke-width="0.5"/>
+    <path d="M 110 168 L 110 174" stroke="#888" stroke-width="0.5"/>
+    <path d="M 114 168 L 114 174" stroke="#888" stroke-width="0.5"/>
+    <!-- Head shape -->
+    <ellipse cx="100" cy="104" rx="39" ry="47" fill="none" stroke="#999" stroke-width="1.6"/>
+    <!-- Jaw — refined -->
+    <path d="M 65 110 Q 72 142 100 152 Q 128 142 135 110" fill="none" stroke="#888" stroke-width="1"/>
+    <!-- Hair pulled back into bun -->
+    <path d="M 61 90 Q 58 68 68 56 Q 80 44 100 42 Q 120 44 132 56 Q 142 68 139 90" fill="none" stroke="#aaa" stroke-width="1.8"/>
+    <!-- Hair swept back strokes -->
+    <path d="M 64 86 Q 72 55 100 46" fill="none" stroke="#999" stroke-width="0.8"/>
+    <path d="M 70 82 Q 80 52 100 44" fill="none" stroke="#888" stroke-width="0.6"/>
+    <path d="M 130 82 Q 120 52 100 44" fill="none" stroke="#888" stroke-width="0.6"/>
+    <path d="M 136 86 Q 128 55 100 46" fill="none" stroke="#999" stroke-width="0.8"/>
+    <!-- Bun at top/back -->
+    <ellipse cx="100" cy="38" rx="16" ry="12" fill="none" stroke="#aaa" stroke-width="1.5"/>
+    <path d="M 88 38 Q 92 30 100 28 Q 108 30 112 38" fill="none" stroke="#999" stroke-width="0.8"/>
+    <path d="M 90 42 Q 95 35 100 34 Q 105 35 110 42" fill="none" stroke="#888" stroke-width="0.6"/>
+    <!-- Hair pin -->
+    <line x1="92" y1="32" x2="108" y2="32" stroke="#bbb" stroke-width="0.8"/>
+    <!-- Ears (visible, hair pulled back) -->
+    <path d="M 61 96 Q 54 102 55 112 Q 56 118 61 119" fill="none" stroke="#999" stroke-width="0.9"/>
+    <!-- Small earring -->
+    <circle cx="58" cy="120" r="1.5" fill="none" stroke="#bbb" stroke-width="0.8"/>
+    <path d="M 139 96 Q 146 102 145 112 Q 144 118 139 119" fill="none" stroke="#999" stroke-width="0.9"/>
+    <circle cx="142" cy="120" r="1.5" fill="none" stroke="#bbb" stroke-width="0.8"/>
+    <!-- Eyes — sharp, analytical -->
+    <path d="M 73 99 Q 82 93 91 99 Q 82 104 73 99" fill="none" stroke="#aaa" stroke-width="1.3"/>
+    <path d="M 109 99 Q 118 93 127 99 Q 118 104 109 99" fill="none" stroke="#aaa" stroke-width="1.3"/>
+    <circle cx="82" cy="98.5" r="3.2" fill="#333"/>
+    <circle cx="118" cy="98.5" r="3.2" fill="#333"/>
+    <circle cx="83" cy="97" r="1.1" fill="#888"/>
+    <circle cx="119" cy="97" r="1.1" fill="#888"/>
+    <!-- Sharp upper lash -->
+    <path d="M 73 99 Q 82 92 91 99" fill="none" stroke="#999" stroke-width="1.8"/>
+    <path d="M 109 99 Q 118 92 127 99" fill="none" stroke="#999" stroke-width="1.8"/>
+    <!-- Eyeliner wing hint -->
+    <path d="M 91 99 L 93 97" stroke="#999" stroke-width="0.6"/>
+    <path d="M 127 99 L 129 97" stroke="#999" stroke-width="0.6"/>
+    <!-- Eyebrows — defined arch -->
+    <path d="M 71 88 Q 82 82 93 88" fill="none" stroke="#aaa" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M 107 88 Q 118 82 129 88" fill="none" stroke="#aaa" stroke-width="1.3" stroke-linecap="round"/>
+    <!-- Nose — straight, classical -->
+    <path d="M 100 96 L 99 116 Q 96 121 93 119" fill="none" stroke="#888" stroke-width="0.9"/>
+    <path d="M 99 116 Q 101 122 107 119" fill="none" stroke="#888" stroke-width="0.7"/>
+    <!-- Mouth — composed, slight smile -->
+    <path d="M 86 134 Q 94 138 100 137 Q 106 138 114 134" fill="none" stroke="#999" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M 89 134 Q 95 131 100 132 Q 105 131 111 134" fill="none" stroke="#888" stroke-width="0.6"/>
+    <!-- Crow's feet (maturity) -->
+    <path d="M 69 98 L 66 95" stroke="#888" stroke-width="0.4"/>
+    <path d="M 69 100 L 65 100" stroke="#888" stroke-width="0.4"/>
+    <path d="M 131 98 L 134 95" stroke="#888" stroke-width="0.4"/>
+    <path d="M 131 100 L 135 100" stroke="#888" stroke-width="0.4"/>
+  </g>
+</svg>

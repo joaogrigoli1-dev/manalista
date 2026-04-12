@@ -1,0 +1,66 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dr. Victor Winnicott — Male, 40s, beard, warm but firm, short hair -->
+  <defs>
+    <radialGradient id="bg-v" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#bg-v)" rx="16"/>
+  <g opacity="0.95">
+    <!-- Neck -->
+    <path d="M 84 150 L 84 170 Q 84 175 90 178 L 110 178 Q 116 175 116 170 L 116 150" fill="none" stroke="#888" stroke-width="1.2"/>
+    <!-- Collar/shirt -->
+    <path d="M 55 200 Q 60 182 88 178 L 100 188 L 112 178 Q 140 182 145 200" fill="none" stroke="#777" stroke-width="1.5"/>
+    <line x1="100" y1="188" x2="100" y2="200" stroke="#777" stroke-width="0.8"/>
+    <!-- Head shape — slightly square jaw -->
+    <ellipse cx="100" cy="102" rx="42" ry="50" fill="none" stroke="#999" stroke-width="1.8"/>
+    <!-- Strong jaw -->
+    <path d="M 62 110 Q 68 148 100 158 Q 132 148 138 110" fill="none" stroke="#888" stroke-width="1.3"/>
+    <!-- Hair — short, textured -->
+    <path d="M 58 88 Q 56 60 72 50 Q 86 42 100 41 Q 114 42 128 50 Q 144 60 142 88" fill="none" stroke="#aaa" stroke-width="2"/>
+    <path d="M 62 85 Q 68 56 85 47" fill="none" stroke="#999" stroke-width="0.8"/>
+    <path d="M 72 82 Q 80 52 100 45" fill="none" stroke="#888" stroke-width="0.7"/>
+    <path d="M 128 82 Q 120 52 100 45" fill="none" stroke="#888" stroke-width="0.7"/>
+    <path d="M 138 85 Q 132 56 115 47" fill="none" stroke="#999" stroke-width="0.8"/>
+    <!-- Short hair texture strokes -->
+    <path d="M 66 80 L 70 72" stroke="#888" stroke-width="0.5"/>
+    <path d="M 78 75 L 82 67" stroke="#999" stroke-width="0.5"/>
+    <path d="M 90 72 L 94 64" stroke="#888" stroke-width="0.5"/>
+    <path d="M 106 72 L 110 64" stroke="#888" stroke-width="0.5"/>
+    <path d="M 118 75 L 122 67" stroke="#999" stroke-width="0.5"/>
+    <path d="M 130 80 L 134 72" stroke="#888" stroke-width="0.5"/>
+    <!-- Ears -->
+    <path d="M 58 94 Q 50 100 50 110 Q 50 118 58 120" fill="none" stroke="#999" stroke-width="1"/>
+    <path d="M 142 94 Q 150 100 150 110 Q 150 118 142 120" fill="none" stroke="#999" stroke-width="1"/>
+    <!-- Eyes — deep set, focused -->
+    <ellipse cx="82" cy="100" rx="10" ry="5" fill="none" stroke="#aaa" stroke-width="1.2"/>
+    <ellipse cx="118" cy="100" rx="10" ry="5" fill="none" stroke="#aaa" stroke-width="1.2"/>
+    <circle cx="82" cy="100" r="3.5" fill="#333"/>
+    <circle cx="118" cy="100" r="3.5" fill="#333"/>
+    <circle cx="83" cy="98.5" r="1" fill="#888"/>
+    <circle cx="119" cy="98.5" r="1" fill="#888"/>
+    <!-- Eyebrows — thicker, expressive -->
+    <path d="M 70 88 Q 82 83 94 88" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 106 88 Q 118 83 130 88" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"/>
+    <!-- Nose — broader -->
+    <path d="M 100 96 L 97 118 Q 93 124 90 122" fill="none" stroke="#999" stroke-width="1"/>
+    <path d="M 97 118 Q 100 125 110 122" fill="none" stroke="#888" stroke-width="0.9"/>
+    <!-- Beard — full, trimmed -->
+    <path d="M 68 120 Q 65 135 72 148 Q 85 160 100 162 Q 115 160 128 148 Q 135 135 132 120" fill="none" stroke="#999" stroke-width="1.5"/>
+    <!-- Beard texture strokes -->
+    <g stroke="#888" stroke-width="0.5" fill="none">
+      <line x1="75" y1="128" x2="78" y2="140"/>
+      <line x1="82" y1="130" x2="84" y2="145"/>
+      <line x1="90" y1="132" x2="91" y2="150"/>
+      <line x1="100" y1="133" x2="100" y2="155"/>
+      <line x1="110" y1="132" x2="109" y2="150"/>
+      <line x1="118" y1="130" x2="116" y2="145"/>
+      <line x1="125" y1="128" x2="122" y2="140"/>
+    </g>
+    <!-- Mustache -->
+    <path d="M 88 126 Q 94 122 100 124 Q 106 122 112 126" fill="none" stroke="#aaa" stroke-width="1.2"/>
+    <!-- Mouth hint under mustache -->
+    <path d="M 90 130 Q 100 134 110 130" fill="none" stroke="#888" stroke-width="0.8"/>
+  </g>
+</svg>
