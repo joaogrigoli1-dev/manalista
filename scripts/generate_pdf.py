@@ -256,7 +256,7 @@ def build_story(data, styles):
         # Agent header row
         agent_header = Table([[
             Paragraph(f"<b>{name}</b>", ParagraphStyle("ah", fontName="Helvetica-Bold", fontSize=10, textColor=C_WHITE)),
-            Paragraph(role, ParagraphStyle("ar", fontName="Helvetica", fontSize=8, textColor=colors.HexColor(str(ac).replace("HexColor('#","").replace("')","").strip() if hasattr(ac,'hexval') else "#94A3B8"))),
+            Paragraph(role, ParagraphStyle("ar", fontName="Helvetica", fontSize=8, textColor=colors.HexColor('#%02x%02x%02x' % (int(ac.red*255), int(ac.green*255), int(ac.blue*255))) if hasattr(ac, 'red') else colors.HexColor("#94A3B8"))),
         ]], colWidths=[80*mm, None])
         agent_header.setStyle(TableStyle([
             ("BACKGROUND", (0,0), (-1,-1), colors.HexColor("#111827")),
