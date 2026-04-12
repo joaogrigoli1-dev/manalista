@@ -6,7 +6,6 @@ export type AgentId =
   | "mediator"
   | "psi-infantil"
   | "psi-parentalidade"
-  | "neuropsico"
   | "neuropediatra"
   | "bcba";
 

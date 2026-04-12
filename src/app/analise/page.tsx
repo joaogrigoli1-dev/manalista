@@ -81,7 +81,7 @@ export default function AnalisePage() {
   const [childData, setChildData] = useState<ChildData | null>(null);
   const [agentStatuses, setAgentStatuses] = useState<Record<AgentId, AgentStatus>>({
     mediator: "idle", "psi-infantil": "idle", "psi-parentalidade": "idle",
-    neuropsico: "idle", neuropediatra: "idle", bcba: "idle",
+    neuropediatra: "idle", bcba: "idle",
   });
   const [messages, setMessages] = useState<DebateMessage[]>([]);
   const [streamingId, setStreamingId] = useState<string | undefined>();
@@ -442,7 +442,7 @@ export default function AnalisePage() {
             {phase === "complete" && (
               <div style={{ textAlign: "center", paddingTop: "1rem" }}>
                 <button
-                  onClick={() => { setPhase("form"); setMessages([]); setResults([]); setChildData(null); setAgentStatuses({ mediator:"idle","psi-infantil":"idle","psi-parentalidade":"idle",neuropsico:"idle",neuropediatra:"idle",bcba:"idle" }); setAgentDialogTexts({} as Record<AgentId, string>); setDetectedPathologies([]); setSpecialistRecs([]); setQualityScore(0); setNeedsMoreInfo(false); setPendingQuestions([]); }}
+                  onClick={() => { setPhase("form"); setMessages([]); setResults([]); setChildData(null); setAgentStatuses({ mediator:"idle","psi-infantil":"idle","psi-parentalidade":"idle",neuropediatra:"idle",bcba:"idle" }); setAgentDialogTexts({} as Record<AgentId, string>); setDetectedPathologies([]); setSpecialistRecs([]); setQualityScore(0); setNeedsMoreInfo(false); setPendingQuestions([]); }}
                   style={{
                     padding: "0.7rem 1.5rem", borderRadius: "9999px",
                     border: "1px solid var(--border-input)", background: "var(--bg-glass)",
