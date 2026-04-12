@@ -352,6 +352,7 @@ export default function AnalisePage() {
   const [agentStatuses, setAgentStatuses] = useState<Record<AgentId, AgentStatus>>({
     mediator: "idle", "psi-infantil": "idle", "psi-parentalidade": "idle",
     neuropediatra: "idle", bcba: "idle",
+    "fonoaudiologia": "idle", "terapeuta-ocupacional": "idle", "psiquiatra-infantil": "idle",
   });
   const [messages, setMessages] = useState<DebateMessage[]>([]);
   const [streamingId, setStreamingId] = useState<string | undefined>();
@@ -805,7 +806,7 @@ export default function AnalisePage() {
                 <button
                   onClick={() => {
                     setPhase("form"); setMessages([]); setResults([]); setChildData(null);
-                    setAgentStatuses({ mediator:"idle","psi-infantil":"idle","psi-parentalidade":"idle",neuropediatra:"idle",bcba:"idle" });
+                    setAgentStatuses({ mediator:"idle","psi-infantil":"idle","psi-parentalidade":"idle",neuropediatra:"idle",bcba:"idle","fonoaudiologia":"idle","terapeuta-ocupacional":"idle","psiquiatra-infantil":"idle" });
                     setAgentDialogTexts({} as Record<AgentId, string>);
                     setDetectedPathologies([]); setQualityScore(0);
                     setNeedsMoreInfo(false); setPendingQuestions([]);

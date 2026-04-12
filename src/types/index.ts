@@ -7,7 +7,10 @@ export type AgentId =
   | "psi-infantil"
   | "psi-parentalidade"
   | "neuropediatra"
-  | "bcba";
+  | "bcba"
+  | "fonoaudiologia"
+  | "terapeuta-ocupacional"
+  | "psiquiatra-infantil";
 
 export type Theme = "dark" | "clinic" | "aurora";
 export type Lang  = "pt" | "en";
