@@ -54,7 +54,7 @@ export const AGENT_BACKSTORIES: Record<AgentId, AgentBackstory> = {
     clinicalApproach: "Avaliação baseada em marcos comportamentais (VB-MAPP), análise funcional do comportamento-problema (FBA), coleta sistemática de dados ABC, avaliação de habilidades linguísticas verbais e funcionais para definir objetivos de intervenção ABA.",
   },
   "mediator": {
-    originName: "Coord. Atlas",
+    originName: "MAnalista",
     originDescription: "Referência ao Titã Atlas que sustentava o mundo. O sistema mediador sustenta o diálogo multiprofissional, garantindo que todas as perspectivas sejam integradas harmoniosamente no diagnóstico final.",
     whyChosen: "O agente mediador é a inteligência central que orquestra o debate multiprofissional. Recebe as análises de todos os especialistas, facilita o diálogo, consolida perspectivas e produz um diagnóstico integrado que respeita as contribuições de cada profissional.",
     fictionalBio: "Sistema de IA desenvolvido para orquestração multiprofissional em diagnóstico infantil. Integra análises de psicólogos, neuropsicopediatras, neuropediatras e analistas do comportamento em uma síntese diagnóstica coerente e fundamentada.",

@@ -11,11 +11,11 @@ export const AGENT_PROFILES: AgentProfile[] = [
   {
     id: "mediator",
     isMediator: true,
-    emoji: "🎯",
+    emoji: "🧠",
     color: "#8B5CF6",
     colorLight: "rgba(139,92,246,0.12)",
-    namePt: "Coord. Atlas",
-    nameEn: "Coord. Atlas",
+    namePt: "MAnalista",
+    nameEn: "MAnalista",
     rolePt: "Agente Mediador Central",
     roleEn: "Central Mediator Agent",
     credentialsPt: "Sistema de IA — Orquestrador Multiprofissional",
@@ -74,7 +74,7 @@ export const AGENT_PROFILES: AgentProfile[] = [
   },
   {
     id: "neuropediatra",
-    emoji: "🧠",
+    emoji: "⚕️",
     color: "#10B981",
     colorLight: "rgba(16,185,129,0.12)",
     namePt: "Dr. Marco Cajal",
