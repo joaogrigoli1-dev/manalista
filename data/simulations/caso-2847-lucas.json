@@ -1,0 +1,40 @@
+{
+  "id": "caso-2847",
+  "paciente": {
+    "nome": "Lucas Gabriel M.",
+    "idade": "4 anos e 7 meses",
+    "sexo": "Masculino",
+    "escolaridade": "Educação Infantil — Jardim I",
+    "encaminhamento": "Pediatra de acompanhamento"
+  },
+  "responsavel": {
+    "nome": "Carla M.",
+    "parentesco": "Mãe",
+    "relato": "O Lucas sempre foi um bebê muito quieto. Desde pequeno ele não olhava nos olhos durante a amamentação, e eu achava que era normal. Com 2 anos ele ainda não falava nenhuma palavra, só apontava para as coisas. Agora com 4 anos ele fala algumas palavras, mas repete muito o que a gente diz, tipo eco. Na escola a professora disse que ele não brinca com as outras crianças, fica sozinho fazendo fileiras com os carrinhos. Quando alguém tira o carrinho dele ou muda algo na rotina, ele tem crises de choro muito fortes que duram até 40 minutos. Ele balança muito as mãos quando está animado, e às vezes fica girando em círculos. Também é muito sensível a barulhos — tampa os ouvidos no supermercado e em festas de aniversário. Em casa ele só come 5 alimentos e não aceita experimentar nada novo."
+  },
+  "hipoteses_iniciais": ["TEA", "TDAH", "Ansiedade de Separação", "Atraso no Desenvolvimento"],
+  "debates": [
+    {
+      "agente": "Dra. Sofia Vygotski",
+      "fala": "A criança apresenta interação simbólica atípica. O brincar não segue o padrão esperado para a faixa etária — há ausência de jogo de faz-de-conta e rigidez na manipulação de objetos. Observei também déficit na atenção compartilhada e na capacidade de imitação social, o que sugere comprometimento na Zona de Desenvolvimento Proximal."
+    },
+    {
+      "agente": "Dr. Victor Winnicott",
+      "fala": "Os vínculos primários estão fragilizados. A mãe relata dificuldade em estabelecer contato visual durante amamentação. O padrão de apego apresenta características de insegurança evitativa, mas precisamos diferenciar se é consequência do quadro neurológico ou causa primária."
+    },
+    {
+      "agente": "Dr. Marco Cajal",
+      "fala": "Reflexos primitivos persistentes confirmados no exame. Hipersensibilidade tátil e auditiva consistente com disfunção de integração sensorial. Sugiro investigar padrão eletroencefalográfico para descartar atividade epileptiforme subclínica."
+    },
+    {
+      "agente": "Dra. Íris Skinner",
+      "fala": "Ecolalia tardia e estereotipias motoras consistentes com TEA nível 2. Frequência de hand-flapping: 12x em sessão de 30 minutos. Taxa de resposta a comandos verbais simples: 23%. Seletividade alimentar severa com repertório de apenas 5 alimentos."
+    }
+  ],
+  "resultado_probabilidades": {
+    "TEA": 72,
+    "TDAH": 58,
+    "Ansiedade de Separação": 41,
+    "Atraso no Desenvolvimento": 34
+  }
+}

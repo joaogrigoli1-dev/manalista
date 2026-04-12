@@ -1,0 +1,41 @@
+{
+  "id": "caso-3401",
+  "paciente": {
+    "nome": "Enzo B.",
+    "idade": "5 anos e 3 meses",
+    "sexo": "Masculino",
+    "escolaridade": "Educação Infantil — Jardim II",
+    "encaminhamento": "Neuropediatra"
+  },
+  "responsavel": {
+    "nome": "Patrícia e Marcos B.",
+    "parentesco": "Mãe e Pai",
+    "relato_mae": "O Enzo é muito agressivo na escola. Ele bate nos coleguinhas, joga as coisas no chão, xinga a professora. Em casa quando contrariado ele grita, chuta a porta e já quebrou dois tablets. Ele também é muito desatento, não consegue assistir um desenho inteiro, troca de canal o tempo todo. O pai dele viaja muito a trabalho e quando está em casa é muito rígido, grita muito e já bateu no Enzo várias vezes. Eu e meu marido estamos em processo de separação e tem sido muito difícil. O Enzo começou a fazer xixi na cama de novo depois que começamos a brigar mais. Na escola ele só se dá bem com uma criança, o melhor amigo dele, com os outros é sempre conflito.",
+    "relato_pai": "Eu acho que é falta de limite. Na minha época a gente apanhava e aprendia. A mãe dele é muito permissiva. Mas concordo que ele está mais difícil, teve uma vez que ele tentou pular da janela do quarto dele no segundo andar, não sei se era birra ou se ele realmente queria se machucar. Isso me assustou muito."
+  },
+  "hipoteses_iniciais": ["TOD", "TDAH", "Trauma/Estresse", "Depressão Infantil"],
+  "debates": [
+    {
+      "agente": "Dra. Sofia Vygotski",
+      "fala": "O comportamento da criança precisa ser contextualizado no ambiente em que ela se desenvolve. A agressividade não é um traço isolado — é uma linguagem. A criança está reproduzindo o modelo de resolução de conflitos que vivencia em casa: violência verbal e física. A regressão do controle esfincteriano e o episódio da janela são sinais de alerta importantes de sofrimento psíquico grave."
+    },
+    {
+      "agente": "Dr. Victor Winnicott",
+      "fala": "Estamos diante de um ambiente que deixou de ser facilitador. O conflito parental violento, a ausência emocional do pai e a ameaça de separação criaram uma ruptura no holding emocional da criança. O comportamento agressivo é um pedido de socorro — Winnicott chamaria de tendência antissocial. O episódio da janela é extremamente preocupante e indica risco. A criança precisa de proteção imediata."
+    },
+    {
+      "agente": "Dr. Marco Cajal",
+      "fala": "O quadro de desatenção precisa ser diferenciado de TDAH primário versus déficit de atenção secundário a estresse/trauma. Crianças em situação de violência doméstica frequentemente apresentam hipervigilância que mimetiza TDAH. A enurese secundária e a ideação suicida ou parasuicida são marcadores de trauma. Não vejo indicação de medicação estimulante neste momento — o tratamento prioritário é a proteção ambiental."
+    },
+    {
+      "agente": "Dra. Íris Skinner",
+      "fala": "Análise funcional do comportamento agressivo: 65% das ocorrências são antecedidas por frustrações interpessoais e mantidas por fuga de demandas. Porém 35% ocorrem sem antecedente claro — o que sugere componente emocional/trauma além da contingência comportamental. A criança demonstra capacidade social intacta com o amigo, indicando que o repertório existe mas está suprimido pelo estresse. Encaminhamento urgente para avaliação de risco e proteção à criança."
+    }
+  ],
+  "resultado_probabilidades": {
+    "Transtorno de Estresse Pós-Traumático": 71,
+    "TOD": 64,
+    "TDAH": 38,
+    "Depressão Infantil": 55
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "caso-3156",
+  "paciente": {
+    "nome": "Pedro Henrique A.",
+    "idade": "3 anos e 11 meses",
+    "sexo": "Masculino",
+    "escolaridade": "Educação Infantil — Maternal II",
+    "encaminhamento": "Fonoaudióloga"
+  },
+  "responsavel": {
+    "nome": "Juliana A.",
+    "parentesco": "Mãe",
+    "relato": "O Pedro não fala quase nada ainda. Só fala mamã e papá, e olhe lá. A fonoaudióloga disse que ele tem um atraso importante na fala e pediu essa avaliação. Ele entende bastante coisa, quando eu peço pra pegar um brinquedo ele pega certo, mas não consegue expressar. Na creche ele brinca com as outras crianças, corre, ri, faz brincadeira de faz-de-conta com os bonequinhos. Ele imita muito tudo que a gente faz em casa, ajuda a varrer, quer cozinhar junto. Não tem problema com barulho nem com comida, come de tudo. O que me preocupa é que o primo dele tem autismo e a família toda acha que o Pedro também tem por causa da fala. Nasceu prematuro de 34 semanas e ficou 8 dias na UTI neonatal."
+  },
+  "hipoteses_iniciais": ["Atraso de Linguagem", "TEA", "Atraso Global do Desenvolvimento", "Apraxia de Fala"],
+  "debates": [
+    {
+      "agente": "Dra. Sofia Vygotski",
+      "fala": "A criança apresenta desenvolvimento sociocognitivo dentro do esperado para a idade. A brincadeira simbólica está presente, a imitação social é rica e a atenção compartilhada está preservada. O déficit parece restrito ao domínio da linguagem expressiva, sem comprometimento das funções psicológicas superiores globais."
+    },
+    {
+      "agente": "Dr. Victor Winnicott",
+      "fala": "O vínculo mãe-criança é seguro e o ambiente familiar é facilitador. A mãe demonstra preocupação adequada, porém influenciada pela história familiar de TEA do primo. O holding emocional é bom. Não identifico fatores relacionais que justifiquem o atraso na fala."
+    },
+    {
+      "agente": "Dr. Marco Cajal",
+      "fala": "A prematuridade de 34 semanas com 8 dias de UTI neonatal é um fator de risco significativo para atraso de linguagem sem necessariamente indicar TEA. A compreensão preservada com expressão comprometida sugere um quadro de atraso específico de linguagem expressiva ou possível apraxia de fala na infância. Recomendo audiometria completa e ressonância de crânio para descartar lesões perinatais."
+    },
+    {
+      "agente": "Dra. Íris Skinner",
+      "fala": "Na avaliação comportamental estruturada, a criança demonstra 92% de resposta a comandos não-verbais e gestuais. Interesse social: alto. Estereotipias: ausentes. Repertório de brincar: variado e flexível. O perfil comportamental NÃO é compatível com TEA. Sugiro investigação fonoaudiológica aprofundada com foco em praxia orofacial."
+    }
+  ],
+  "resultado_probabilidades": {
+    "Atraso de Linguagem Expressiva": 78,
+    "Apraxia de Fala": 45,
+    "TEA": 8,
+    "Atraso Global do Desenvolvimento": 22
+  }
+}

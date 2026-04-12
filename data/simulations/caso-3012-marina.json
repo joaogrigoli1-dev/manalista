@@ -1,0 +1,40 @@
+{
+  "id": "caso-3012",
+  "paciente": {
+    "nome": "Marina S.",
+    "idade": "6 anos e 2 meses",
+    "sexo": "Feminino",
+    "escolaridade": "1º ano do Ensino Fundamental",
+    "encaminhamento": "Escola — coordenação pedagógica"
+  },
+  "responsavel": {
+    "nome": "Roberto S.",
+    "parentesco": "Pai",
+    "relato": "A Marina sempre foi muito agitada, desde bebê era difícil colocá-la para dormir. Na escola ela não consegue ficar sentada, levanta o tempo todo, fala sem parar e interrompe a professora e os coleguinhas. Ela perde o material escolar toda semana, esquece o que a gente pede, e nunca termina uma atividade. Em casa ela começa a brincar de uma coisa e em 3 minutos já está em outra. Tem muita dificuldade de esperar a vez na fila ou em jogos. A professora disse que ela é inteligente mas não consegue focar. Também percebi que ela fica muito ansiosa quando eu viajo a trabalho, liga chorando e não dorme enquanto eu não volto. Ela já foi expulsa de duas festinhas porque não obedecia as regras dos jogos."
+  },
+  "hipoteses_iniciais": ["TDAH", "Ansiedade de Separação", "TOD", "TEA (meninas)"],
+  "debates": [
+    {
+      "agente": "Dra. Sofia Vygotski",
+      "fala": "A criança demonstra capacidade cognitiva preservada com dificuldade significativa na autorregulação. O perfil não é de déficit intelectual, mas de desregulação executiva. A impulsividade interfere na mediação social, impedindo a internalização de regras — como previsto na teoria de Vygotski sobre funções executivas superiores."
+    },
+    {
+      "agente": "Dr. Victor Winnicott",
+      "fala": "Há um padrão de ansiedade de separação significativo vinculado à ausência paterna por viagens. A criança demonstra ambiente suficientemente bom com ambos os pais, porém a intermitência da presença paterna gera insegurança vincular que se manifesta como hiperatividade compensatória."
+    },
+    {
+      "agente": "Dr. Marco Cajal",
+      "fala": "O quadro clínico é compatível com TDAH predominantemente hiperativo-impulsivo. Não identifico sinais neurológicos focais. O padrão de sono fragmentado desde a infância reforça a hipótese de disfunção dopaminérgica. Recomendo avaliação neuropsicológica formal com protocolo de atenção sustentada."
+    },
+    {
+      "agente": "Dra. Íris Skinner",
+      "fala": "Na análise funcional do comportamento, a impulsividade serve como função de acesso a atenção social e fuga de demandas acadêmicas. Taxa de permanência em tarefa: 2.8 minutos. Frequência de interrupções em 30 minutos: 18. Importante: ela mantém contato visual adequado e tem interesse social, o que diferencia de TEA."
+    }
+  ],
+  "resultado_probabilidades": {
+    "TDAH": 81,
+    "Ansiedade de Separação": 63,
+    "TOD": 35,
+    "TEA": 12
+  }
+}

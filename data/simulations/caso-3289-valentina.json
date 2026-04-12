@@ -1,0 +1,40 @@
+{
+  "id": "caso-3289",
+  "paciente": {
+    "nome": "Valentina R.",
+    "idade": "7 anos e 8 meses",
+    "sexo": "Feminino",
+    "escolaridade": "2º ano do Ensino Fundamental",
+    "encaminhamento": "Psicóloga escolar"
+  },
+  "responsavel": {
+    "nome": "Fernanda R.",
+    "parentesco": "Mãe",
+    "relato": "A Valentina é uma menina muito inteligente, lê desde os 5 anos e sabe coisas sobre dinossauros que até adulto não sabe. Mas ela não tem amigas. Na escola ela fica sozinha no recreio lendo ou desenhando. Quando tentam brincar com ela, ela impõe regras muito rígidas e se alguém não segue, ela se isola e fica muito irritada. A professora diz que ela é perfeccionista demais, refaz as atividades várias vezes até ficar perfeito e por isso nunca termina no tempo. Ela também é muito literal — quando disseram 'chove canivetes' ela ficou com medo de sair de casa. Em casa ela organiza todos os brinquedos por cor e tamanho e fica muito angustiada se alguém muda a ordem. Ela teve duas amigas no ano passado mas brigou com as duas porque elas não seguiam as regras dos jogos como ela queria."
+  },
+  "hipoteses_iniciais": ["TEA Nível 1 (Asperger)", "Altas Habilidades", "Ansiedade Generalizada", "TOC"],
+  "debates": [
+    {
+      "agente": "Dra. Sofia Vygotski",
+      "fala": "O perfil cognitivo é dissincrônico: alto desempenho intelectual com déficit significativo na cognição social. A literalidade na compreensão de metáforas, a rigidez nas regras sociais e a dificuldade de teoria da mente são indicadores de TEA nível 1 em meninas, frequentemente mascarado pela capacidade intelectual acima da média. A mediação social não funciona como esperado pela teoria sociocultural."
+    },
+    {
+      "agente": "Dr. Victor Winnicott",
+      "fala": "O padrão de vinculação é peculiar: a criança demonstra apego seguro com a mãe mas dificuldade significativa em formar vínculos com pares. O perfeccionismo excessivo e a necessidade de controle podem ser mecanismos de defesa contra a angústia de não compreender as regras implícitas da socialização. O isolamento é mais uma consequência do que uma escolha genuína."
+    },
+    {
+      "agente": "Dr. Marco Cajal",
+      "fala": "O perfil neuropsicológico sugere processamento atípico com inteligência verbal superior e déficit em funções executivas de flexibilidade cognitiva. A literalidade e rigidez comportamental são consistentes com processamento predominantemente lógico-sequencial. Sem sinais de TOC clássico — os rituais dela têm função organizacional, não ansiogênica."
+    },
+    {
+      "agente": "Dra. Íris Skinner",
+      "fala": "A análise comportamental revela: flexibilidade comportamental baixa (3/10), interação social iniciada pela criança: 2 vezes em 60 minutos, comportamentos repetitivos de organização: 8x em sessão. Porém, contato visual presente, linguagem verbal rica e interesse em ter amizades existente mas sem repertório social para mantê-las. Perfil compatível com TEA nível 1 — o masking feminino dificulta o diagnóstico precoce."
+    }
+  ],
+  "resultado_probabilidades": {
+    "TEA Nível 1": 74,
+    "Altas Habilidades/Superdotação": 68,
+    "Ansiedade Generalizada": 42,
+    "TOC": 18
+  }
+}
