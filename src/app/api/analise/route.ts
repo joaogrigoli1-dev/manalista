@@ -7,6 +7,13 @@ import type { AgentId, ChildData } from "@/types";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
+// Estratégia híbrida de modelos:
+// - Opus 4.6 para o mediador (consolidação exige síntese profunda)
+// - Sonnet 4.6 para os 4 especialistas (análise e debate — rápido e preciso)
+function getModelForAgent(agentId: AgentId): string {
+  return agentId === "mediator" ? "claude-opus-4-6" : "claude-sonnet-4-6";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json() as {
@@ -21,6 +28,7 @@ export async function POST(req: NextRequest) {
     const client = new Anthropic({ apiKey });
     const systemPrompt = buildSystemPrompt(body.agentId, body.lang);
     const dataContext   = buildChildDataPrompt(body.childData, body.lang);
+    const model = getModelForAgent(body.agentId);
 
     // Monta o histórico de mensagens para o debate
     const messages: Anthropic.MessageParam[] = [
@@ -54,7 +62,7 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           const response = await client.messages.stream({
-            model: "claude-opus-4-6",
+            model,
             max_tokens: 2048,
             system: systemPrompt,
             messages,
