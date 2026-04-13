@@ -141,13 +141,6 @@ label {
 }
 .animate-in { animation: fade-in-up 0.4s cubic-bezier(0.32,0.72,0,1) both; }
 
-/* ── Navbar button hover ─────────────────────────── */
-.nav-btn:hover {
-  background: var(--accent-brand-soft) !important;
-  border-color: var(--accent-brand) !important;
-  color: var(--accent-brand) !important;
-}
-
 /* ── Card hover glow accent ──────────────────────── */
 .card-agent:hover {
   border-color: rgba(124,92,252,0.25) !important;

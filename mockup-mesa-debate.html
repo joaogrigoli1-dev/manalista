@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAnalista — Mesa de Debate Clínico (Mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+<style>
+  :root {
+    --bg-primary: #050505;
+    --bg-secondary: #0A0A0A;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --card-highlight: rgba(255,255,255,0.12);
+    --surface-elevated: rgba(255,255,255,0.06);
+    --accent-purple: #7C3AED;
+    --accent-purple-glow: rgba(124,58,237,0.25);
+    --accent-purple-soft: rgba(167,139,250,0.15);
+    --accent-emerald: #059669;
+    --accent-emerald-glow: rgba(5,150,105,0.20);
+    --accent-emerald-soft: rgba(52,211,153,0.15);
+    --accent-amber: #D97706;
+    --accent-amber-soft: rgba(217,119,6,0.15);
+    --accent-rose: #E11D48;
+    --accent-rose-soft: rgba(225,29,72,0.15);
+    --text-primary: #F8F8F8;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-muted: rgba(255,255,255,0.30);
+    --speaking-glow: rgba(52,211,153,0.50);
+    --ease-premium: cubic-bezier(0.32, 0.72, 0, 1);
+    --radius-xl: 2rem;
+    --radius-lg: 1.25rem;
+    --radius-md: 0.75rem;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* ═══ BACKGROUND AMBIENT ═══ */
+  .bg-ambient {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 10% 15%, rgba(124,58,237,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 88% 82%, rgba(5,150,105,0.08) 0%, transparent 50%),
+      var(--bg-primary);
+  }
+  .bg-grain {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 128px;
+  }
+
+  /* ═══ LAYOUT GRID ═══ */
+  .app-layout {
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    grid-template-rows: 1fr;
+    height: 100dvh;
+    gap: 0;
+    padding-top: 72px;
+  }
+
+  /* ═══ TOPBAR ═══ */
+  .topbar {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(5,5,5,0.88);
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 9999px;
+    padding: 8px 24px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .topbar-logo {
+    font-weight: 700; font-size: 1rem;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-emerald));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; white-space: nowrap;
+  }
+  .topbar-live {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent-emerald-soft);
+    border: 1px solid rgba(52,211,153,0.25);
+    border-radius: 9999px; padding: 4px 12px;
+    font-size: 0.6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: #34D399;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #34D399;
+    animation: pulse-dot 1.5s ease infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .topbar-case {
+    font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;
+  }
+  .topbar-sep { color: var(--text-muted); font-size: 0.9rem; }
+  .topbar-timer {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.78rem; color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .topbar-end {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent-rose-soft);
+    border: 1px solid rgba(225,29,72,0.25);
+    border-radius: 9999px; padding: 6px 14px 6px 12px;
+    font-size: 0.72rem; font-weight: 600; color: #FB7185;
+    cursor: pointer;
+    transition: all 400ms var(--ease-premium);
+  }
+  .topbar-end:hover { background: rgba(225,29,72,0.25); transform: scale(1.03); }
+  .topbar-end:active { transform: scale(0.97); }
+  .topbar-end-icon {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(225,29,72,0.25);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ═══ SIDEBAR ESQUERDA ═══ */
+  .sidebar {
+    height: calc(100dvh - 72px);
+    overflow-y: auto; overflow-x: hidden;
+    padding: 20px 14px;
+    border-right: 1px solid var(--card-border);
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar-header { margin-bottom: 20px; }
+  .eyebrow {
+    font-size: 0.6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .sidebar-title { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+  .sidebar-sub { font-size: 0.72rem; color: var(--text-muted); }
+
+  /* ═══ CARD DOUBLE-BEZEL ═══ */
+  .card-shell {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: 5px;
+    margin-bottom: 10px;
+    transition: all 500ms var(--ease-premium);
+  }
+  .card-shell:hover {
+    border-color: rgba(255,255,255,0.14);
+  }
+  .card-shell.speaking {
+    border-color: rgba(52,211,153,0.4);
+    box-shadow: 0 0 24px rgba(52,211,153,0.12);
+    transform: scale(1.015);
+  }
+  .card-core {
+    background: var(--card-bg);
+    border-radius: calc(var(--radius-xl) - 5px);
+    box-shadow: inset 0 1px 1px var(--card-highlight);
+    padding: 16px;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* ═══ AVATAR ═══ */
+  .avatar-ring {
+    width: 44px; height: 44px; border-radius: 50%;
+    padding: 2px; flex-shrink: 0;
+    position: relative;
+  }
+  .avatar-ring.purple { background: linear-gradient(135deg, var(--accent-purple), rgba(139,92,246,0.4)); }
+  .avatar-ring.amber { background: linear-gradient(135deg, var(--accent-amber), rgba(251,191,36,0.4)); }
+  .avatar-ring.emerald { background: linear-gradient(135deg, var(--accent-emerald), rgba(52,211,153,0.4)); }
+  .avatar-ring.rose { background: linear-gradient(135deg, var(--accent-rose), rgba(244,63,94,0.4)); }
+  .avatar-ring.gradient { background: linear-gradient(135deg, var(--accent-purple), var(--accent-emerald)); }
+  .avatar-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--text-secondary);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.15);
+    overflow: hidden;
+    filter: grayscale(100%) contrast(1.1);
+  }
+  .avatar-inner img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: grayscale(100%) contrast(1.15);
+  }
+  .speaking-badge {
+    position: absolute; bottom: -1px; right: -1px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent-emerald);
+    border: 2px solid var(--bg-primary);
+    display: flex; align-items: center; justify-content: center;
+    animation: mic-pulse 0.8s ease infinite alternate;
+  }
+  @keyframes mic-pulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+  .speaking-badge i { font-size: 8px; color: white; }
+
+  .card-name { font-size: 0.8rem; font-weight: 600; line-height: 1.2; }
+  .card-spec { font-size: 0.68rem; color: var(--text-muted); font-style: italic; }
+  .card-divider {
+    height: 1px; background: var(--card-border);
+    margin: 10px 0;
+  }
+  .card-section-label {
+    font-size: 0.58rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .card-bio {
+    font-size: 0.7rem; color: var(--text-secondary);
+    line-height: 1.5; margin-bottom: 10px;
+  }
+  .badge-role {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.6rem; font-weight: 600;
+    padding: 4px 10px; border-radius: 9999px;
+    margin-bottom: 10px;
+  }
+  .badge-role.purple { background: var(--accent-purple-soft); color: #A78BFA; }
+  .badge-role.amber { background: var(--accent-amber-soft); color: #FBBF24; }
+  .badge-role.emerald { background: var(--accent-emerald-soft); color: #34D399; }
+  .badge-role.rose { background: var(--accent-rose-soft); color: #FB7185; }
+  .badge-role.gradient {
+    background: linear-gradient(135deg, var(--accent-purple-soft), var(--accent-emerald-soft));
+    color: #A78BFA;
+  }
+  .contrib-bar-bg {
+    height: 3px; background: rgba(255,255,255,0.06);
+    border-radius: 9999px; overflow: hidden; margin-bottom: 4px;
+  }
+  .contrib-bar-fill { height: 100%; border-radius: 9999px; transition: width 800ms var(--ease-premium); }
+  .contrib-count { font-size: 0.62rem; color: var(--text-muted); }
+
+  /* ═══ MESA DE DEBATE (CENTRO) ═══ */
+  .debate-center {
+    height: calc(100dvh - 72px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .table-container {
+    position: relative;
+    width: min(520px, 80%);
+    aspect-ratio: 1.35 / 1;
+  }
+
+  .table-surface {
+    position: absolute; inset: 60px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+      rgba(255,255,255,0.05) 0%,
+      rgba(255,255,255,0.02) 55%,
+      transparent 100%
+    );
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.08),
+      0 0 80px rgba(124,58,237,0.06),
+      0 0 120px rgba(5,150,105,0.04);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .table-label {
+    font-size: 0.6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.3em;
+    color: var(--text-muted); opacity: 0.6;
+  }
+  .table-case {
+    font-size: 0.55rem; color: var(--text-muted);
+    letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.5;
+    margin-top: 4px;
+  }
+
+  /* ═══ AGENTES NA MESA ═══ */
+  .agent-seat {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px;
+    transition: transform 300ms var(--ease-premium);
+  }
+  .agent-seat:hover { transform: scale(1.08); cursor: pointer; }
+
+  .seat-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    padding: 2px; position: relative;
+  }
+  .seat-avatar-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.75rem;
+    color: var(--text-secondary);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.15);
+  }
+  .seat-avatar.speaking-ring {
+    animation: speaking-ring-pulse 1.5s ease infinite;
+  }
+  @keyframes speaking-ring-pulse {
+    0% { box-shadow: 0 0 0 0px rgba(52,211,153,0.5); }
+    70% { box-shadow: 0 0 0 10px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0px rgba(52,211,153,0); }
+  }
+  .seat-name { font-size: 0.65rem; font-weight: 600; text-align: center; white-space: nowrap; }
+  .seat-spec { font-size: 0.55rem; color: var(--text-muted); font-style: italic; text-align: center; }
+
+  /* Agent positions */
+  .seat-top    { top: -10px; left: 50%; transform: translateX(-50%); }
+  .seat-right-top { top: 22%; right: -14px; }
+  .seat-right-bot { bottom: 22%; right: -14px; }
+  .seat-left-top  { top: 22%; left: -14px; }
+  .seat-left-bot  { bottom: 22%; left: -14px; }
+
+  /* ═══ MAnalista Avatar (IA) ═══ */
+  .ia-hex {
+    width: 60px; height: 60px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-emerald));
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: ia-glow 4s ease-in-out infinite alternate;
+  }
+  @keyframes ia-glow {
+    0% { box-shadow: 0 0 20px rgba(124,58,237,0.3); }
+    100% { box-shadow: 0 0 20px rgba(5,150,105,0.3); }
+  }
+  .ia-hex i { font-size: 28px; color: white; opacity: 0.9; }
+
+  /* ═══ BALÕES DE FALA ═══ */
+  .bubble {
+    position: absolute;
+    max-width: 220px; min-width: 150px;
+    border-radius: var(--radius-lg);
+    padding: 10px 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    opacity: 0.45;
+    transition: all 500ms var(--ease-premium);
+    animation: bubble-in 500ms var(--ease-premium) backwards;
+  }
+  .bubble.active {
+    opacity: 1;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 20px rgba(52,211,153,0.08);
+  }
+  .bubble-eyebrow {
+    display: inline-block;
+    font-size: 0.55rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 2px 8px; border-radius: 9999px;
+    margin-bottom: 6px;
+  }
+  .bubble-text { font-size: 0.75rem; color: var(--text-primary); line-height: 1.55; }
+  .bubble-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 8px;
+  }
+  .bubble-time { font-size: 0.58rem; color: var(--text-muted); }
+  .bubble-expand {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 300ms var(--ease-premium);
+  }
+  .bubble-expand:hover { background: rgba(255,255,255,0.12); transform: scale(1.1); }
+  .bubble-expand i { font-size: 11px; color: var(--text-secondary); }
+  @keyframes bubble-in {
+    from { opacity: 0; transform: scale(0.82); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Bubble themes */
+  .bubble.purple { background: rgba(139,92,246,0.10); border: 1px solid rgba(139,92,246,0.20); }
+  .bubble.purple .bubble-eyebrow { background: var(--accent-purple-soft); color: #A78BFA; }
+  .bubble.amber { background: rgba(217,119,6,0.10); border: 1px solid rgba(217,119,6,0.20); }
+  .bubble.amber .bubble-eyebrow { background: var(--accent-amber-soft); color: #FBBF24; }
+  .bubble.emerald-b { background: rgba(5,150,105,0.10); border: 1px solid rgba(5,150,105,0.20); }
+  .bubble.emerald-b .bubble-eyebrow { background: var(--accent-emerald-soft); color: #34D399; }
+  .bubble.rose-b { background: rgba(225,29,72,0.10); border: 1px solid rgba(225,29,72,0.20); }
+  .bubble.rose-b .bubble-eyebrow { background: var(--accent-rose-soft); color: #FB7185; }
+  .bubble.gradient-b {
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(5,150,105,0.10));
+    border: 1px solid rgba(167,139,250,0.25);
+  }
+  .bubble.gradient-b .bubble-eyebrow {
+    background: linear-gradient(135deg, var(--accent-purple-soft), var(--accent-emerald-soft));
+    color: #A78BFA;
+  }
+
+  /* Bubble positions */
+  .bubble-top { top: -80px; left: 50%; transform: translateX(-50%); }
+  .bubble-rt { top: 5%; right: calc(100% + 20px); }
+  .bubble-rb { bottom: 5%; right: calc(100% + 20px); }
+  .bubble-lt { top: 5%; left: calc(100% + 20px); }
+  .bubble-lb { bottom: 5%; left: calc(100% + 20px); }
+
+  /* ═══ INDICADOR QUEM FALA ═══ */
+  .speaking-bar {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(5,5,5,0.85);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(52,211,153,0.20);
+    border-radius: 9999px;
+    padding: 8px 20px;
+    box-shadow: 0 0 24px rgba(52,211,153,0.08);
+  }
+  .speaking-bar-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-emerald), rgba(52,211,153,0.4));
+    padding: 2px;
+  }
+  .speaking-bar-avatar-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem; font-weight: 700; color: var(--text-secondary);
+  }
+  .speaking-bar-info { display: flex; flex-direction: column; }
+  .speaking-bar-name { font-size: 0.72rem; font-weight: 600; color: #34D399; }
+  .speaking-bar-role { font-size: 0.58rem; color: var(--text-muted); }
+  .waveform { display: flex; align-items: center; gap: 2px; height: 20px; }
+  .waveform-bar {
+    width: 2.5px; border-radius: 9999px;
+    background: var(--accent-emerald);
+    animation: wave 0.8s ease-in-out infinite alternate;
+  }
+
+  @keyframes wave {
+    0% { height: 4px; opacity: 0.4; }
+    100% { height: 16px; opacity: 1; }
+  }
+
+  /* ═══ PAINEL DIREITO ═══ */
+  .panel-right {
+    height: calc(100dvh - 72px);
+    overflow-y: auto; overflow-x: hidden;
+    padding: 20px 14px;
+    border-left: 1px solid var(--card-border);
+    scrollbar-width: none;
+  }
+  .panel-right::-webkit-scrollbar { display: none; }
+
+  .section-header { margin-bottom: 16px; }
+  .section-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
+
+  /* ═══ GAUGE KPI ═══ */
+  .gauge-card {
+    margin-bottom: 12px;
+  }
+  .gauge-card .card-core {
+    padding: 14px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .gauge-svg { width: 100px; height: 55px; margin-bottom: 4px; }
+  .gauge-value {
+    font-size: 1.6rem; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+  .gauge-value.high { color: var(--accent-rose); }
+  .gauge-value.mid { color: var(--accent-amber); }
+  .gauge-value.low { color: var(--accent-emerald); }
+  .gauge-label {
+    font-size: 0.72rem; font-weight: 600;
+    text-align: center; margin-bottom: 6px;
+  }
+  .gauge-sub {
+    font-size: 0.6rem; text-align: center;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .gauge-badge {
+    font-size: 0.58rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 9999px;
+  }
+  .gauge-badge.high { background: var(--accent-rose-soft); color: #FB7185; }
+  .gauge-badge.mid { background: var(--accent-amber-soft); color: #FBBF24; }
+  .gauge-badge.low { background: var(--accent-emerald-soft); color: #34D399; }
+
+  /* ═══ STATUS GRID ═══ */
+  .status-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 16px;
+  }
+  .status-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .status-value {
+    font-size: 1.2rem; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .status-label { font-size: 0.6rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ═══ TIMELINE ═══ */
+  .timeline {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 20px; padding: 0 8px;
+  }
+  .timeline-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .timeline-dot.done { background: var(--accent-emerald); }
+  .timeline-dot.active {
+    background: var(--accent-purple);
+    animation: t-pulse 1.5s ease infinite;
+  }
+  @keyframes t-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+    50% { box-shadow: 0 0 0 5px rgba(124,58,237,0); }
+  }
+  .timeline-dot.pending { background: rgba(255,255,255,0.15); }
+  .timeline-line {
+    flex: 1; height: 2px;
+    background: rgba(255,255,255,0.08);
+  }
+  .timeline-line.done { background: var(--accent-emerald); opacity: 0.4; }
+  .timeline-labels {
+    display: flex; justify-content: space-between;
+    padding: 0 2px;
+  }
+  .timeline-label { font-size: 0.55rem; color: var(--text-muted); text-align: center; }
+  .timeline-label.active-l { color: #A78BFA; font-weight: 600; }
+
+  /* ═══ LAUDO CARD ═══ */
+  .laudo-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.6rem; font-weight: 600;
+    padding: 4px 12px; border-radius: 9999px;
+    background: linear-gradient(135deg, var(--accent-purple-soft), var(--accent-emerald-soft));
+    color: #A78BFA;
+    margin-bottom: 14px;
+  }
+  .laudo-section {
+    margin-bottom: 12px;
+  }
+  .laudo-section-title {
+    font-size: 0.62rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .laudo-hyp {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px; margin-bottom: 8px;
+  }
+  .laudo-hyp-title { font-size: 0.78rem; font-weight: 600; margin-bottom: 2px; }
+  .laudo-hyp-codes { font-size: 0.62rem; color: var(--text-muted); }
+  .laudo-text { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.6; }
+  .laudo-items { list-style: none; padding: 0; }
+  .laudo-items li {
+    font-size: 0.72rem; color: var(--text-secondary);
+    padding: 4px 0; display: flex; align-items: center; gap: 6px;
+  }
+  .laudo-items li::before {
+    content: '';
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent-emerald); flex-shrink: 0;
+  }
+
+  /* ═══ BOTÃO PILL ═══ */
+  .btn-pill {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(5,150,105,0.12));
+    color: var(--text-primary);
+    font-size: 0.78rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 400ms var(--ease-premium);
+  }
+  .btn-pill:hover {
+    background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(5,150,105,0.25));
+    transform: scale(1.02);
+    box-shadow: 0 0 24px rgba(124,58,237,0.15);
+  }
+  .btn-pill:active { transform: scale(0.97); }
+  .btn-pill-icon {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 300ms var(--ease-premium);
+  }
+  .btn-pill:hover .btn-pill-icon { transform: translate(2px, -1px) scale(1.05); }
+</style>
+</head>
+<body>
+  <div class="bg-ambient"></div>
+  <div class="bg-grain"></div>
+
+  <!-- ═══ TOPBAR ═══ -->
+  <nav class="topbar">
+    <span class="topbar-logo">MAnalista</span>
+    <div class="topbar-live">
+      <span class="live-dot"></span>
+      Sessao ao Vivo
+    </div>
+    <span class="topbar-case">Caso #2847 — Avaliacao Neuropsicopediatrica</span>
+    <span class="topbar-sep">|</span>
+    <span class="topbar-timer">
+      <i class="ph-light ph-timer" style="font-size:14px"></i>
+      23:41
+    </span>
+    <button class="topbar-end">
+      <span class="topbar-end-icon"><i class="ph-light ph-x" style="font-size:10px;color:#FB7185"></i></span>
+      Encerrar
+    </button>
+  </nav>
+
+  <!-- ═══ LAYOUT ═══ -->
+  <div class="app-layout">
+
+    <!-- ═══ SIDEBAR ESQUERDA ═══ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="eyebrow">Equipe Especializada</div>
+        <div class="sidebar-title">Profissionais em Sessao</div>
+        <div class="sidebar-sub">4 especialistas · 1 mediador IA</div>
+      </div>
+
+      <!-- MAnalista IA -->
+      <div class="card-shell">
+        <div class="card-core">
+          <div class="card-header">
+            <div class="avatar-ring gradient">
+              <div class="avatar-inner" style="filter:none;background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(5,150,105,0.3))">
+                <i class="ph-light ph-brain" style="font-size:20px;color:#A78BFA"></i>
+              </div>
+            </div>
+            <div>
+              <div class="card-name">MAnalista</div>
+              <div class="card-spec">Inteligencia Artificial Clinica</div>
+            </div>
+          </div>
+          <span class="badge-role gradient"><i class="ph-light ph-crown-simple" style="font-size:10px"></i> Mediadora</span>
+          <div class="card-bio">IA gestora do debate clinico. Sintetiza dados, arbitra o debate e consolida o laudo final.</div>
+          <div class="contrib-bar-bg"><div class="contrib-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--accent-purple),var(--accent-emerald))"></div></div>
+          <div class="contrib-count">Sempre ativa</div>
+        </div>
+      </div>
+
+      <!-- Dra. Sofia -->
+      <div class="card-shell speaking">
+        <div class="card-core">
+          <div class="card-header">
+            <div class="avatar-ring purple">
+              <div class="avatar-inner">SV</div>
+              <div class="speaking-badge"><i class="ph-fill ph-microphone" style="font-size:7px"></i></div>
+            </div>
+            <div>
+              <div class="card-name">Dra. Sofia Vygotski</div>
+              <div class="card-spec">Psicologa Infantil</div>
+            </div>
+          </div>
+          <span class="badge-role purple"><i class="ph-light ph-brain" style="font-size:10px"></i> Desenvolvimento Sociocultural</span>
+          <div class="card-section-label">Formacao</div>
+          <div class="card-bio">CRP registrada, especialista em desenvolvimento cognitivo infantil e aprendizagem mediada. Pos-graduada em Neuropsicologia.</div>
+          <div class="contrib-bar-bg"><div class="contrib-bar-fill" style="width:72%;background:var(--accent-purple)"></div></div>
+          <div class="contrib-count">14 contribuicoes</div>
+        </div>
+      </div>
+
+      <!-- Dr. Marco -->
+      <div class="card-shell">
+        <div class="card-core">
+          <div class="card-header">
+            <div class="avatar-ring emerald">
+              <div class="avatar-inner">MC</div>
+            </div>
+            <div>
+              <div class="card-name">Dr. Marco Cajal</div>
+              <div class="card-spec">Neuropediatra</div>
+            </div>
+          </div>
+          <span class="badge-role emerald"><i class="ph-light ph-pulse" style="font-size:10px"></i> Bases Neurologicas</span>
+          <div class="card-section-label">Formacao</div>
+          <div class="card-bio">Neuropediatra com foco em TDAH, TEA e epilepsia infantil. Formacao em neuroimagem funcional.</div>
+          <div class="contrib-bar-bg"><div class="contrib-bar-fill" style="width:58%;background:var(--accent-emerald)"></div></div>
+          <div class="contrib-count">11 contribuicoes</div>
+        </div>
+      </div>
+
+      <!-- Dr. Victor -->
+      <div class="card-shell">
+        <div class="card-core">
+          <div class="card-header">
+            <div class="avatar-ring amber">
+              <div class="avatar-inner">VW</div>
+            </div>
+            <div>
+              <div class="card-name">Dr. Victor Winnicott</div>
+              <div class="card-spec">Parentalidade</div>
+            </div>
+          </div>
+          <span class="badge-role amber"><i class="ph-light ph-users" style="font-size:10px"></i> Vinculos e Ambiente Familiar</span>
+          <div class="card-section-label">Formacao</div>
+          <div class="card-bio">Especialista em relacoes parentais, apego e desenvolvimento emocional. Referencia em objeto transicional.</div>
+          <div class="contrib-bar-bg"><div class="contrib-bar-fill" style="width:45%;background:var(--accent-amber)"></div></div>
+          <div class="contrib-count">9 contribuicoes</div>
+        </div>
+      </div>
+
+      <!-- Dra. Íris -->
+      <div class="card-shell">
+        <div class="card-core">
+          <div class="card-header">
+            <div class="avatar-ring rose">
+              <div class="avatar-inner">IS</div>
+            </div>
+            <div>
+              <div class="card-name">Dra. Iris Skinner</div>
+              <div class="card-spec">Psicologa BCBA</div>
+            </div>
+          </div>
+          <span class="badge-role rose"><i class="ph-light ph-chart-line" style="font-size:10px"></i> Analise do Comportamento</span>
+          <div class="card-section-label">Formacao</div>
+          <div class="card-bio">Board Certified Behavior Analyst. Especialista em ABA e intervencoes baseadas em evidencias para TEA.</div>
+          <div class="contrib-bar-bg"><div class="contrib-bar-fill" style="width:52%;background:var(--accent-rose)"></div></div>
+          <div class="contrib-count">10 contribuicoes</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ MESA DE DEBATE ═══ -->
+    <main class="debate-center">
+      <div class="table-container">
+        <div class="table-surface">
+          <span class="table-label">Mesa Clinica</span>
+          <span class="table-case">Caso #2847</span>
+        </div>
+
+        <!-- Agentes posicionados -->
+        <!-- MAnalista (topo) -->
+        <div class="agent-seat seat-top">
+          <div class="ia-hex"><i class="ph-light ph-brain" style="font-size:26px"></i></div>
+          <span class="seat-name">MAnalista</span>
+          <span class="seat-spec">IA Mediadora</span>
+        </div>
+
+        <!-- Dra. Sofia (dir superior) -->
+        <div class="agent-seat seat-right-top">
+          <div class="seat-avatar speaking-ring" style="background:linear-gradient(135deg,var(--accent-purple),rgba(139,92,246,0.4))">
+            <div class="seat-avatar-inner">SV</div>
+            <div class="speaking-badge"><i class="ph-fill ph-microphone" style="font-size:7px"></i></div>
+          </div>
+          <span class="seat-name" style="color:#A78BFA">Dra. Sofia</span>
+          <span class="seat-spec">Psic. Infantil</span>
+        </div>
+
+        <!-- Dr. Marco (dir inferior) -->
+        <div class="agent-seat seat-right-bot">
+          <div class="seat-avatar" style="background:linear-gradient(135deg,var(--accent-emerald),rgba(52,211,153,0.4))">
+            <div class="seat-avatar-inner">MC</div>
+          </div>
+          <span class="seat-name">Dr. Marco</span>
+          <span class="seat-spec">Neuropediatra</span>
+        </div>
+
+        <!-- Dra. Íris (esq superior) -->
+        <div class="agent-seat seat-left-top">
+          <div class="seat-avatar" style="background:linear-gradient(135deg,var(--accent-rose),rgba(244,63,94,0.4))">
+            <div class="seat-avatar-inner">IS</div>
+          </div>
+          <span class="seat-name">Dra. Iris</span>
+          <span class="seat-spec">BCBA</span>
+        </div>
+
+        <!-- Dr. Victor (esq inferior) -->
+        <div class="agent-seat seat-left-bot">
+          <div class="seat-avatar" style="background:linear-gradient(135deg,var(--accent-amber),rgba(251,191,36,0.4))">
+            <div class="seat-avatar-inner">VW</div>
+          </div>
+          <span class="seat-name">Dr. Victor</span>
+          <span class="seat-spec">Parentalidade</span>
+        </div>
+
+        <!-- Balões de fala -->
+        <!-- MAnalista bubble (topo) -->
+        <div class="bubble gradient-b bubble-top" style="top:-95px;">
+          <span class="bubble-eyebrow">MAnalista</span>
+          <div class="bubble-text">Analisando contribuicoes da equipe. Dra. Iris, complemente sobre os padroes comportamentais.</div>
+          <div class="bubble-footer">
+            <span class="bubble-time">ha 45s</span>
+            <div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:10px"></i></div>
+          </div>
+        </div>
+
+        <!-- Sofia bubble (ativo) -->
+        <div class="bubble purple active" style="top:10%;right:calc(100% + 28px);animation-delay:0.1s;">
+          <span class="bubble-eyebrow">Dra. Sofia</span>
+          <div class="bubble-text">O perfil de aprendizagem mediada aponta para processamento nao-convencional da informacao simbolica.</div>
+          <div class="bubble-footer">
+            <span class="bubble-time">agora</span>
+            <div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:10px"></i></div>
+          </div>
+        </div>
+
+        <!-- Marco bubble -->
+        <div class="bubble emerald-b" style="bottom:10%;right:calc(100% + 28px);animation-delay:0.2s;">
+          <span class="bubble-eyebrow">Dr. Marco</span>
+          <div class="bubble-text">Reflexos primitivos persistentes e hipersensibilidade sensorial sao marcadores relevantes.</div>
+          <div class="bubble-footer">
+            <span class="bubble-time">ha 2min</span>
+            <div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:10px"></i></div>
+          </div>
+        </div>
+
+        <!-- Íris bubble -->
+        <div class="bubble rose-b" style="top:10%;left:calc(100% + 28px);animation-delay:0.3s;">
+          <span class="bubble-eyebrow">Dra. Iris</span>
+          <div class="bubble-text">Ecolalia funcional e estereotipias motoras documentadas sao consistentes com TEA grau 2.</div>
+          <div class="bubble-footer">
+            <span class="bubble-time">ha 4min</span>
+            <div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:10px"></i></div>
+          </div>
+        </div>
+
+        <!-- Victor bubble -->
+        <div class="bubble amber" style="bottom:10%;left:calc(100% + 28px);animation-delay:0.4s;">
+          <span class="bubble-eyebrow">Dr. Victor</span>
+          <div class="bubble-text">Ambiente familiar com inconsistencia nos vinculos primarios amplifica os sintomas observados.</div>
+          <div class="bubble-footer">
+            <span class="bubble-time">ha 6min</span>
+            <div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:10px"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador quem fala -->
+      <div class="speaking-bar">
+        <div class="speaking-bar-avatar">
+          <div class="speaking-bar-avatar-inner">SV</div>
+        </div>
+        <div class="speaking-bar-info">
+          <span class="speaking-bar-name">Dra. Sofia Vygotski</span>
+          <span class="speaking-bar-role">falando agora · Psicologa Infantil</span>
+        </div>
+        <div class="waveform">
+          <div class="waveform-bar" style="animation-delay:0s;height:6px"></div>
+          <div class="waveform-bar" style="animation-delay:0.1s;height:12px"></div>
+          <div class="waveform-bar" style="animation-delay:0.2s;height:8px"></div>
+          <div class="waveform-bar" style="animation-delay:0.05s;height:14px"></div>
+          <div class="waveform-bar" style="animation-delay:0.15s;height:6px"></div>
+          <div class="waveform-bar" style="animation-delay:0.25s;height:10px"></div>
+          <div class="waveform-bar" style="animation-delay:0.08s;height:16px"></div>
+          <div class="waveform-bar" style="animation-delay:0.18s;height:7px"></div>
+          <div class="waveform-bar" style="animation-delay:0.12s;height:11px"></div>
+          <div class="waveform-bar" style="animation-delay:0.22s;height:5px"></div>
+          <div class="waveform-bar" style="animation-delay:0.03s;height:13px"></div>
+          <div class="waveform-bar" style="animation-delay:0.13s;height:9px"></div>
+          <div class="waveform-bar" style="animation-delay:0.07s;height:15px"></div>
+          <div class="waveform-bar" style="animation-delay:0.17s;height:6px"></div>
+          <div class="waveform-bar" style="animation-delay:0.23s;height:10px"></div>
+          <div class="waveform-bar" style="animation-delay:0.02s;height:8px"></div>
+          <div class="waveform-bar" style="animation-delay:0.11s;height:14px"></div>
+          <div class="waveform-bar" style="animation-delay:0.19s;height:5px"></div>
+          <div class="waveform-bar" style="animation-delay:0.06s;height:12px"></div>
+          <div class="waveform-bar" style="animation-delay:0.16s;height:7px"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ═══ PAINEL DIREITO ═══ -->
+    <aside class="panel-right">
+
+      <!-- SEÇÃO: KPIs -->
+      <div class="section-header">
+        <div class="eyebrow">Analise em Tempo Real</div>
+        <div class="section-title">Probabilidade por Patologia</div>
+      </div>
+
+      <!-- TEA 72% -->
+      <div class="card-shell gauge-card">
+        <div class="card-core">
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#g-rose)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="35.18"/>
+            <defs><linearGradient id="g-rose"><stop offset="0%" stop-color="#E11D48"/><stop offset="100%" stop-color="#FB7185"/></linearGradient></defs>
+          </svg>
+          <div class="gauge-value high">72%</div>
+          <div class="gauge-label">Transtorno do Espectro Autista</div>
+          <div class="gauge-sub">TEA — CID-11: 6A02</div>
+          <div class="contrib-bar-bg" style="width:100%;margin-bottom:8px"><div class="contrib-bar-fill" style="width:72%;background:var(--accent-rose)"></div></div>
+          <span class="gauge-badge high">Alta probabilidade</span>
+        </div>
+      </div>
+
+      <!-- TDAH 58% -->
+      <div class="card-shell gauge-card">
+        <div class="card-core">
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#g-amber)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="52.78"/>
+            <defs><linearGradient id="g-amber"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient></defs>
+          </svg>
+          <div class="gauge-value mid">58%</div>
+          <div class="gauge-label">Deficit de Atencao e Hiperatividade</div>
+          <div class="gauge-sub">TDAH — CID-11: 6A05</div>
+          <div class="contrib-bar-bg" style="width:100%;margin-bottom:8px"><div class="contrib-bar-fill" style="width:58%;background:var(--accent-amber)"></div></div>
+          <span class="gauge-badge mid">Media probabilidade</span>
+        </div>
+      </div>
+
+      <!-- Ansiedade 41% -->
+      <div class="card-shell gauge-card">
+        <div class="card-core">
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#g-amber2)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="74.14"/>
+            <defs><linearGradient id="g-amber2"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient></defs>
+          </svg>
+          <div class="gauge-value mid">41%</div>
+          <div class="gauge-label">Ansiedade de Separacao</div>
+          <div class="gauge-sub">CID-11: 6B05</div>
+          <div class="contrib-bar-bg" style="width:100%;margin-bottom:8px"><div class="contrib-bar-fill" style="width:41%;background:var(--accent-amber)"></div></div>
+          <span class="gauge-badge mid">Media probabilidade</span>
+        </div>
+      </div>
+
+      <!-- Atraso 34% -->
+      <div class="card-shell gauge-card">
+        <div class="card-core">
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#g-em)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="82.93"/>
+            <defs><linearGradient id="g-em"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs>
+          </svg>
+          <div class="gauge-value low">34%</div>
+          <div class="gauge-label">Atraso no Desenvolvimento</div>
+          <div class="gauge-sub">CID-11: 6A00</div>
+          <div class="contrib-bar-bg" style="width:100%;margin-bottom:8px"><div class="contrib-bar-fill" style="width:34%;background:var(--accent-emerald)"></div></div>
+          <span class="gauge-badge low">Baixa probabilidade</span>
+        </div>
+      </div>
+
+      <!-- SEÇÃO: STATUS -->
+      <div style="margin-top:8px">
+        <div class="eyebrow">Progresso da Sessao</div>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-value" style="color:#34D399">23:41</div>
+            <div class="status-label">Duracao</div>
+          </div>
+          <div class="status-item">
+            <div class="status-value">47</div>
+            <div class="status-label">Contribuicoes</div>
+          </div>
+          <div class="status-item">
+            <div class="status-value">4</div>
+            <div class="status-label">Agentes</div>
+          </div>
+          <div class="status-item">
+            <div class="status-value" style="color:#A78BFA">2 <span style="font-size:0.7rem;color:var(--text-muted)">de 4</span></div>
+            <div class="status-label">Fase Atual</div>
+          </div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-line done"></div>
+          <div class="timeline-dot active"></div>
+          <div class="timeline-line"></div>
+          <div class="timeline-dot pending"></div>
+          <div class="timeline-line"></div>
+          <div class="timeline-dot pending"></div>
+        </div>
+        <div class="timeline-labels">
+          <span class="timeline-label">Abertura</span>
+          <span class="timeline-label active-l">Analise</span>
+          <span class="timeline-label">Hipotese</span>
+          <span class="timeline-label">Laudo</span>
+        </div>
+      </div>
+
+      <!-- SEÇÃO: LAUDO -->
+      <div style="margin-top:20px">
+        <div class="eyebrow">Laudo Diagnostico</div>
+        <div class="section-title" style="margin-bottom:10px">Em elaboracao...</div>
+        <div class="laudo-status">
+          <i class="ph-light ph-arrows-clockwise" style="font-size:12px;animation:spin 2s linear infinite"></i>
+          Sendo elaborado em tempo real
+        </div>
+        <style>@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }</style>
+
+        <div class="card-shell">
+          <div class="card-core">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <i class="ph-light ph-first-aid-kit" style="font-size:18px;color:#A78BFA"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700">Relatorio Clinico Preliminar</div>
+                <div style="font-size:0.62rem;color:var(--text-muted)">Caso #2847 · 11 abr 2026</div>
+              </div>
+            </div>
+
+            <div class="laudo-section">
+              <div class="laudo-section-title">Hipoteses Diagnosticas</div>
+              <div class="laudo-hyp">
+                <div class="laudo-hyp-title">1o TEA — grau moderado</div>
+                <div class="laudo-hyp-codes">CID-11: 6A02.1 · DSM-5: 299.00</div>
+              </div>
+            </div>
+
+            <div class="laudo-section">
+              <div class="laudo-section-title">Consenso da Equipe</div>
+              <div class="laudo-text">A apresentacao clinica sugere comprometimento no desenvolvimento sociocomunicativo com padroes restritos de comportamento...</div>
+              <button style="background:none;border:none;color:#A78BFA;font-size:0.68rem;font-weight:600;cursor:pointer;padding:4px 0;font-family:inherit">ver mais ▾</button>
+            </div>
+
+            <div class="laudo-section">
+              <div class="laudo-section-title">Encaminhamentos Sugeridos</div>
+              <ul class="laudo-items">
+                <li>Avaliacao neurologica completa</li>
+                <li>Intervencao ABA imediata</li>
+                <li>Suporte parental estruturado</li>
+                <li>Avaliacao fonoaudiologica</li>
+              </ul>
+            </div>
+
+            <div style="margin-top:14px">
+              <button class="btn-pill">
+                <span class="btn-pill-icon"><i class="ph-light ph-file-pdf" style="font-size:14px"></i></span>
+                Gerar Laudo Completo em PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

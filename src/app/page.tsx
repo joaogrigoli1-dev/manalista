@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, ReactNode } from "react";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
 import { AgentCard } from "@/components/agents/AgentCard";
 import { AGENT_PROFILES, SPECIALISTS } from "@/lib/agents/profiles";
 import type { Lang } from "@/types";
@@ -311,7 +310,26 @@ export default function LandingPage() {
       }}
     >
       <div className="bg-mesh" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
-      <Navbar lang={lang} onLangChange={setLang} />
+
+      {/* ── Lang toggle — fixed top-right ── */}
+      <button
+        type="button"
+        onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+        style={{
+          position: "fixed", top: "1.25rem", right: "1.5rem", zIndex: 100,
+          padding: "0.35rem 0.85rem", borderRadius: "9999px",
+          border: "1px solid rgba(255,255,255,0.1)",
+          background: "rgba(10,10,14,0.75)",
+          backdropFilter: "blur(16px)",
+          color: "rgba(255,255,255,0.5)",
+          fontSize: "0.68rem", fontWeight: 700,
+          cursor: "pointer", fontFamily: "inherit",
+          letterSpacing: "0.08em",
+          transition: "all 0.2s ease",
+        }}
+      >
+        {lang === "pt" ? "EN" : "PT"}
+      </button>
 
       {/* ══════════════════════════════════════════════
           HERO SECTION
@@ -325,7 +343,7 @@ export default function LandingPage() {
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
-          padding: "7rem 1.5rem 5rem",
+          padding: "5rem 1.5rem 5rem",
           position: "relative",
           zIndex: 1,
         }}

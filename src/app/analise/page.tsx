@@ -1,7 +1,6 @@
 "use client";
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
 import { ChildForm } from "@/components/forms/ChildForm";
 import { ConsentModal } from "@/components/forms/ConsentModal";
 import { AgentMiniCard } from "@/components/agents/AgentMiniCard";
@@ -716,7 +715,26 @@ export default function AnalisePage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg-base)" }}>
       <div className="bg-mesh" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
-      {phase !== "form" && <Navbar lang={lang} onLangChange={setLang} />}
+      {/* ── Lang toggle — visible only outside form phase ── */}
+      {phase !== "form" && (
+        <button
+          type="button"
+          onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+          style={{
+            position: "fixed", top: "1.25rem", right: "1.5rem", zIndex: 100,
+            padding: "0.35rem 0.85rem", borderRadius: "9999px",
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(10,10,14,0.75)",
+            backdropFilter: "blur(16px)",
+            color: "rgba(255,255,255,0.5)",
+            fontSize: "0.68rem", fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+            letterSpacing: "0.08em",
+          }}
+        >
+          {lang === "pt" ? "EN" : "PT"}
+        </button>
+      )}
 
       {phase === "consent" && childData && (
         <ConsentModal lang={lang} onAccept={handleConsentAccept} onDecline={() => setPhase("form")} />
