@@ -645,7 +645,7 @@ export default function AnalisePage() {
       setDetectedPathologies(parsedPathologies);
       setQualityScore(parsedQuality);
       setNeedsMoreInfo(parsedNeedsMore);
-      setPendingQuestions(parsedQuestions);
+      setPendingQuestions(parsedQuestions.map((q: string) => ({ question: q })));
 
       // Derive confidence level from quality score
       const confLevel: "alta" | "moderada" | "baixa" =
