@@ -249,94 +249,145 @@ function DebateKPIPanel({
   );
 }
 
-// ── Q&A parent answer modal ────────────────────────────────────
+// ── Q&A parent answer modal — warm & collaborative ────────────
+interface QAQuestion {
+  question: string;
+  agentId?: AgentId;
+  agentName?: string;
+}
+
 function QAModal({
-  questions, lang, onSubmit, onSkip,
+  questions, lang, childName, onSubmit, onSkip,
 }: {
-  questions: string[];
+  questions: QAQuestion[];
   lang: Lang;
+  childName?: string;
   onSubmit: (answers: string[]) => void;
   onSkip: () => void;
 }) {
   const pt = lang === "pt";
   const [answers, setAnswers] = useState<string[]>(questions.map(() => ""));
+  const name = childName || (pt ? "a criança" : "the child");
+
+  const subtitlePt = questions.length === 1
+    ? `A equipe tem uma pergunta rápida. Quanto mais você compartilhar, mais rica fica a análise de ${name}.`
+    : `A equipe tem ${questions.length} perguntas rápidas. Suas respostas ajudam a refinar a análise de ${name}.`;
+
+  const subtitleEn = questions.length === 1
+    ? `The team has one quick question. The more you share, the richer ${name}'s analysis becomes.`
+    : `The team has ${questions.length} quick questions. Your answers help refine ${name}'s analysis.`;
+
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "rgba(0,0,0,0.75)", backdropFilter: "blur(12px)",
+      background: "rgba(0,0,0,0.72)", backdropFilter: "blur(14px)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "1.5rem",
+      padding: "1.25rem",
     }}>
       <div style={{
-        maxWidth: 520, width: "100%", maxHeight: "85vh", overflowY: "auto",
+        maxWidth: 540, width: "100%", maxHeight: "88vh", overflowY: "auto",
         padding: "0.5rem", borderRadius: "2rem",
-        background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
       }}>
         <div style={{
           borderRadius: "calc(2rem - 0.5rem)", padding: "2rem",
-          background: "rgba(10,10,14,0.95)",
-          boxShadow: "inset 0 1px 1px rgba(255,255,255,0.08)",
+          background: "rgba(10,10,14,0.97)",
+          boxShadow: "inset 0 1px 1px rgba(255,255,255,0.07)",
         }}>
-          <div style={{ marginBottom: "1.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.4rem" }}>
-              <span style={{ fontSize: "1.2rem" }}>💬</span>
-              <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-primary)" }}>
-                {pt ? "Os especialistas precisam de mais informações" : "Specialists need more information"}
-              </h3>
+          {/* Header */}
+          <div style={{ marginBottom: "1.5rem" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "0.4rem",
+              background: "rgba(124,111,232,0.12)", border: "1px solid rgba(124,111,232,0.25)",
+              borderRadius: "9999px", padding: "0.25rem 0.75rem", marginBottom: "0.75rem",
+            }}>
+              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--accent-brand)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {pt ? "A equipe quer saber" : "The team wants to know"}
+              </span>
             </div>
-            <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-              {pt
-                ? "Por favor, responda às perguntas abaixo para enriquecer a análise."
-                : "Please answer the questions below to enrich the analysis."}
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+              {pt ? "Algumas perguntas para completar a análise" : "A few questions to complete the analysis"}
+            </h3>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
+              {pt ? subtitlePt : subtitleEn}
             </p>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {questions.map((q, i) => (
-              <div key={i}>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--accent-brand)", marginBottom: "0.4rem" }}>
-                  {i + 1}. {q}
+          {/* Questions */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            {questions.map((item, i) => (
+              <div key={i} style={{
+                padding: "1rem",
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: "1rem",
+              }}>
+                {/* Agent attribution */}
+                {item.agentName && (
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: "0.4rem",
+                    marginBottom: "0.5rem",
+                  }}>
+                    {item.agentId && (
+                      <img
+                        src={`/avatars/${item.agentId === "psi-infantil" ? "psi-infantil" : item.agentId === "psi-parentalidade" ? "psi-parentalidade" : item.agentId}.svg`}
+                        alt=""
+                        width={22} height={22}
+                        style={{ borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", objectFit: "cover", flexShrink: 0 }}
+                        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    )}
+                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-brand)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                      {item.agentName}
+                    </span>
+                  </div>
+                )}
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "0.6rem", lineHeight: 1.5 }}>
+                  {item.question}
                 </label>
                 <textarea
                   value={answers[i]}
                   onChange={e => setAnswers(prev => prev.map((a, j) => j === i ? e.target.value : a))}
-                  rows={3}
+                  rows={2}
                   style={{
-                    width: "100%", background: "var(--bg-input)",
-                    border: "1px solid var(--border-input)", borderRadius: "0.75rem",
-                    color: "var(--text-primary)", padding: "0.6rem 0.75rem",
-                    fontFamily: "inherit", fontSize: "0.85rem", resize: "vertical",
-                    outline: "none",
+                    width: "100%", background: "rgba(255,255,255,0.04)",
+                    border: "1px solid var(--border-input)", borderRadius: "0.65rem",
+                    color: "var(--text-primary)", padding: "0.55rem 0.75rem",
+                    fontFamily: "inherit", fontSize: "0.83rem", resize: "vertical",
+                    outline: "none", lineHeight: 1.5,
+                    transition: "border-color 0.2s",
+                    boxSizing: "border-box",
                   }}
-                  placeholder={pt ? "Sua resposta..." : "Your answer..."}
+                  placeholder={pt ? "Conte com suas palavras..." : "Tell us in your words..."}
                 />
               </div>
             ))}
           </div>
 
-          <div style={{ display: "flex", gap: "0.65rem", marginTop: "1.5rem" }}>
+          {/* Actions */}
+          <div style={{ display: "flex", gap: "0.65rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
             <button
               onClick={() => onSubmit(answers)}
               style={{
-                flex: 1, padding: "0.7rem 1.25rem", borderRadius: "9999px",
+                flex: 1, minWidth: 120, padding: "0.75rem 1.25rem", borderRadius: "9999px",
                 border: "none", background: "var(--accent-brand)",
                 color: "#fff", fontFamily: "inherit", fontWeight: 700,
                 fontSize: "0.85rem", cursor: "pointer",
                 boxShadow: "var(--shadow-button)",
               }}
             >
-              {pt ? "Enviar Respostas" : "Send Answers"}
+              {pt ? "Enviar e continuar ✓" : "Send & continue ✓"}
             </button>
             <button
               onClick={onSkip}
               style={{
-                padding: "0.7rem 1.25rem", borderRadius: "9999px",
-                border: "1px solid var(--border-input)", background: "var(--bg-glass)",
-                color: "var(--text-secondary)", fontFamily: "inherit", fontWeight: 600,
-                fontSize: "0.85rem", cursor: "pointer",
+                padding: "0.75rem 1.1rem", borderRadius: "9999px",
+                border: "1px solid rgba(255,255,255,0.12)", background: "transparent",
+                color: "var(--text-muted)", fontFamily: "inherit", fontWeight: 500,
+                fontSize: "0.82rem", cursor: "pointer",
               }}
             >
-              {pt ? "Pular" : "Skip"}
+              {pt ? "Continuar sem responder" : "Continue without answering"}
             </button>
           </div>
         </div>
@@ -365,7 +416,7 @@ export default function AnalisePage() {
   const [qualityScore, setQualityScore] = useState(0);
   const [confidence, setConfidence] = useState<"alta" | "moderada" | "baixa">("moderada");
   const [needsMoreInfo, setNeedsMoreInfo] = useState(false);
-  const [pendingQuestions, setPendingQuestions] = useState<string[]>([]);
+  const [pendingQuestions, setPendingQuestions] = useState<QAQuestion[]>([]);
   const [showQAModal, setShowQAModal] = useState(false);
   const [qaCallback, setQaCallback] = useState<((answers: string[]) => void) | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -428,7 +479,22 @@ export default function AnalisePage() {
 
     const history: Array<{ role: "user" | "assistant"; content: string }> = [];
 
+    // Helper: extract questions from a specialist's JSON output
+    const extractQuestions = (result: string, agentId: AgentId): QAQuestion[] => {
+      const techJson = extractTechnicalJSON(result);
+      if (techJson?.needsMoreInfo && Array.isArray(techJson.questions) && techJson.questions.length > 0) {
+        const profile = AGENT_PROFILES.find(a => a.id === agentId);
+        return (techJson.questions as string[]).slice(0, 1).map(q => ({
+          question: q,
+          agentId,
+          agentName: profile?.name ?? undefined,
+        }));
+      }
+      return [];
+    };
+
     // 1 — Each specialist analyzes independently
+    const allMidQuestions: QAQuestion[] = [];
     for (const agent of SPECIALISTS) {
       setStatus(agent.id, "analyzing");
       setStreamingId(agent.id);
@@ -448,12 +514,49 @@ export default function AnalisePage() {
         addMessage(agent.id, result, "analysis");
         history.push({ role: "assistant", content: `[${agent.id}] ${result}` });
         setStatus(agent.id, "ready");
+        // Collect questions from this specialist
+        allMidQuestions.push(...extractQuestions(result, agent.id));
       } catch (e) {
         setError(String(e));
         setStatus(agent.id, "idle");
       }
       setStreamingId(undefined);
       setStreamingContent("");
+    }
+
+    // ── Mid-flow Q&A: show questions after analyze, before debate ──
+    if (allMidQuestions.length > 0) {
+      // Deduplicate by question text (keep first occurrence per question)
+      const seen = new Set<string>();
+      const deduped = allMidQuestions.filter(q => {
+        const key = q.question.toLowerCase().slice(0, 40);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      // Wait for parent answers before starting debate
+      const answers = await new Promise<string[]>((resolve) => {
+        setPendingQuestions(deduped);
+        setShowQAModal(true);
+        setQaCallback(() => (ans: string[]) => {
+          setShowQAModal(false);
+          setQaCallback(null);
+          setPendingQuestions([]);
+          resolve(ans);
+        });
+      });
+
+      // Inject answers into context for debate phase (only non-empty answers)
+      const filledAnswers = deduped
+        .map((q, i) => ({ q, a: answers[i]?.trim() || "" }))
+        .filter(({ a }) => a.length > 0);
+      if (filledAnswers.length > 0) {
+        const answerContext = filledAnswers
+          .map(({ q, a }) => `${q.agentName ? `[${q.agentName}] ` : ""}${q.question}\nResposta: ${a}`)
+          .join("\n\n");
+        history.push({ role: "user", content: `[Informações adicionais dos pais]\n${answerContext}` });
+      }
     }
 
     // 2 — Debate phase
@@ -575,12 +678,15 @@ export default function AnalisePage() {
 
       // ── Q&A: open modal if specialists need more info ──
       if (parsedNeedsMore && parsedQuestions.length > 0) {
+        const qaItems: QAQuestion[] = parsedQuestions.map((q: string) => ({ question: q }));
         setPhase("complete"); // mark complete first so UI updates
+        setPendingQuestions(qaItems);
         setShowQAModal(true);
         setQaCallback(() => (answers: string[]) => {
-          const answerText = parsedQuestions.map((q, i) => `${q}\nResposta: ${answers[i] || "(sem resposta)"}`).join("\n\n");
+          const answerText = parsedQuestions.map((q: string, i: number) => `${q}\nResposta: ${answers[i] || "(sem resposta)"}`).join("\n\n");
           setShowQAModal(false);
           setQaCallback(null);
+          setPendingQuestions([]);
           // Re-run analysis with extra context
           runAnalysis(data, answerText);
         });
@@ -630,8 +736,17 @@ export default function AnalisePage() {
         <QAModal
           questions={pendingQuestions}
           lang={lang}
+          childName={childData?.name}
           onSubmit={(answers) => qaCallback?.(answers)}
-          onSkip={() => { setShowQAModal(false); setQaCallback(null); setPhase("complete"); }}
+          onSkip={() => {
+            // Always call callback with empty answers to unblock mid-flow Promise
+            if (qaCallback) {
+              qaCallback(pendingQuestions.map(() => ""));
+            } else {
+              setShowQAModal(false);
+              setPendingQuestions([]);
+            }
+          }}
         />
       )}
 
