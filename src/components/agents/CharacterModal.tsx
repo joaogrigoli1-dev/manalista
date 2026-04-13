@@ -80,7 +80,7 @@ export function CharacterModal({ agent, backstory, lang, onClose }: CharacterMod
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               {!imgError ? (
-                <Image src={`/avatars/${agent.id}.png`} alt="" width={72} height={72} style={{ objectFit: "cover" }} onError={() => setImgError(true)} />
+                <Image src={`/avatars/${agent.id}.svg`} alt="" width={72} height={72} style={{ objectFit: "cover" }} onError={() => setImgError(true)} />
               ) : (
                 <span style={{ fontSize: "2rem" }}>{agent.emoji}</span>
               )}

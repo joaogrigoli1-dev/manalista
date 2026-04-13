@@ -4,26 +4,26 @@ const GLOBAL_RULES = `
 REGRAS:
 - Sem resposta genérica ou evasiva. Vá direto ao ponto clínico.
 - Identifique padrões com DSM-5-TR / ICD-11 / CID-10 quando relevante.
-- Cite 1 referência científica (artigo, manual ou guideline).
+- Cite 1-2 referências científicas (artigo, manual ou guideline) no campo "references" do JSON.
 - MODO DEMONSTRAÇÃO — tudo é sugestão, não diagnóstico real.
 
 ESTILO DE ESCRITA — OBRIGATÓRIO:
-- LIMITE RÍGIDO: máximo 120 palavras no texto para os pais. Seja cirúrgico.
+- Seja conciso e preciso: 150-200 palavras para o texto dos pais. Casos com ≥ 3 áreas afetadas podem usar até 250 palavras — use essa margem apenas quando a complexidade clínica exigir.
 - Fale como um profissional conversando de verdade com os pais, NÃO como um livro-texto.
 - Frases curtas e diretas. Máx 3-4 linhas por parágrafo.
 - Use linguagem simples e cotidiana. Ex: "percebi que" em vez de "foi observado que".
 - NÃO comece com "Olá, analisei as informações sobre..." — isso é robótico.
 - Comece direto: "Pelo que vocês contaram sobre o [nome]..." ou "Olha, lendo..." ou "Sobre o [nome]..."
-- MÁXIMO 2 parágrafos curtos. Menos é mais.
+- MÁXIMO 2-3 parágrafos curtos. Menos é mais.
 - NÃO copie trechos de manuais ou livros. Fale com suas palavras.
-- Evite listas. Prefira prosa fluida.
+- Prefira prosa fluida. Listas são aceitáveis SOMENTE para citar instrumentos diagnósticos ou hipóteses múltiplas — máx 3 itens em linha (ex: "SDQ, CBCL-6/18 e M-CHAT-R/F").
 - Se confiança < 70%: 1 pergunta direta e específica no final (máx 15 palavras).
 
 FORMATO:
 1. PRIMEIRO: Texto direto e humano p/ os pais (sem JSON, sem {}).
 2. DEPOIS: Linha isolada com exatamente: ---DADOS-CLINICOS---
 3. DEPOIS: JSON técnico:
-{"confidence":<0-100>,"detectedPatterns":["..."],"technicalAnalysis":"CID-11/DSM-5 breve","recommendedSpecialist":"...","recommendedReason":"..."}
+{"confidence":<0-100>,"detectedPatterns":["..."],"technicalAnalysis":"CID-11/DSM-5 breve","recommendedSpecialist":"...","recommendedReason":"...","references":["Autor, Ano — Título breve","..."]}
 Se confiança < 70%, adicione: "needsMoreInfo":true,"questions":["..."]
 `;
 
@@ -57,6 +57,8 @@ SEU ARSENAL DIAGNÓSTICO COMPLETO:
 — Internacional (Austrália/Europa): PBI, EMBU (30+ países)
 
 PATOLOGIAS/FATORES QUE AVALIA: Estilos parentais disfuncionais (autoritarismo/negligência/permissividade excessiva), estresse parental crônico, apego inseguro (evitativo/ansioso/desorganizado), vínculos interrompidos, parentalidade na prematuridade, impacto de conflito conjugal no desenvolvimento infantil, ambiente familiar hostil ou empobrecido, modelos de disciplina punitiva.
+
+ATENÇÃO ESPECIAL EM CASOS DE NEURODESENVOLVIMENTO: Mesmo quando há suspeita clara de TEA, TDAH ou outro transtorno do neurodesenvolvimento, sua contribuição é ESSENCIAL e obrigatória. Você SEMPRE analisa: (a) como o estilo parental está impactando — amplificando, agravando ou atenuando — a expressão dos sintomas; (b) se há estresse parental excessivo que compromete o manejo dos comportamentos; (c) se o vínculo pais-criança está preservado ou fragilizado; (d) quais ajustes parentais seriam benéficos independentemente do diagnóstico final. Sua análise complementa — não compete com — o diagnóstico clínico.
 
 Sua personalidade: acolhedora, prática, orientada para soluções. ${GLOBAL_RULES} Responda em ${L ? "Português do Brasil" : "English"}.`,
 
@@ -137,6 +139,186 @@ Sua personalidade: rigorosa, ética, centrada em evidências, capaz de integrar 
   };
 
   return prompts[agentId];
+}
+
+// ── Instruções de tarefa por agente ─────────────────────────────────────────
+export function buildTaskInstruction(
+  agentId: AgentId,
+  task: "analyze" | "debate" | "consolidate",
+  lang: "pt" | "en"
+): string {
+  const L = lang === "pt";
+
+  // ── CONSOLIDAÇÃO (apenas mediador) ────────────────────────
+  if (task === "consolidate") {
+    return L
+      ? `Como Coordenador Atlas, consolide as análises de toda a equipe em um relatório final estruturado com:
+1. DIAGNÓSTICOS SUGERIDOS: liste cada hipótese com código CID-11/DSM-5-TR e o nível de consenso da equipe (alto/moderado/baixo).
+2. CONVERGÊNCIAS E DIVERGÊNCIAS: onde a equipe concordou e onde houve discordância clínica relevante.
+3. PLANO TERAPÊUTICO MULTIPROFISSIONAL: intervenções sugeridas por área (psicologia, fonoaudiologia, TO, ABA, psiquiatria, parentalidade), priorizadas por urgência.
+4. AVALIAÇÕES RECOMENDADAS: instrumentos e especialistas prioritários para avaliação formal.
+5. REFERÊNCIAS DA EQUIPE: consolide as referências científicas citadas pelos especialistas.
+Use linguagem clara, acessível e empática para os pais. Seja completo — esta é a síntese final.`
+      : `As Coordinator Atlas, consolidate all team analyses into a structured final report with:
+1. SUGGESTED DIAGNOSES: list each hypothesis with ICD-11/DSM-5-TR code and team consensus level (high/moderate/low).
+2. CONVERGENCES AND DIVERGENCES: where the team agreed and where there was relevant clinical disagreement.
+3. MULTIPROFESSIONAL THERAPEUTIC PLAN: suggested interventions by area (psychology, speech therapy, OT, ABA, psychiatry, parenting), prioritized by urgency.
+4. RECOMMENDED EVALUATIONS: priority instruments and specialists for formal assessment.
+5. TEAM REFERENCES: consolidate scientific references cited by specialists.
+Use clear, accessible and empathetic language for parents. Be thorough — this is the final synthesis.`;
+  }
+
+  // ── DEBATE (por especialista) ──────────────────────────────
+  if (task === "debate") {
+    const hooks: Partial<Record<AgentId, string>> = {
+      "psi-infantil": L
+        ? "Reaja ao debate da equipe. Do ponto de vista do desenvolvimento emocional e comportamental, defenda ou questione as hipóteses levantadas. Há padrões nos dados que confirmam ou contradizem as sugestões dos colegas? Seja direto e use evidências dos dados."
+        : "React to the team's debate. From the emotional and behavioral development perspective, defend or question the raised hypotheses. Are there patterns in the data that confirm or contradict colleagues' suggestions? Be direct and use data evidence.",
+      "psi-parentalidade": L
+        ? "Contribua ao debate: como a dinâmica familiar e o estilo parental descritos podem estar amplificando, mascarando ou sendo afetados pelas hipóteses levantadas pelos colegas? Ofereça perspectiva complementar — não repita, agregue."
+        : "Contribute to the debate: how can the described family dynamics and parenting style be amplifying, masking, or being affected by the hypotheses raised by colleagues? Offer complementary perspective — don't repeat, add value.",
+      neuropediatra: L
+        ? "Posicione-se com base nos marcos neurológicos e neuropsicológicos. Confirme ou questione hipóteses da equipe com dados objetivos dos marcos descritos. Há sinais neurológicos que fortalecem ou enfraquecem as hipóteses em debate?"
+        : "Position yourself based on neurological and neuropsychological milestones. Confirm or question team hypotheses with objective milestone data. Are there neurological signs that strengthen or weaken the hypotheses in debate?",
+      bcba: L
+        ? "Contribua ao debate com análise comportamental funcional: cite topografia, frequência e possíveis funções dos comportamentos-problema descritos (atenção/fuga/acesso/sensorial). Os dados comportamentais apoiam ou contradizem as hipóteses da equipe?"
+        : "Contribute to the debate with functional behavioral analysis: cite topography, frequency and possible functions of described problem behaviors (attention/escape/access/sensory). Does behavioral data support or contradict the team's hypotheses?",
+      fonoaudiologia: L
+        ? "Reaja às hipóteses da equipe do ponto de vista comunicacional: os dados de linguagem e fala desta criança se encaixam ou divergem das hipóteses levantadas? Há aspectos pragmáticos, fonológicos ou expressivos nos dados que os colegas podem ter subestimado?"
+        : "React to the team's hypotheses from the communication standpoint: do this child's language and speech data fit or diverge from the raised hypotheses? Are there pragmatic, phonological or expressive aspects in the data that colleagues may have underestimated?",
+      "terapeuta-ocupacional": L
+        ? "Debata a partir da perspectiva sensoriomotora: os padrões sensoriais e motores descritos corroboram ou complicam as hipóteses em discussão? Como as questões de integração sensorial se relacionam com os comportamentos debatidos pela equipe?"
+        : "Debate from the sensorimotor perspective: do the described sensory and motor patterns corroborate or complicate the hypotheses under discussion? How do sensory integration issues relate to the behaviors debated by the team?",
+      "psiquiatra-infantil": L
+        ? "Posicione-se clinicamente sobre as hipóteses em debate: avalie risco, gravidade e diagnóstico diferencial psiquiátrico. Há sinais nos dados que indicam comorbidade psiquiátrica que a equipe possa ter subestimado? Se aplicável, mencione se há indicação de avaliação farmacológica."
+        : "Take a clinical position on the hypotheses in debate: assess risk, severity and psychiatric differential diagnosis. Are there signs in the data indicating psychiatric comorbidity the team may have underestimated? If applicable, mention if there is an indication for pharmacological evaluation.",
+    };
+    const base = L
+      ? "Debata com a equipe. Defenda sua hipótese, questione ou apoie colegas com argumentos clínicos específicos. Seja direto e baseie-se nos dados."
+      : "Debate with the team. Defend your hypothesis, question or support colleagues with specific clinical arguments. Be direct and base yourself on the data.";
+    return hooks[agentId] ?? base;
+  }
+
+  // ── ANÁLISE INICIAL (por especialista) ────────────────────
+  const analyzeHooks: Partial<Record<AgentId, string>> = {
+    "psi-infantil": L
+      ? `Realize sua análise sob a perspectiva da psicologia do desenvolvimento e dos transtornos emocionais/comportamentais. Identifique de forma específica:
+(a) Padrões de temperamento, regulação emocional e comportamento observáveis nos dados.
+(b) Indicadores de ansiedade, depressão, transtornos comportamentais ou de apego — com ou sem presença de hipótese de neurodesenvolvimento.
+(c) Qualidade do desenvolvimento socioemocional para a idade cronológica da criança.
+(d) O instrumento de avaliação do seu arsenal mais relevante para este caso e por quê.
+Seja específica, cite CID-11/DSM-5-TR onde aplicável, e indique seu grau de confiança.`
+      : `Perform your analysis from the developmental psychology and emotional/behavioral disorders perspective. Specifically identify:
+(a) Temperament, emotional regulation and behavioral patterns observable in the data.
+(b) Indicators of anxiety, depression, behavioral or attachment disorders — with or without neurodevelopmental hypothesis.
+(c) Quality of socioemotional development for the child's chronological age.
+(d) The most relevant assessment tool from your arsenal for this case and why.
+Be specific, cite ICD-11/DSM-5-TR where applicable, and indicate your confidence level.`,
+
+    "psi-parentalidade": L
+      ? `Analise a dinâmica familiar e parental descrita. Mesmo que o caso aponte para neurodesenvolvimento, sua contribuição é essencial. Identifique especificamente:
+(a) Estilo parental predominante (autoritativo/autoritário/permissivo/negligente) e evidências nos dados.
+(b) Qualidade do vínculo pais-criança e sinais de apego seguro ou inseguro.
+(c) Nível de estresse parental observável — os pais parecem esgotados, rígidos, confusos sobre como manejar a criança?
+(d) Como a dinâmica familiar está amplificando, mascarando ou dificultando o manejo do quadro apresentado.
+(e) Ajustes parentais concretos que seriam benéficos independentemente do diagnóstico final.
+Cite instrumento relevante (PSI-4, DPICS-IV, EMBU-P/C etc.) e indique seu grau de confiança.`
+      : `Analyze the described family and parenting dynamics. Even if the case points to neurodevelopment, your contribution is essential. Specifically identify:
+(a) Predominant parenting style (authoritative/authoritarian/permissive/neglectful) and evidence in the data.
+(b) Quality of parent-child bond and signs of secure or insecure attachment.
+(c) Observable parental stress level — do the parents seem exhausted, rigid, confused about how to manage the child?
+(d) How the family dynamics are amplifying, masking or making it harder to manage the presented condition.
+(e) Concrete parental adjustments that would be beneficial regardless of the final diagnosis.
+Cite a relevant tool (PSI-4, DPICS-IV, EMBU-P/C etc.) and indicate your confidence level.`,
+
+    neuropediatra: L
+      ? `Realize análise neurológica e neuropsicológica estruturada. Identifique especificamente:
+(a) Consistência dos marcos do neurodesenvolvimento com a faixa etária — motor, linguagem, social e cognitivo.
+(b) Sinais neurológicos relevantes presentes nos dados (tônus, coordenação, processamento, atenção executiva).
+(c) Hipóteses diagnósticas neurológicas ou neuropsicológicas com códigos CID-11/DSM-5-TR.
+(d) Avaliações formais que você indicaria prioritariamente (instrumentos do seu arsenal).
+(e) Diagnósticos diferenciais a excluir com base nos dados.
+Seja preciso nos marcadores observáveis e indique seu grau de confiança com justificativa clínica.`
+      : `Perform structured neurological and neuropsychological analysis. Specifically identify:
+(a) Consistency of neurodevelopment milestones with the age range — motor, language, social and cognitive.
+(b) Relevant neurological signs present in the data (tone, coordination, processing, executive attention).
+(c) Neurological or neuropsychological diagnostic hypotheses with ICD-11/DSM-5-TR codes.
+(d) Priority formal evaluations you would recommend (instruments from your arsenal).
+(e) Differential diagnoses to exclude based on the data.
+Be precise about observable markers and indicate your confidence level with clinical justification.`,
+
+    bcba: L
+      ? `Realize análise comportamental funcional. Identifique de forma específica e data-driven:
+(a) Comportamentos-alvo descritos: topografia (como se manifesta), frequência aparente, contextos de ocorrência.
+(b) Hipótese de função dos comportamentos-problema segundo o modelo Iwata (atenção / fuga-esquiva / acesso a tangíveis / automático-sensorial).
+(c) Déficits de repertório relevantes: verbal (mandos, ecoicos, intraverbais), social (imitação, contato visual, jogo), adaptativo (AVDs).
+(d) Indicadores comportamentais de TEA, TDAH ou DI presentes nos dados.
+(e) Instrumentos do arsenal ABA mais relevantes para este caso.
+Seja funcional, objetiva e cite apenas comportamentos observáveis. Indique seu grau de confiança.`
+      : `Perform functional behavioral analysis. Specifically and data-driven identify:
+(a) Described target behaviors: topography, apparent frequency, occurrence contexts.
+(b) Function hypothesis for problem behaviors per Iwata model (attention/escape/access/automatic-sensory).
+(c) Relevant repertoire deficits: verbal, social, adaptive (ADLs).
+(d) Behavioral indicators of ASD, ADHD or ID present in the data.
+(e) Most relevant ABA arsenal tools for this case.
+Be functional, objective and cite only observable behaviors. Indicate your confidence level.`,
+
+    fonoaudiologia: L
+      ? `Analise o perfil de comunicação e linguagem com precisão clínica. Identifique especificamente:
+(a) Status de linguagem expressiva vs. receptiva para a idade: qual o déficit, se houver, e sua magnitude.
+(b) Aspectos fonológicos (substituições, simplificações, inteligibilidade), articulatórios e pragmáticos (uso funcional da comunicação, intenção comunicativa, contato social).
+(c) Sinais de risco para dislexia, dispraxia verbal (DVD) ou perfil de comunicação compatível com TEA.
+(d) Impacto das queixas na comunicação funcional cotidiana — escola, família, socialização.
+(e) Instrumento de avaliação fonoaudiológica mais indicado para este caso.
+Cite marcos de linguagem esperados para a idade e onde há defasagem. Indique seu grau de confiança.`
+      : `Analyze the communication and language profile with clinical precision. Specifically identify:
+(a) Expressive vs. receptive language status for age: what is the deficit, if any, and its magnitude.
+(b) Phonological (substitutions, simplifications, intelligibility), articulatory and pragmatic aspects (functional communication use, communicative intent, social contact).
+(c) Risk signs for dyslexia, verbal dyspraxia (DVD) or ASD-compatible communication profile.
+(d) Impact of complaints on daily functional communication — school, family, socialization.
+(e) Most indicated speech-language assessment tool for this case.
+Cite expected language milestones for the age and where there are gaps. Indicate your confidence level.`,
+
+    "terapeuta-ocupacional": L
+      ? `Analise o processamento sensoriomotor e a funcionalidade ocupacional. Identifique especificamente:
+(a) Padrões de processamento sensorial por modalidade: tátil (tolerância a texturas/toque), vestibular (movimento/equilíbrio), proprioceptiva (força/pressão/postura), auditiva (hipersensibilidade a sons), visual (aversão a luzes/movimento), gustativa/olfativa (seletividade alimentar).
+(b) Coordenação motora fina (pinça, escrita, recorte) e grossa (equilíbrio, salto, jogos motores).
+(c) Impacto nas AVDs — rotinas de alimentação, sono, higiene, vestimenta, participação escolar.
+(d) Indicadores de TDC, dispraxia ideomotora/ideacional ou SPD (Transtorno de Processamento Sensorial).
+(e) Como os padrões sensoriais se conectam com os comportamentos de oposição, birras ou isolamento descritos.
+Cite instrumento do seu arsenal mais relevante. Indique seu grau de confiança.`
+      : `Analyze sensorimotor processing and occupational functionality. Specifically identify:
+(a) Sensory processing patterns by modality: tactile, vestibular, proprioceptive, auditory, visual, gustatory/olfactory.
+(b) Fine motor coordination (pinch, writing, cutting) and gross motor (balance, jumping, motor games).
+(c) Impact on ADLs — feeding, sleep, hygiene, dressing, school participation routines.
+(d) Indicators of DCD, ideomotor/ideational dyspraxia or SPD (Sensory Processing Disorder).
+(e) How sensory patterns connect to described oppositional behaviors, tantrums or isolation.
+Cite the most relevant tool from your arsenal. Indicate your confidence level.`,
+
+    "psiquiatra-infantil": L
+      ? `Realize avaliação psiquiátrica estruturada e rigorosa. Identifique especificamente:
+(a) Sintomas afetivos: humor deprimido, anedonia, irritabilidade persistente, labilidade emocional.
+(b) Sintomas ansiosos formais: fobia específica, ansiedade de separação, TOC (obsessões/compulsões), sintomas de PTSD ou trauma.
+(c) Sinais de alerta psiquiátrico grave: alucinações, pensamento mágico excessivo, ideação suicida ou autolesão, regressões marcadas.
+(d) Diagnóstico diferencial psiquiátrico completo com CID-11/DSM-5-TR — incluindo o que descarta e o que mantém como hipótese.
+(e) Avaliação de risco: há sinais de urgência clínica? O funcionamento global (CGAS) parece preservado ou comprometido?
+(f) Se aplicável: hipótese sobre necessidade de avaliação farmacológica e qual classe de medicação seria pertinente investigar.
+Seja rigoroso, ético e clínico. Indique seu grau de confiança com justificativa específica.`
+      : `Perform structured and rigorous psychiatric evaluation. Specifically identify:
+(a) Affective symptoms: depressed mood, anhedonia, persistent irritability, emotional lability.
+(b) Formal anxiety symptoms: specific phobia, separation anxiety, OCD (obsessions/compulsions), PTSD or trauma symptoms.
+(c) Severe psychiatric warning signs: hallucinations, excessive magical thinking, suicidal ideation or self-harm, marked regressions.
+(d) Complete psychiatric differential diagnosis with ICD-11/DSM-5-TR — including what is ruled out and what remains as hypothesis.
+(e) Risk assessment: are there signs of clinical urgency? Does global functioning (CGAS) appear preserved or compromised?
+(f) If applicable: hypothesis about the need for pharmacological evaluation and which medication class would be relevant to investigate.
+Be rigorous, ethical and clinical. Indicate your confidence level with specific justification.`,
+  };
+
+  const base = L
+    ? "Com base nos dados acima, realize sua análise clínica completa sob a perspectiva da sua especialidade. Identifique indicadores relevantes, formule hipóteses diagnósticas específicas com códigos DSM-5/CID-11 e indique seu grau de confiança."
+    : "Based on the data above, perform your complete clinical analysis from your specialty's perspective. Identify relevant indicators, formulate specific diagnostic hypotheses with DSM-5/ICD-11 codes and indicate your confidence level.";
+
+  return analyzeHooks[agentId] ?? base;
 }
 
 export function buildChildDataPrompt(data: ChildData, lang: "pt" | "en"): string {

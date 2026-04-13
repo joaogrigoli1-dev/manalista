@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getClaudeApiKey } from "@/lib/aws-ssm";
-import { buildSystemPrompt, buildChildDataPrompt } from "@/lib/agents/prompts";
+import { buildSystemPrompt, buildChildDataPrompt, buildTaskInstruction } from "@/lib/agents/prompts";
 import type { AgentId, ChildData } from "@/types";
 
 export const runtime = "nodejs";
@@ -9,9 +9,16 @@ export const maxDuration = 120;
 
 // Estratégia híbrida de modelos:
 // - Opus 4.6 para o mediador (consolidação exige síntese profunda)
-// - Sonnet 4.6 para os 4 especialistas (análise e debate — rápido e preciso)
+// - Sonnet 4.6 para os 7 especialistas (análise e debate — rápido e preciso)
 function getModelForAgent(agentId: AgentId): string {
   return agentId === "mediator" ? "claude-opus-4-6" : "claude-sonnet-4-6";
+}
+
+// Tokens por fase:
+// - analyze / debate: 2048 (especialistas, respostas focadas)
+// - consolidate: 3500 (mediador precisa sintetizar 7 análises)
+function getMaxTokens(task: string): number {
+  return task === "consolidate" ? 3500 : 2048;
 }
 
 export async function POST(req: NextRequest) {
@@ -29,6 +36,7 @@ export async function POST(req: NextRequest) {
     const systemPrompt = buildSystemPrompt(body.agentId, body.lang);
     const dataContext   = buildChildDataPrompt(body.childData, body.lang);
     const model = getModelForAgent(body.agentId);
+    const maxTokens = getMaxTokens(body.task);
 
     // Monta o histórico de mensagens para o debate
     const messages: Anthropic.MessageParam[] = [
@@ -41,20 +49,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Instrução específica por tarefa
-    const taskInstruction: Record<string, string> = {
-      analyze: body.lang === "pt"
-        ? "Com base nos dados acima, realize sua análise clínica completa sob a perspectiva da sua especialidade. Identifique indicadores relevantes, formule hipóteses diagnósticas específicas com códigos DSM-5/CID-11 e indique seu grau de confiança (alto/moderado/baixo)."
-        : "Based on the data above, perform your complete clinical analysis from your specialty's perspective. Identify relevant indicators, formulate specific diagnostic hypotheses with DSM-5/ICD-11 codes and indicate your confidence level (high/moderate/low).",
-      debate: body.lang === "pt"
-        ? "Debata com a equipe. Defenda sua hipótese, questione ou apoie colegas com argumentos clínicos específicos. Seja direto e baseie-se nos dados."
-        : "Debate with the team. Defend your hypothesis, question or support colleagues with specific clinical arguments. Be direct and base yourself on the data.",
-      consolidate: body.lang === "pt"
-        ? "Como mediador, consolide todas as análises acima em: (1) Lista de patologias sugeridas com CID-11/DSM-5, (2) Nível de consenso da equipe, (3) Plano terapêutico sugerido com base em evidências, (4) Referências científicas."
-        : "As mediator, consolidate all analyses above into: (1) List of suggested pathologies with ICD-11/DSM-5, (2) Team consensus level, (3) Evidence-based suggested therapeutic plan, (4) Scientific references.",
-    };
-
-    messages.push({ role: "user", content: taskInstruction[body.task] ?? taskInstruction.analyze });
+    // Instrução específica por agente e tarefa
+    const taskInstruction = buildTaskInstruction(body.agentId, body.task, body.lang);
+    messages.push({ role: "user", content: taskInstruction });
 
     // Stream SSE
     const encoder = new TextEncoder();
@@ -63,7 +60,7 @@ export async function POST(req: NextRequest) {
         try {
           const response = await client.messages.stream({
             model,
-            max_tokens: 2048,
+            max_tokens: maxTokens,
             system: systemPrompt,
             messages,
           });

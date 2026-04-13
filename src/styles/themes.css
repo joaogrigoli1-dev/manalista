@@ -1,71 +1,45 @@
 /* ═══════════════════════════════════════════════════
-   MAnalista — Sistema de Temas
-   Tema 1: dark   → Ethereal Glass (OLED Black)
-   Tema 2: clinic → MyClinicSoft Design System
+   MAnalista — Design System: Ethereal Glass
+   High-end Premium Dark UI — OLED Black base
    ═══════════════════════════════════════════════════ */
 
-/* ── TEMA DARK (Ethereal Glass) ─────────────────── */
+/* ── Ethereal Glass — único tema oficial ─────────── */
+:root,
 [data-theme="dark"],
-.theme-dark {
+html {
+  /* ── Base surfaces ───────────────── */
   --bg-base:           #050508;
-  --bg-card:           rgba(10, 10, 14, 0.85);
+  --bg-card:           rgba(10, 10, 14, 0.88);
   --bg-glass:          rgba(255, 255, 255, 0.04);
+  --bg-elevated:       rgba(255, 255, 255, 0.07);
   --bg-input:          rgba(255, 255, 255, 0.05);
+
+  /* ── Borders ─────────────────────── */
   --border-subtle:     rgba(255, 255, 255, 0.06);
   --border-input:      rgba(255, 255, 255, 0.10);
+  --border-strong:     rgba(255, 255, 255, 0.14);
+
+  /* ── Typography ──────────────────── */
   --text-primary:      #F0EEF6;
   --text-secondary:    rgba(255, 255, 255, 0.55);
   --text-muted:        rgba(255, 255, 255, 0.30);
-  --text-label:        rgba(255, 255, 255, 0.35);
+  --text-label:        rgba(255, 255, 255, 0.32);
+
+  /* ── Brand accent (electric violet) ─ */
   --accent-brand:      #7C5CFC;
-  --accent-brand-soft: rgba(124, 92, 252, 0.15);
-  --shadow-card:       0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
-  --shadow-button:     0 4px 24px rgba(124,92,252,0.3);
+  --accent-brand-soft: rgba(124, 92, 252, 0.14);
+  --accent-glow:       rgba(124, 92, 252, 0.28);
+
+  /* ── Shadows ─────────────────────── */
+  --shadow-card:       0 0 0 1px rgba(255,255,255,0.05), 0 24px 48px rgba(0,0,0,0.55);
+  --shadow-button:     0 4px 24px rgba(124,92,252,0.35), 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-float:      0 8px 40px rgba(0,0,0,0.7);
+
+  /* ── Radii ───────────────────────── */
   --radius-card:       1.5rem;
   --radius-input:      0.75rem;
-  --nav-bg:            rgba(10,10,14,0.75);
-}
+  --radius-pill:       9999px;
 
-/* ── TEMA CLINIC (MyClinicSoft DS) ──────────────── */
-[data-theme="clinic"],
-.theme-clinic {
-  --bg-base:           #F4F6F9;
-  --bg-card:           #FFFFFF;
-  --bg-glass:          rgba(0, 0, 0, 0.03);
-  --bg-input:          #FFFFFF;
-  --border-subtle:     #E2E8F0;
-  --border-input:      #CBD5E1;
-  --text-primary:      #1A2332;
-  --text-secondary:    #4A5568;
-  --text-muted:        #8A96A3;
-  --text-label:        #64748B;
-  --accent-brand:      #2D6AFF;
-  --accent-brand-soft: rgba(45, 106, 255, 0.10);
-  --shadow-card:       0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-button:     0 4px 12px rgba(45,106,255,0.25);
-  --radius-card:       1rem;
-  --radius-input:      0.75rem;
-  --nav-bg:            #FFFFFF;
-}
-
-/* ── TEMA AURORA (Premium Light+Dark Hybrid) ──── */
-[data-theme="aurora"],
-.theme-aurora {
-  --bg-base:           #0C0F1A;
-  --bg-card:           rgba(15, 18, 35, 0.9);
-  --bg-glass:          rgba(100, 130, 255, 0.04);
-  --bg-input:          rgba(100, 130, 255, 0.06);
-  --border-subtle:     rgba(100, 130, 255, 0.08);
-  --border-input:      rgba(100, 130, 255, 0.15);
-  --text-primary:      #E8ECF8;
-  --text-secondary:    rgba(200, 210, 240, 0.6);
-  --text-muted:        rgba(200, 210, 240, 0.3);
-  --text-label:        rgba(200, 210, 240, 0.4);
-  --accent-brand:      #6C8EFF;
-  --accent-brand-soft: rgba(108, 142, 255, 0.15);
-  --shadow-card:       0 4px 32px rgba(0,0,20,0.6), inset 0 1px 0 rgba(100,130,255,0.06);
-  --shadow-button:     0 4px 24px rgba(108,142,255,0.3);
-  --radius-card:       1.25rem;
-  --radius-input:      0.75rem;
-  --nav-bg:            rgba(12,15,26,0.8);
+  /* ── Nav ─────────────────────────── */
+  --nav-bg:            rgba(10,10,14,0.8);
 }
