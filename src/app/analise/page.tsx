@@ -487,7 +487,7 @@ export default function AnalisePage() {
         return (techJson.questions as string[]).slice(0, 1).map(q => ({
           question: q,
           agentId,
-          agentName: profile?.name,
+          agentName: profile ? (lang === "pt" ? profile.namePt : profile.nameEn) : undefined,
         }));
       }
       return [];
