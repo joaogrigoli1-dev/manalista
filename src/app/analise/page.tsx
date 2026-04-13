@@ -716,7 +716,7 @@ export default function AnalisePage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg-base)" }}>
       <div className="bg-mesh" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
-      <Navbar lang={lang} onLangChange={setLang} />
+      {phase !== "form" && <Navbar lang={lang} onLangChange={setLang} />}
 
       {phase === "consent" && childData && (
         <ConsentModal lang={lang} onAccept={handleConsentAccept} onDecline={() => setPhase("form")} />
@@ -750,24 +750,82 @@ export default function AnalisePage() {
         />
       )}
 
-      <div className="analise-main-container" style={{ maxWidth: 1400, margin: "0 auto", padding: "7rem 1.5rem 4rem", position: "relative", zIndex: 1 }}>
+      <div className="analise-main-container" style={{ maxWidth: 1400, margin: "0 auto", padding: phase === "form" ? "0" : "7rem 1.5rem 4rem", position: "relative", zIndex: 1 }}>
 
         {/* ── FORM PHASE ── */}
         {phase === "form" && (
-          <div style={{ paddingBottom: "3rem" }}>
-            <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-              <Link href="/" style={{ fontSize: "0.78rem", color: "var(--text-muted)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.75rem" }}>
-                ← {pt ? "Voltar" : "Back"}
+          <div style={{
+            minHeight: "100dvh",
+            display: "flex",
+            flexDirection: "column",
+            paddingTop: 0,
+          }}>
+            {/* Minimal top bar: logo left, lang right */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "1.25rem 1.5rem",
+              position: "sticky", top: 0, zIndex: 10,
+            }}>
+              <Link href="/" style={{
+                display: "flex", alignItems: "center", gap: "0.5rem",
+                textDecoration: "none", fontWeight: 800, fontSize: "0.82rem",
+                color: "#7C5CFC", letterSpacing: "-0.01em",
+              }}>
+                <span style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "#7C5CFC",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#fff", fontSize: "0.72rem", fontWeight: 800,
+                  boxShadow: "0 0 14px rgba(124,92,252,0.45)",
+                }}>M</span>
+                MAnalista
               </Link>
-              <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2rem)", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.4rem" }}>
-                {pt ? "Dados da Criança" : "Child Data"}
-              </h1>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-                {pt ? "Preencha as informações para iniciar a análise multiprofissional." : "Fill in the information to start the multiprofessional analysis."}
-              </p>
+              <button
+                type="button"
+                onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+                style={{
+                  padding: "0.35rem 0.85rem", borderRadius: "9999px",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.05)",
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.68rem", fontWeight: 700,
+                  cursor: "pointer", fontFamily: "inherit",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {lang === "pt" ? "EN" : "PT"}
+              </button>
             </div>
-            {/* Let page scroll naturally — no nested overflow container */}
-            <ChildForm lang={lang} onSubmit={handleFormSubmit} />
+
+            {/* Centered form area */}
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              padding: "1rem 1.5rem 3rem",
+            }}>
+              {/* Header */}
+              <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+                <Link href="/" style={{
+                  fontSize: "0.78rem", color: "var(--text-muted)",
+                  textDecoration: "none",
+                  display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                  marginBottom: "0.9rem",
+                }}>
+                  ← {pt ? "Voltar" : "Back"}
+                </Link>
+                <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.4rem", lineHeight: 1.2 }}>
+                  {pt ? "Dados da Criança" : "Child Data"}
+                </h1>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", maxWidth: 440, margin: "0 auto" }}>
+                  {pt ? "Preencha as informações para iniciar a análise multiprofissional." : "Fill in the information to start the multiprofessional analysis."}
+                </p>
+              </div>
+
+              {/* Form — let page scroll naturally */}
+              <ChildForm lang={lang} onSubmit={handleFormSubmit} />
+            </div>
           </div>
         )}
 
