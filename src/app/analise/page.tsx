@@ -754,22 +754,20 @@ export default function AnalisePage() {
 
         {/* ── FORM PHASE ── */}
         {phase === "form" && (
-          <div>
-            <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-              <Link href="/" style={{ fontSize: "0.78rem", color: "var(--text-muted)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.4rem", marginBottom: "1rem" }}>
+          <div style={{ paddingBottom: "3rem" }}>
+            <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+              <Link href="/" style={{ fontSize: "0.78rem", color: "var(--text-muted)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.75rem" }}>
                 ← {pt ? "Voltar" : "Back"}
               </Link>
-              <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
+              <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2rem)", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.4rem" }}>
                 {pt ? "Dados da Criança" : "Child Data"}
               </h1>
-              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)" }}>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
                 {pt ? "Preencha as informações para iniciar a análise multiprofissional." : "Fill in the information to start the multiprofessional analysis."}
               </p>
             </div>
-            {/* Form with viewport overflow fix */}
-            <div style={{ maxHeight: "calc(100dvh - 9rem)", overflowY: "auto", paddingBottom: "2rem" }}>
-              <ChildForm lang={lang} onSubmit={handleFormSubmit} />
-            </div>
+            {/* Let page scroll naturally — no nested overflow container */}
+            <ChildForm lang={lang} onSubmit={handleFormSubmit} />
           </div>
         )}
 

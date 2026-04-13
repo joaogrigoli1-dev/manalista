@@ -144,7 +144,7 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
                   : "Write freely: complaints, behavior at home and school, development, sleep, feeding, family history, medications, therapies — anything you consider relevant."}
               </p>
               <textarea
-                rows={12}
+                rows={9}
                 value={data.mainComplaints}
                 onChange={e => set("mainComplaints", e.target.value)}
                 placeholder={
@@ -155,7 +155,7 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
                 style={{
                   borderColor: showErrors && !data.mainComplaints.trim() ? "#E5725C" : undefined,
                   resize: "vertical",
-                  minHeight: "200px",
+                  minHeight: "160px",
                 }}
               />
               {/* Character counter bar */}
