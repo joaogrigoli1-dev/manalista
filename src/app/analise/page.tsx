@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { ChildForm } from "@/components/forms/ChildForm";
@@ -418,7 +418,7 @@ export default function AnalisePage() {
   const [needsMoreInfo, setNeedsMoreInfo] = useState(false);
   const [pendingQuestions, setPendingQuestions] = useState<QAQuestion[]>([]);
   const [showQAModal, setShowQAModal] = useState(false);
-  const [qaCallback, setQaCallback] = useState<((answers: string[]) => void) | null>(null);
+  const qaCallbackRef = useRef<((answers: string[]) => void) | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const pt = lang === "pt";
@@ -487,7 +487,7 @@ export default function AnalisePage() {
         return (techJson.questions as string[]).slice(0, 1).map(q => ({
           question: q,
           agentId,
-          agentName: profile?.name ?? undefined,
+          agentName: profile?.name,
         }));
       }
       return [];
@@ -539,12 +539,12 @@ export default function AnalisePage() {
       const answers = await new Promise<string[]>((resolve) => {
         setPendingQuestions(deduped);
         setShowQAModal(true);
-        setQaCallback(() => (ans: string[]) => {
+        qaCallbackRef.current = (ans: string[]) => {
           setShowQAModal(false);
-          setQaCallback(null);
+          qaCallbackRef.current = null;
           setPendingQuestions([]);
           resolve(ans);
-        });
+        };
       });
 
       // Inject answers into context for debate phase (only non-empty answers)
@@ -682,14 +682,14 @@ export default function AnalisePage() {
         setPhase("complete"); // mark complete first so UI updates
         setPendingQuestions(qaItems);
         setShowQAModal(true);
-        setQaCallback(() => (answers: string[]) => {
+        qaCallbackRef.current = (answers: string[]) => {
           const answerText = parsedQuestions.map((q: string, i: number) => `${q}\nResposta: ${answers[i] || "(sem resposta)"}`).join("\n\n");
           setShowQAModal(false);
-          setQaCallback(null);
+          qaCallbackRef.current = null;
           setPendingQuestions([]);
           // Re-run analysis with extra context
           runAnalysis(data, answerText);
-        });
+        };
         return; // don't proceed to setPhase("complete") again
       }
     } catch (e) {
@@ -737,11 +737,11 @@ export default function AnalisePage() {
           questions={pendingQuestions}
           lang={lang}
           childName={childData?.name}
-          onSubmit={(answers) => qaCallback?.(answers)}
+          onSubmit={(answers) => qaCallbackRef.current?.(answers)}
           onSkip={() => {
             // Always call callback with empty answers to unblock mid-flow Promise
-            if (qaCallback) {
-              qaCallback(pendingQuestions.map(() => ""));
+            if (qaCallbackRef.current) {
+              qaCallbackRef.current(pendingQuestions.map(() => ""));
             } else {
               setShowQAModal(false);
               setPendingQuestions([]);
