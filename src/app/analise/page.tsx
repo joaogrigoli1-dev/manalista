@@ -431,7 +431,13 @@ export default function AnalisePage() {
       const res = await fetch("/api/relatorio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childData: { name: childData.name }, messages, results, lang }),
+        body: JSON.stringify({
+          childData,
+          results,
+          lang,
+          qualityScore,
+          detectedPathologies,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Erro desconhecido" }));
@@ -451,7 +457,7 @@ export default function AnalisePage() {
     } finally {
       setDownloading(false);
     }
-  }, [childData, messages, results, lang]);
+  }, [childData, results, lang, qualityScore, detectedPathologies]);
 
   const addMessage = useCallback((agentId: AgentId, content: string, type: DebateMessage["type"]) => {
     setMessages(prev => [...prev, { id: uuid(), agentId, content, timestamp: new Date(), type }]);

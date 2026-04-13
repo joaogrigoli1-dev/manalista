@@ -8,14 +8,20 @@ import { randomUUID } from "crypto";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { childData, messages, results, lang } = body;
+    const { childData, results, lang, qualityScore, detectedPathologies } = body;
 
-    if (!childData || !messages || !results) {
+    if (!childData || !results) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Build payload for the Python script
-    const payload = { childData, messages, results, lang: lang ?? "pt" };
+    const payload = {
+      childData,
+      results,
+      lang: lang ?? "pt",
+      qualityScore: qualityScore ?? 0,
+      detectedPathologies: detectedPathologies ?? [],
+    };
 
     // Write temp JSON input
     const id = randomUUID();

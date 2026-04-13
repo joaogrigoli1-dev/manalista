@@ -3,13 +3,18 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { AgentProfile, DebateMessage, Lang } from "@/types";
 import { getAgentById } from "@/lib/agents/profiles";
 
-// ── Renderizador de Markdown leve (sem dependências) ───────────────────────
+// ── Strip technical JSON injected after separator ──────────────────────────
+const CLINICAL_SEPARATOR = "---DADOS-CLINICOS---";
+function extractFriendlyText(text: string): string {
+  const idx = text.indexOf(CLINICAL_SEPARATOR);
+  return idx >= 0 ? text.substring(0, idx).trim() : text.trim();
+}
+
+// ── Renderizador de Markdown leve ─────────────────────────────────────────
 function renderInline(text: string): ReactNode[] {
-  // Processa **bold**, *italic* e `code` inline
   const parts: ReactNode[] = [];
   const re = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
-  let last = 0, m: RegExpExecArray | null;
-  let key = 0;
+  let last = 0, m: RegExpExecArray | null, key = 0;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     if (m[2]) parts.push(<strong key={key++} style={{ fontWeight: 700, color: "inherit" }}>{m[2]}</strong>);
@@ -51,24 +56,20 @@ function MdText({ text, color }: { text: string; color?: string }): ReactNode {
     const rows = tableBuf.map(r =>
       r.split("|").map(c => c.trim()).filter((_, i, a) => i > 0 && i < a.length - (r.endsWith("|") ? 1 : 0))
     );
-    // Detect separator row (---|---|---)
     const sepIdx = rows.findIndex(r => r.every(c => /^[-:]+$/.test(c)));
     const headerRows = sepIdx > 0 ? rows.slice(0, sepIdx) : [];
     const bodyRows = sepIdx >= 0 ? rows.slice(sepIdx + 1) : rows;
-
     nodes.push(
       <div key={key++} style={{ overflowX: "auto", margin: "0.5rem 0", WebkitOverflowScrolling: "touch" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem", lineHeight: 1.6 }}>
           {headerRows.length > 0 && (
             <thead>
               {headerRows.map((row, ri) => (
-                <tr key={ri}>
-                  {row.map((cell, ci) => (
-                    <th key={ci} style={{ padding: "0.4rem 0.6rem", borderBottom: `2px solid ${color ?? "var(--border-subtle)"}66`, fontWeight: 700, color: color ?? "var(--text-primary)", textAlign: "left", whiteSpace: "nowrap" }}>
-                      {renderInline(cell)}
-                    </th>
-                  ))}
-                </tr>
+                <tr key={ri}>{row.map((cell, ci) => (
+                  <th key={ci} style={{ padding: "0.4rem 0.6rem", borderBottom: `2px solid ${color ?? "var(--border-subtle)"}66`, fontWeight: 700, color: color ?? "var(--text-primary)", textAlign: "left", whiteSpace: "nowrap" }}>
+                    {renderInline(cell)}
+                  </th>
+                ))}</tr>
               ))}
             </thead>
           )}
@@ -91,98 +92,35 @@ function MdText({ text, color }: { text: string; color?: string }): ReactNode {
 
   for (const raw of lines) {
     const line = raw.trimEnd();
-
-    // Table row detection (starts with |)
-    if (line.trim().startsWith("|")) {
-      flushList();
-      tableBuf.push(line.trim());
-      continue;
-    } else if (tableBuf.length) {
-      flushTable();
-    }
-
-    // Blank line — flush list and add spacing
-    if (!line.trim()) {
-      flushList();
-      nodes.push(<div key={key++} style={{ height: "0.5rem" }} />);
-      continue;
-    }
-
-    // Horizontal rule
-    if (/^---+$/.test(line.trim())) {
-      flushList();
-      nodes.push(<hr key={key++} style={{ border: "none", borderTop: `1px solid ${color ?? "var(--border-subtle)"}44`, margin: "0.6rem 0" }} />);
-      continue;
-    }
-
-    // H4 ####
-    if (line.startsWith("#### ")) {
-      flushList();
-      nodes.push(
-        <p key={key++} style={{ fontSize: "0.8rem", fontWeight: 800, color: color ?? "var(--accent-brand)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0.8rem 0 0.25rem" }}>
-          {renderInline(line.slice(5))}
-        </p>
-      );
-      continue;
-    }
-
-    // H3 ###
-    if (line.startsWith("### ")) {
-      flushList();
-      nodes.push(
-        <p key={key++} style={{ fontSize: "0.95rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1rem 0 0.35rem", borderBottom: `1px solid ${color ?? "var(--border-subtle)"}33`, paddingBottom: "0.25rem" }}>
-          {renderInline(line.slice(4))}
-        </p>
-      );
-      continue;
-    }
-
-    // H2 ##
-    if (line.startsWith("## ")) {
-      flushList();
-      nodes.push(
-        <p key={key++} style={{ fontSize: "1rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1rem 0 0.4rem" }}>
-          {renderInline(line.slice(3))}
-        </p>
-      );
-      continue;
-    }
-
-    // H1 #
-    if (line.startsWith("# ")) {
-      flushList();
-      nodes.push(
-        <p key={key++} style={{ fontSize: "1.1rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1.2rem 0 0.5rem", borderBottom: `2px solid ${color ?? "var(--border-subtle)"}44`, paddingBottom: "0.35rem" }}>
-          {renderInline(line.slice(2))}
-        </p>
-      );
-      continue;
-    }
-
-    // Numbered list item (1. 2. 3.)
-    if (/^\d+\.\s/.test(line)) {
-      listBuf.push(line.replace(/^\d+\.\s/, ""));
-      continue;
-    }
-
-    // Bullet item
-    if (/^[-•]\s/.test(line)) {
-      listBuf.push(line.slice(2));
-      continue;
-    }
-
-    // Regular paragraph
+    if (line.trim().startsWith("|")) { flushList(); tableBuf.push(line.trim()); continue; }
+    else if (tableBuf.length) { flushTable(); }
+    if (!line.trim()) { flushList(); nodes.push(<div key={key++} style={{ height: "0.5rem" }} />); continue; }
+    if (/^---+$/.test(line.trim())) { flushList(); nodes.push(<hr key={key++} style={{ border: "none", borderTop: `1px solid ${color ?? "var(--border-subtle)"}44`, margin: "0.6rem 0" }} />); continue; }
+    if (line.startsWith("#### ")) { flushList(); nodes.push(<p key={key++} style={{ fontSize: "0.8rem", fontWeight: 800, color: color ?? "var(--accent-brand)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0.8rem 0 0.25rem" }}>{renderInline(line.slice(5))}</p>); continue; }
+    if (line.startsWith("### ")) { flushList(); nodes.push(<p key={key++} style={{ fontSize: "0.95rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1rem 0 0.35rem", borderBottom: `1px solid ${color ?? "var(--border-subtle)"}33`, paddingBottom: "0.25rem" }}>{renderInline(line.slice(4))}</p>); continue; }
+    if (line.startsWith("## ")) { flushList(); nodes.push(<p key={key++} style={{ fontSize: "1rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1rem 0 0.4rem" }}>{renderInline(line.slice(3))}</p>); continue; }
+    if (line.startsWith("# ")) { flushList(); nodes.push(<p key={key++} style={{ fontSize: "1.1rem", fontWeight: 800, color: color ?? "var(--text-primary)", margin: "1.2rem 0 0.5rem", borderBottom: `2px solid ${color ?? "var(--border-subtle)"}44`, paddingBottom: "0.35rem" }}>{renderInline(line.slice(2))}</p>); continue; }
+    if (/^\d+\.\s/.test(line)) { listBuf.push(line.replace(/^\d+\.\s/, "")); continue; }
+    if (/^[-•]\s/.test(line)) { listBuf.push(line.slice(2)); continue; }
     flushList();
-    nodes.push(
-      <p key={key++} style={{ fontSize: "0.87rem", lineHeight: 1.8, color: "var(--text-primary)", margin: "0.1rem 0" }}>
-        {renderInline(line)}
-      </p>
-    );
+    nodes.push(<p key={key++} style={{ fontSize: "0.87rem", lineHeight: 1.8, color: "var(--text-primary)", margin: "0.1rem 0" }}>{renderInline(line)}</p>);
   }
-
-  flushList();
-  flushTable();
+  flushList(); flushTable();
   return <div style={{ display: "flex", flexDirection: "column" }}>{nodes}</div>;
+}
+
+// ── Extract a 1-2 line plain-text preview ─────────────────────────────────
+function getPreview(text: string, maxChars = 120): string {
+  const clean = text
+    .replace(/^#{1,4}\s+/gm, "")      // strip headers
+    .replace(/\*\*(.+?)\*\*/g, "$1")  // strip bold
+    .replace(/\*(.+?)\*/g, "$1")      // strip italic
+    .replace(/`(.+?)`/g, "$1")        // strip inline code
+    .replace(/\n+/g, " ")             // collapse newlines
+    .trim();
+  if (clean.length <= maxChars) return clean;
+  const cut = clean.lastIndexOf(" ", maxChars);
+  return clean.slice(0, cut > 60 ? cut : maxChars) + "…";
 }
 
 interface DebateRoomProps {
@@ -202,65 +140,57 @@ const TYPE_LABEL: Record<string, { pt: string; en: string; color: string }> = {
   summary:   { pt: "Síntese",  en: "Summary",   color: "#8B5CF6" },
 };
 
-// ── Hook: revela texto palavra por palavra ─────────────────────────────────
+// ── Hook: revela texto palavra por palavra ────────────────────────────────
 function useWordReveal(source: string, msPerWord = 55): string {
   const [shown, setShown] = useState("");
   const targetRef = useRef("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    // Source zerado → novo agente começando, reseta tudo
     if (!source) {
       setShown("");
       targetRef.current = "";
       if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
       return;
     }
-
     targetRef.current = source;
-
     if (!timerRef.current) {
       timerRef.current = setInterval(() => {
         setShown(prev => {
           const t = targetRef.current;
           if (prev.length >= t.length) return prev;
-          // Avança até o próximo espaço/nova linha (= próxima palavra completa)
           let end = prev.length;
-          const limit = Math.min(end + 25, t.length); // max 25 chars look-ahead
+          const limit = Math.min(end + 25, t.length);
           while (end < limit && t[end] !== " " && t[end] !== "\n") end++;
-          if (end < t.length) end++; // inclui o separador
+          if (end < t.length) end++;
           return t.slice(0, end);
         });
       }, msPerWord);
     }
   }, [source, msPerWord]);
 
-  // Cleanup ao desmontar
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
-
   return shown;
 }
 
-// ── Componente isolado para o balão de streaming ───────────────────────────
-function StreamingBubble({
-  agent, streamingContent, pt,
-}: { agent: AgentProfile; streamingContent: string; pt: boolean }) {
-  const displayed = useWordReveal(streamingContent);
+// ── StreamingBubble ────────────────────────────────────────────────────────
+function StreamingBubble({ agent, streamingContent, pt }: { agent: AgentProfile; streamingContent: string; pt: boolean }) {
+  // Strip JSON before revealing word-by-word
+  const friendly = extractFriendlyText(streamingContent);
+  const displayed = useWordReveal(friendly);
   const isMediator = agent.isMediator;
 
   if (isMediator) {
     return (
       <div style={{
-        padding: "1.1rem 1.3rem", borderRadius: "1rem",
-        background: "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,155,245,0.06))",
-        border: "1px solid rgba(139,92,246,0.25)",
+        padding: "0.9rem 1.1rem", borderRadius: "0.85rem",
+        background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,155,245,0.04))",
+        border: "1px solid rgba(139,92,246,0.2)",
         borderLeft: `3px solid ${agent.color}`,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
           <span>{agent.emoji}</span>
-          <span style={{ fontSize: "0.82rem", fontWeight: 800, color: agent.color }}>
-            {pt ? agent.namePt : agent.nameEn}
-          </span>
+          <span style={{ fontSize: "0.8rem", fontWeight: 800, color: agent.color }}>{pt ? agent.namePt : agent.nameEn}</span>
           <StreamingDots color={agent.color} />
         </div>
         {displayed ? (
@@ -268,36 +198,28 @@ function StreamingBubble({
             <MdText text={displayed} color={agent.color} />
             <BlinkCursor color={agent.color} />
           </div>
-        ) : (
-          <StreamingDots color={agent.color} />
-        )}
+        ) : <StreamingDots color={agent.color} />}
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", gap: "0.75rem" }}>
+    <div style={{ display: "flex", gap: "0.6rem" }}>
       <div style={{
-        width: 38, height: 38, borderRadius: "0.6rem", flexShrink: 0,
+        width: 32, height: 32, borderRadius: "0.5rem", flexShrink: 0,
         background: agent.colorLight, border: `1px solid ${agent.color}44`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "1rem", marginTop: 2,
-      }}>
-        {agent.emoji}
-      </div>
+        fontSize: "0.9rem", marginTop: 2,
+      }}>{agent.emoji}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", marginBottom: "0.3rem" }}>
-          <span style={{ fontSize: "0.82rem", fontWeight: 700, color: agent.color }}>
-            {pt ? agent.namePt : agent.nameEn}
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
+          <span style={{ fontSize: "0.78rem", fontWeight: 700, color: agent.color }}>{pt ? agent.namePt : agent.nameEn}</span>
           <StreamingDots color={agent.color} />
         </div>
         <div style={{
-          padding: "0.85rem 1rem",
-          borderRadius: "0 0.85rem 0.85rem 0.85rem",
-          background: "var(--bg-glass)",
-          border: "1px solid var(--border-subtle)",
-          borderLeft: `2px solid ${agent.color}66`,
+          padding: "0.65rem 0.85rem", borderRadius: "0 0.75rem 0.75rem 0.75rem",
+          background: "var(--bg-glass)", border: "1px solid var(--border-subtle)",
+          borderLeft: `2px solid ${agent.color}55`,
         }}>
           {displayed ? (
             <div style={{ position: "relative" }}>
@@ -315,6 +237,114 @@ function StreamingBubble({
   );
 }
 
+// ── CompactMessageCard — collapsed preview, expand on click ───────────────
+function CompactMessageCard({ msg, pt }: { msg: DebateMessage; pt: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const agent = getAgentById(msg.agentId);
+  if (!agent) return null;
+
+  const typeInfo = TYPE_LABEL[msg.type] ?? { pt: msg.type, en: msg.type, color: "var(--accent-brand)" };
+  const typeColor = typeInfo.color;
+  // Always filter JSON from the displayed content
+  const friendlyContent = extractFriendlyText(msg.content);
+  const preview = getPreview(friendlyContent);
+  const hasMore = friendlyContent.trim().length > preview.replace("…","").length + 1;
+
+  if (agent.isMediator) {
+    return (
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          padding: "0.8rem 1rem", borderRadius: "0.85rem", cursor: hasMore ? "pointer" : "default",
+          background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,155,245,0.04))",
+          border: "1px solid rgba(139,92,246,0.2)",
+          borderLeft: `3px solid ${agent.color}`,
+          transition: "background 0.2s",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", marginBottom: "0.4rem" }}>
+          <span style={{ fontSize: "0.95rem" }}>{agent.emoji}</span>
+          <span style={{ fontSize: "0.78rem", fontWeight: 800, color: agent.color }}>{pt ? agent.namePt : agent.nameEn}</span>
+          <span style={{
+            fontSize: "0.55rem", padding: "0.12rem 0.45rem", borderRadius: "9999px",
+            background: `${typeColor}22`, color: typeColor, fontWeight: 700,
+            textTransform: "uppercase", letterSpacing: "0.08em",
+          }}>{pt ? typeInfo.pt : typeInfo.en}</span>
+          <span style={{ marginLeft: "auto", fontSize: "0.6rem", color: "var(--text-muted)" }}>
+            {msg.timestamp.toLocaleTimeString(pt ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+          {hasMore && (
+            <span style={{ fontSize: "0.6rem", color: agent.color, marginLeft: "0.25rem", flexShrink: 0 }}>
+              {expanded ? (pt ? "▲ menos" : "▲ less") : (pt ? "▼ mais" : "▼ more")}
+            </span>
+          )}
+        </div>
+
+        {expanded ? (
+          <MdText text={friendlyContent} color={agent.color} />
+        ) : (
+          <p style={{ fontSize: "0.82rem", lineHeight: 1.65, color: "var(--text-secondary)", margin: 0 }}>
+            {preview}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={() => setExpanded(e => !e)}
+      style={{ display: "flex", gap: "0.6rem", cursor: hasMore ? "pointer" : "default" }}
+    >
+      {/* Avatar */}
+      <div style={{
+        width: 32, height: 32, borderRadius: "0.5rem", flexShrink: 0,
+        background: agent.colorLight, border: `1px solid ${agent.color}44`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: "0.9rem", marginTop: 2,
+      }}>{agent.emoji}</div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Header row */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "0.78rem", fontWeight: 700, color: agent.color }}>{pt ? agent.namePt : agent.nameEn}</span>
+          <span style={{ fontSize: "0.65rem", color: "var(--text-muted)" }}>· {pt ? agent.rolePt : agent.roleEn}</span>
+          <span style={{
+            fontSize: "0.55rem", padding: "0.1rem 0.4rem", borderRadius: "9999px",
+            background: `${typeColor}18`, color: typeColor, fontWeight: 700,
+            textTransform: "uppercase", letterSpacing: "0.06em",
+          }}>{pt ? typeInfo.pt : typeInfo.en}</span>
+          <span style={{ marginLeft: "auto", fontSize: "0.6rem", color: "var(--text-muted)" }}>
+            {msg.timestamp.toLocaleTimeString(pt ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+          {hasMore && (
+            <span style={{ fontSize: "0.6rem", color: agent.color, marginLeft: "0.1rem", flexShrink: 0 }}>
+              {expanded ? (pt ? "▲" : "▲") : (pt ? "▼" : "▼")}
+            </span>
+          )}
+        </div>
+
+        {/* Content bubble */}
+        <div style={{
+          padding: "0.55rem 0.8rem",
+          borderRadius: "0 0.75rem 0.75rem 0.75rem",
+          background: "var(--bg-glass)",
+          border: "1px solid var(--border-subtle)",
+          borderLeft: `2px solid ${agent.color}44`,
+        }}>
+          {expanded ? (
+            <MdText text={friendlyContent} color={agent.color} />
+          ) : (
+            <p style={{ fontSize: "0.82rem", lineHeight: 1.65, color: "var(--text-secondary)", margin: 0 }}>
+              {preview}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── DebateRoom principal ───────────────────────────────────────────────────
 export function DebateRoom({
   messages, lang, isStreaming, streamingAgentId, streamingContent = "",
@@ -322,7 +352,6 @@ export function DebateRoom({
   const containerRef = useRef<HTMLDivElement>(null);
   const pt = lang === "pt";
 
-  // Auto-scroll dentro do container quando chegar nova mensagem ou novo chunk
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -368,92 +397,17 @@ export function DebateRoom({
         height: "clamp(320px, 60vh, 520px)",
         overflowY: "auto",
         WebkitOverflowScrolling: "touch",
-        padding: "clamp(0.75rem, 2vw, 1.25rem)",
+        padding: "clamp(0.6rem, 1.5vw, 1rem)",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
+        gap: "0.65rem",
       }}
     >
-      {/* Mensagens já finalizadas */}
-      {messages.map((msg) => {
-        const agent = getAgentById(msg.agentId);
-        if (!agent) return null;
-        const typeInfo = TYPE_LABEL[msg.type] ?? { pt: msg.type, en: msg.type, color: "var(--accent-brand)" };
-        const typeColor = typeInfo.color;
+      {messages.map((msg) => (
+        <CompactMessageCard key={msg.id} msg={msg} pt={pt} />
+      ))}
 
-        if (agent.isMediator) {
-          return (
-            <div key={msg.id} style={{
-              padding: "1.1rem 1.3rem", borderRadius: "1rem",
-              background: "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,155,245,0.06))",
-              border: "1px solid rgba(139,92,246,0.25)",
-              borderLeft: `3px solid ${agent.color}`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem" }}>
-                <span>{agent.emoji}</span>
-                <span style={{ fontSize: "0.82rem", fontWeight: 800, color: agent.color }}>
-                  {pt ? agent.namePt : agent.nameEn}
-                </span>
-                <span style={{
-                  fontSize: "0.58rem", padding: "0.15rem 0.5rem", borderRadius: "9999px",
-                  background: `${typeColor}22`, color: typeColor,
-                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em",
-                }}>
-                  {pt ? typeInfo.pt : typeInfo.en}
-                </span>
-                <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: "var(--text-muted)" }}>
-                  {msg.timestamp.toLocaleTimeString(pt ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-              <MdText text={msg.content} color={agent.color} />
-            </div>
-          );
-        }
-
-        return (
-          <div key={msg.id} style={{ display: "flex", gap: "0.75rem" }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: "0.6rem", flexShrink: 0,
-              background: agent.colorLight, border: `1px solid ${agent.color}44`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "1rem", marginTop: 2,
-            }}>
-              {agent.emoji}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", marginBottom: "0.3rem", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "0.82rem", fontWeight: 700, color: agent.color }}>
-                  {pt ? agent.namePt : agent.nameEn}
-                </span>
-                <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
-                  · {pt ? agent.rolePt : agent.roleEn}
-                </span>
-                <span style={{
-                  fontSize: "0.58rem", padding: "0.12rem 0.45rem", borderRadius: "9999px",
-                  background: `${typeColor}20`, color: typeColor,
-                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
-                }}>
-                  {pt ? typeInfo.pt : typeInfo.en}
-                </span>
-                <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: "var(--text-muted)" }}>
-                  {msg.timestamp.toLocaleTimeString(pt ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-              <div style={{
-                padding: "0.85rem 1rem",
-                borderRadius: "0 0.85rem 0.85rem 0.85rem",
-                background: "var(--bg-glass)",
-                border: "1px solid var(--border-subtle)",
-                borderLeft: `2px solid ${agent.color}66`,
-              }}>
-                <MdText text={msg.content} color={agent.color} />
-              </div>
-            </div>
-          </div>
-        );
-      })}
-
-      {/* Balão de streaming ao vivo — revela palavra por palavra */}
+      {/* Balão de streaming ao vivo */}
       {isStreaming && streamAgent && (
         <StreamingBubble
           agent={streamAgent}
@@ -467,7 +421,7 @@ export function DebateRoom({
   );
 }
 
-// ── Helpers visuais ────────────────────────────────────────────────────────
+// ── Helpers visuais ───────────────────────────────────────────────────────
 function BlinkCursor({ color }: { color: string }) {
   return (
     <span style={{
