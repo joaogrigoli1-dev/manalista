@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ChildForm } from "@/components/forms/ChildForm";
 import { ConsentModal } from "@/components/forms/ConsentModal";
@@ -266,129 +266,175 @@ function QAModal({
 }) {
   const pt = lang === "pt";
   const [answers, setAnswers] = useState<string[]>(questions.map(() => ""));
+  const [step, setStep] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const name = childName || (pt ? "a criança" : "the child");
+  const total = questions.length;
+  const current = questions[step];
+  const isLast = step === total - 1;
 
-  const subtitlePt = questions.length === 1
-    ? `A equipe tem uma pergunta rápida. Quanto mais você compartilhar, mais rica fica a análise de ${name}.`
-    : `A equipe tem ${questions.length} perguntas rápidas. Suas respostas ajudam a refinar a análise de ${name}.`;
+  // Auto-focus textarea when step changes
+  useEffect(() => {
+    setTimeout(() => textareaRef.current?.focus(), 80);
+  }, [step]);
 
-  const subtitleEn = questions.length === 1
-    ? `The team has one quick question. The more you share, the richer ${name}'s analysis becomes.`
-    : `The team has ${questions.length} quick questions. Your answers help refine ${name}'s analysis.`;
+  const handleNext = () => {
+    if (isLast) {
+      onSubmit(answers);
+    } else {
+      setStep(s => s + 1);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleNext();
+    }
+  };
 
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "rgba(0,0,0,0.72)", backdropFilter: "blur(14px)",
+      background: "rgba(0,0,0,0.78)", backdropFilter: "blur(16px)",
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "1.25rem",
     }}>
       <div style={{
-        maxWidth: 540, width: "100%", maxHeight: "88vh", overflowY: "auto",
+        maxWidth: 500, width: "100%",
         padding: "0.5rem", borderRadius: "2rem",
         background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+        animation: "fadeSlideUp 0.22s ease",
       }}>
+        <style>{`@keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}`}</style>
         <div style={{
-          borderRadius: "calc(2rem - 0.5rem)", padding: "2rem",
+          borderRadius: "calc(2rem - 0.5rem)", padding: "1.75rem 2rem",
           background: "rgba(10,10,14,0.97)",
           boxShadow: "inset 0 1px 1px rgba(255,255,255,0.07)",
         }}>
-          {/* Header */}
-          <div style={{ marginBottom: "1.5rem" }}>
+
+          {/* Step indicator */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "0.4rem",
               background: "rgba(124,111,232,0.12)", border: "1px solid rgba(124,111,232,0.25)",
-              borderRadius: "9999px", padding: "0.25rem 0.75rem", marginBottom: "0.75rem",
+              borderRadius: "9999px", padding: "0.25rem 0.75rem",
             }}>
-              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--accent-brand)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                {pt ? "A equipe quer saber" : "The team wants to know"}
+              <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-brand)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {pt ? "Pergunta" : "Question"} {step + 1}/{total}
               </span>
             </div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.5rem", lineHeight: 1.3 }}>
-              {pt ? "Algumas perguntas para completar a análise" : "A few questions to complete the analysis"}
-            </h3>
-            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
-              {pt ? subtitlePt : subtitleEn}
-            </p>
+            {/* Dot progress */}
+            {total > 1 && (
+              <div style={{ display: "flex", gap: "0.35rem" }}>
+                {questions.map((_, i) => (
+                  <div key={i} style={{
+                    width: 6, height: 6, borderRadius: "50%",
+                    background: i === step ? "var(--accent-brand)" : i < step ? "rgba(124,111,232,0.4)" : "rgba(255,255,255,0.12)",
+                    transition: "background 0.2s",
+                  }} />
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Questions */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            {questions.map((item, i) => (
-              <div key={i} style={{
-                padding: "1rem",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: "1rem",
-              }}>
-                {/* Agent attribution */}
-                {item.agentName && (
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: "0.4rem",
-                    marginBottom: "0.5rem",
-                  }}>
-                    {item.agentId && (
-                      <img
-                        src={`/avatars/${item.agentId === "psi-infantil" ? "psi-infantil" : item.agentId === "psi-parentalidade" ? "psi-parentalidade" : item.agentId}.svg`}
-                        alt=""
-                        width={22} height={22}
-                        style={{ borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", objectFit: "cover", flexShrink: 0 }}
-                        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                    )}
-                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-brand)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      {item.agentName}
-                    </span>
-                  </div>
+          {/* Agent "chat bubble" */}
+          <div style={{ marginBottom: "1.25rem" }}>
+            {current.agentName && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", marginBottom: "0.6rem" }}>
+                {current.agentId && (
+                  <img
+                    src={`/avatars/${current.agentId}.svg`}
+                    alt=""
+                    width={26} height={26}
+                    style={{ borderRadius: "50%", border: "1px solid rgba(255,255,255,0.14)", objectFit: "cover", flexShrink: 0 }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
                 )}
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "0.6rem", lineHeight: 1.5 }}>
-                  {item.question}
-                </label>
-                <textarea
-                  value={answers[i]}
-                  onChange={e => setAnswers(prev => prev.map((a, j) => j === i ? e.target.value : a))}
-                  rows={2}
-                  style={{
-                    width: "100%", background: "rgba(255,255,255,0.04)",
-                    border: "1px solid var(--border-input)", borderRadius: "0.65rem",
-                    color: "var(--text-primary)", padding: "0.55rem 0.75rem",
-                    fontFamily: "inherit", fontSize: "0.83rem", resize: "vertical",
-                    outline: "none", lineHeight: 1.5,
-                    transition: "border-color 0.2s",
-                    boxSizing: "border-box",
-                  }}
-                  placeholder={pt ? "Conte com suas palavras..." : "Tell us in your words..."}
-                />
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--accent-brand)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {current.agentName}
+                </span>
               </div>
-            ))}
+            )}
+            {/* Question bubble */}
+            <div style={{
+              padding: "0.9rem 1.1rem",
+              background: "rgba(124,111,232,0.08)",
+              border: "1px solid rgba(124,111,232,0.2)",
+              borderRadius: "0.25rem 1.1rem 1.1rem 1.1rem",
+              fontSize: "0.9rem", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.55,
+            }}>
+              {current.question}
+            </div>
+          </div>
+
+          {/* Reply box */}
+          <div style={{ position: "relative" }}>
+            <textarea
+              ref={textareaRef}
+              key={step}
+              value={answers[step]}
+              onChange={e => setAnswers(prev => prev.map((a, j) => j === step ? e.target.value : a))}
+              onKeyDown={handleKeyDown}
+              rows={3}
+              style={{
+                width: "100%", background: "rgba(255,255,255,0.05)",
+                border: "1.5px solid rgba(124,111,232,0.35)", borderRadius: "1rem",
+                color: "var(--text-primary)", padding: "0.8rem 1rem",
+                fontFamily: "inherit", fontSize: "0.88rem", resize: "none",
+                outline: "none", lineHeight: 1.55,
+                boxSizing: "border-box",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = "rgba(124,111,232,0.65)"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "rgba(124,111,232,0.35)"; }}
+              placeholder={pt ? "Escreva aqui sua resposta..." : "Type your answer here..."}
+            />
+            <span style={{
+              position: "absolute", bottom: "0.5rem", right: "0.75rem",
+              fontSize: "0.65rem", color: "var(--text-muted)", pointerEvents: "none",
+            }}>
+              {pt ? "Ctrl+Enter para continuar" : "Ctrl+Enter to continue"}
+            </span>
           </div>
 
           {/* Actions */}
-          <div style={{ display: "flex", gap: "0.65rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "0.6rem", marginTop: "1rem", alignItems: "center" }}>
             <button
-              onClick={() => onSubmit(answers)}
+              onClick={handleNext}
               style={{
-                flex: 1, minWidth: 120, padding: "0.75rem 1.25rem", borderRadius: "9999px",
+                flex: 1, padding: "0.78rem 1.25rem", borderRadius: "9999px",
                 border: "none", background: "var(--accent-brand)",
                 color: "#fff", fontFamily: "inherit", fontWeight: 700,
                 fontSize: "0.85rem", cursor: "pointer",
                 boxShadow: "var(--shadow-button)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
               }}
             >
-              {pt ? "Enviar e continuar ✓" : "Send & continue ✓"}
+              {isLast
+                ? (pt ? "Enviar e continuar ✓" : "Send & continue ✓")
+                : (pt ? "Próxima →" : "Next →")
+              }
             </button>
             <button
               onClick={onSkip}
               style={{
-                padding: "0.75rem 1.1rem", borderRadius: "9999px",
+                padding: "0.78rem 1rem", borderRadius: "9999px",
                 border: "1px solid rgba(255,255,255,0.12)", background: "transparent",
                 color: "var(--text-muted)", fontFamily: "inherit", fontWeight: 500,
-                fontSize: "0.82rem", cursor: "pointer",
+                fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap",
               }}
             >
-              {pt ? "Continuar sem responder" : "Continue without answering"}
+              {pt ? "Pular" : "Skip"}
             </button>
           </div>
+
+          {/* Skip all hint */}
+          <p style={{ textAlign: "center", fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "0.75rem" }}>
+            {pt
+              ? `Suas respostas ajudam a refinar a análise de ${name}.`
+              : `Your answers help refine ${name}'s analysis.`}
+          </p>
         </div>
       </div>
     </div>
@@ -540,9 +586,13 @@ export default function AnalisePage() {
         return true;
       });
 
+      // Cap at half the total to keep the session focused
+      const MAX_MID_QUESTIONS = Math.max(1, Math.ceil(deduped.length / 2));
+      const capped = deduped.slice(0, MAX_MID_QUESTIONS);
+
       // Wait for parent answers before starting debate
       const answers = await new Promise<string[]>((resolve) => {
-        setPendingQuestions(deduped);
+        setPendingQuestions(capped);
         setShowQAModal(true);
         qaCallbackRef.current = (ans: string[]) => {
           setShowQAModal(false);
@@ -553,7 +603,7 @@ export default function AnalisePage() {
       });
 
       // Inject answers into context for debate phase (only non-empty answers)
-      const filledAnswers = deduped
+      const filledAnswers = capped
         .map((q, i) => ({ q, a: answers[i]?.trim() || "" }))
         .filter(({ a }) => a.length > 0);
       if (filledAnswers.length > 0) {
@@ -683,12 +733,15 @@ export default function AnalisePage() {
 
       // ── Q&A: open modal if specialists need more info ──
       if (parsedNeedsMore && parsedQuestions.length > 0) {
-        const qaItems: QAQuestion[] = parsedQuestions.map((q: string) => ({ question: q }));
+        // Cap at half to keep it focused
+        const MAX_CONSOL_QUESTIONS = Math.max(1, Math.ceil(parsedQuestions.length / 2));
+        const cappedConsolQ = parsedQuestions.slice(0, MAX_CONSOL_QUESTIONS);
+        const qaItems: QAQuestion[] = cappedConsolQ.map((q: string) => ({ question: q }));
         setPhase("complete"); // mark complete first so UI updates
         setPendingQuestions(qaItems);
         setShowQAModal(true);
         qaCallbackRef.current = (answers: string[]) => {
-          const answerText = parsedQuestions.map((q: string, i: number) => `${q}\nResposta: ${answers[i] || "(sem resposta)"}`).join("\n\n");
+          const answerText = cappedConsolQ.map((q: string, i: number) => `${q}\nResposta: ${answers[i] || "(sem resposta)"}`).join("\n\n");
           setShowQAModal(false);
           qaCallbackRef.current = null;
           setPendingQuestions([]);
