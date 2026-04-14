@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef } from "react";
 import type { AgentProfile, Lang } from "@/types";
 
 // Simple backstory type for now
@@ -22,7 +21,6 @@ interface CharacterModalProps {
 
 export function CharacterModal({ agent, backstory, lang, onClose }: CharacterModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [imgError, setImgError] = useState(false);
   const pt = lang === "pt";
 
   useEffect(() => {
@@ -72,22 +70,23 @@ export function CharacterModal({ agent, backstory, lang, onClose }: CharacterMod
           }}
           >✕</button>
 
-          {/* Avatar + Name */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", clear: "both" }}>
-            <div style={{
-              width: 72, height: 72, borderRadius: "1rem", overflow: "hidden",
-              background: agent.colorLight, border: `2px solid ${agent.color}44`,
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              {!imgError ? (
-                <Image src={`/avatars/${agent.id}.svg`} alt="" width={72} height={72} style={{ objectFit: "cover" }} onError={() => setImgError(true)} />
-              ) : (
-                <span style={{ fontSize: "2rem" }}>{agent.emoji}</span>
-              )}
-            </div>
-            <div>
-              <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)" }}>{pt ? agent.namePt : agent.nameEn}</h3>
-              <p style={{ fontSize: "0.78rem", color: agent.color, fontWeight: 600 }}>{pt ? agent.rolePt : agent.roleEn}</p>
+          {/* Name + Especialidades button */}
+          <div style={{ marginBottom: "1.5rem", clear: "both" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+              <div>
+                <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.25rem" }}>{pt ? agent.namePt : agent.nameEn}</h3>
+                <p style={{ fontSize: "0.78rem", color: agent.color, fontWeight: 600 }}>{pt ? agent.rolePt : agent.roleEn}</p>
+              </div>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                background: `${agent.color}18`, border: `1px solid ${agent.color}44`,
+                borderRadius: "9999px", padding: "0.3rem 0.9rem",
+                fontSize: "0.7rem", fontWeight: 700, color: agent.color,
+                letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}>
+                ✦ {pt ? "Especialidades" : "Specialties"}
+              </div>
             </div>
           </div>
 
