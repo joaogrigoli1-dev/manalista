@@ -635,8 +635,10 @@ export default function AnalisePage() {
         updateAgentDialogText(agent.id, displayText);
         addMessage(agent.id, result, "debate");
         history.push({ role: "assistant", content: `[${agent.id}-debate] ${result}` });
+        setStatus(agent.id, "ready");
       } catch (e) {
         setError(String(e));
+        setStatus(agent.id, "idle");
       }
       setStreamingId(undefined);
       setStreamingContent("");
