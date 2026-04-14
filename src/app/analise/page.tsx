@@ -227,22 +227,7 @@ function DebateKPIPanel({
           </div>
         )}
 
-        {/* ── Scientific refs (complete only) ── */}
-        {isComplete && scientificRefs && scientificRefs.length > 0 && (
-          <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid var(--border-subtle)" }}>
-            <p style={{ fontSize: "0.6rem", fontWeight: 700, color: "var(--text-label)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.6rem" }}>
-              {pt ? "Referências" : "References"}
-            </p>
-            {scientificRefs.map((ref, i) => (
-              <div key={i} style={{ marginBottom: "0.5rem", padding: "0.4rem 0.5rem", borderRadius: "0.45rem", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                <p style={{ fontSize: "0.62rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  <span style={{ color: "var(--accent-brand)", fontWeight: 700 }}>[{i + 1}]</span>{" "}
-                  {ref.authors} ({ref.year}). <em>{ref.title}</em>.
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+
       </div>
     </div>
   );
