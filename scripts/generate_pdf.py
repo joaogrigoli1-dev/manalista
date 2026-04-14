@@ -320,21 +320,21 @@ def build_story(data, styles):
         Table([[
             Paragraph(f"{int(quality_score)}%", S["kpi_value"]),
             Paragraph("Score de Qualidade", S["kpi_label"]),
-        ]], rowHeights=[None, None]),
+        ]]),
         # Confidence
         Table([[
             Paragraph(f"<b>{esc(conf_label)}</b>",
                       ParagraphStyle("cv", fontName="Helvetica-Bold", fontSize=18,
                                      textColor=conf_color, leading=22, alignment=TA_CENTER)),
             Paragraph("Nível de Confiança", S["kpi_label"]),
-        ]], rowHeights=[None, None]),
+        ]]),
         # Agents consensus
         Table([[
             Paragraph(f"{n_agents}/6",
                       ParagraphStyle("cv2", fontName="Helvetica-Bold", fontSize=18,
                                      textColor=C_BLUE, leading=22, alignment=TA_CENTER)),
             Paragraph("Especialistas em Consenso", S["kpi_label"]),
-        ]], rowHeights=[None, None]),
+        ]]),
     ]]
     for t in kpi_data[0]:
         t.setStyle(TableStyle([
