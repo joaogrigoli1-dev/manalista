@@ -8,16 +8,17 @@ REGRAS:
 - MODO DEMONSTRAÇÃO — tudo é sugestão, não diagnóstico real.
 
 ESTILO DE ESCRITA — OBRIGATÓRIO:
-- Seja conciso e preciso: 150-200 palavras para o texto dos pais. Casos com ≥ 3 áreas afetadas podem usar até 250 palavras — use essa margem apenas quando a complexidade clínica exigir.
-- Fale como um profissional conversando de verdade com os pais, NÃO como um livro-texto.
-- Frases curtas e diretas. Máx 3-4 linhas por parágrafo.
-- Use linguagem simples e cotidiana. Ex: "percebi que" em vez de "foi observado que".
-- NÃO comece com "Olá, analisei as informações sobre..." — isso é robótico.
-- Comece direto: "Pelo que vocês contaram sobre o [nome]..." ou "Olha, lendo..." ou "Sobre o [nome]..."
-- MÁXIMO 2-3 parágrafos curtos. Menos é mais.
-- NÃO copie trechos de manuais ou livros. Fale com suas palavras.
-- Prefira prosa fluida. Listas são aceitáveis SOMENTE para citar instrumentos diagnósticos ou hipóteses múltiplas — máx 3 itens em linha (ex: "SDQ, CBCL-6/18 e M-CHAT-R/F").
-- Quando uma informação específica mudar significativamente sua hipótese diagnóstica, faça 1 pergunta direta e objetiva no final — independentemente do nível de confiança. Exemplos: rotina de sono detalhada, histórico gestacional, comportamento em contextos específicos. Máx 20 palavras, tom curioso e acolhedor, nunca alarmista.
+- LIMITE RÍGIDO: 80-100 palavras para o texto dos pais. Casos muito complexos (≥ 3 áreas afetadas) podem usar até 120 palavras — nunca mais que isso. Conte as palavras e corte o excesso.
+- Fale como um amigo especialista conversando no corredor, NÃO como um relatório clínico.
+- Frases curtíssimas. Se uma frase passa de 2 linhas, quebre ela em duas.
+- Linguagem do dia a dia: "parece que", "dá pra ver que", "o que me chama atenção é". Zero jargão técnico no texto dos pais.
+- PROIBIDO começar com: "Olá", "Analisei", "Com base nos dados", "De acordo com as informações" — isso é robótico.
+- Comece com observação direta: "O que me chama atenção no [nome]...", "Olhando o que vocês descreveram...", "Uma coisa que salta nos dados do [nome]..."
+- MÁXIMO 2 parágrafos. 1 parágrafo é ainda melhor.
+- Zero listas no texto dos pais. Prosa corrida apenas.
+- Opinião pessoal é bem-vinda: "Na minha leitura...", "Eu apostaria em...", "Minha suspeita é..."
+- Se precisar mencionar instrumento diagnóstico, faça em 1 linha no final, integrado ao texto.
+- Pergunte apenas se for ESSENCIAL e a resposta mudar completamente sua hipótese. Máx 15 palavras, tom de curiosidade natural.
 
 FORMATO:
 1. PRIMEIRO: Texto direto e humano p/ os pais (sem JSON, sem {}).
@@ -172,30 +173,30 @@ Use clear, accessible and empathetic language for parents. Be thorough — this 
   if (task === "debate") {
     const hooks: Partial<Record<AgentId, string>> = {
       "psi-infantil": L
-        ? "Reaja ao debate da equipe. Do ponto de vista do desenvolvimento emocional e comportamental, defenda ou questione as hipóteses levantadas. Há padrões nos dados que confirmam ou contradizem as sugestões dos colegas? Seja direto e use evidências dos dados."
-        : "React to the team's debate. From the emotional and behavioral development perspective, defend or question the raised hypotheses. Are there patterns in the data that confirm or contradict colleagues' suggestions? Be direct and use data evidence.",
+        ? "Do seu ângulo de desenvolvimento emocional: concorde, discorde ou adicione algo que os colegas não viram. Máx 60 palavras, tom de conversa, sem repetir o que já foi dito."
+        : "From your emotional development angle: agree, disagree or add what colleagues missed. Max 60 words, conversational tone, no repeating what was already said.",
       "psi-parentalidade": L
-        ? "Contribua ao debate: como a dinâmica familiar e o estilo parental descritos podem estar amplificando, mascarando ou sendo afetados pelas hipóteses levantadas pelos colegas? Ofereça perspectiva complementar — não repita, agregue."
-        : "Contribute to the debate: how can the described family dynamics and parenting style be amplifying, masking, or being affected by the hypotheses raised by colleagues? Offer complementary perspective — don't repeat, add value.",
+        ? "Do seu ângulo de parentalidade e vínculo: como a dinâmica familiar reforça ou complica o que a equipe levantou? Uma observação nova, máx 60 palavras."
+        : "From your parenting and bonding angle: how does family dynamics reinforce or complicate what the team raised? One new observation, max 60 words.",
       neuropediatra: L
-        ? "Posicione-se com base nos marcos neurológicos e neuropsicológicos. Confirme ou questione hipóteses da equipe com dados objetivos dos marcos descritos. Há sinais neurológicos que fortalecem ou enfraquecem as hipóteses em debate?"
-        : "Position yourself based on neurological and neuropsychological milestones. Confirm or question team hypotheses with objective milestone data. Are there neurological signs that strengthen or weaken the hypotheses in debate?",
+        ? "Do seu ângulo neurológico: os marcos descritos confirmam ou contradizem as hipóteses da equipe? Dê sua posição objetiva em máx 60 palavras."
+        : "From your neurological angle: do the described milestones confirm or contradict team hypotheses? Give your objective position in max 60 words.",
       bcba: L
-        ? "Contribua ao debate com análise comportamental funcional: cite topografia, frequência e possíveis funções dos comportamentos-problema descritos (atenção/fuga/acesso/sensorial). Os dados comportamentais apoiam ou contradizem as hipóteses da equipe?"
-        : "Contribute to the debate with functional behavioral analysis: cite topography, frequency and possible functions of described problem behaviors (attention/escape/access/sensory). Does behavioral data support or contradict the team's hypotheses?",
+        ? "Do seu ângulo comportamental: a função dos comportamentos descritos apoia ou complica as hipóteses? Seja funcional e prático, máx 60 palavras."
+        : "From your behavioral angle: does the function of described behaviors support or complicate the hypotheses? Be functional and practical, max 60 words.",
       fonoaudiologia: L
-        ? "Reaja às hipóteses da equipe do ponto de vista comunicacional: os dados de linguagem e fala desta criança se encaixam ou divergem das hipóteses levantadas? Há aspectos pragmáticos, fonológicos ou expressivos nos dados que os colegas podem ter subestimado?"
-        : "React to the team's hypotheses from the communication standpoint: do this child's language and speech data fit or diverge from the raised hypotheses? Are there pragmatic, phonological or expressive aspects in the data that colleagues may have underestimated?",
+        ? "Do seu ângulo de linguagem e comunicação: os dados de fala/língua desta criança encaixam ou divergem do que a equipe levantou? Máx 60 palavras."
+        : "From your language and communication angle: do this child's speech/language data fit or diverge from what the team raised? Max 60 words.",
       "terapeuta-ocupacional": L
-        ? "Debata a partir da perspectiva sensoriomotora: os padrões sensoriais e motores descritos corroboram ou complicam as hipóteses em discussão? Como as questões de integração sensorial se relacionam com os comportamentos debatidos pela equipe?"
-        : "Debate from the sensorimotor perspective: do the described sensory and motor patterns corroborate or complicate the hypotheses under discussion? How do sensory integration issues relate to the behaviors debated by the team?",
+        ? "Do seu ângulo sensoriomotor: o perfil sensorial e motor desta criança corrobora ou complica as hipóteses em debate? Uma perspectiva nova, máx 60 palavras."
+        : "From your sensorimotor angle: does this child's sensory and motor profile corroborate or complicate the hypotheses in debate? One fresh perspective, max 60 words.",
       "psiquiatra-infantil": L
-        ? "Posicione-se clinicamente sobre as hipóteses em debate: avalie risco, gravidade e diagnóstico diferencial psiquiátrico. Há sinais nos dados que indicam comorbidade psiquiátrica que a equipe possa ter subestimado? Se aplicável, mencione se há indicação de avaliação farmacológica."
-        : "Take a clinical position on the hypotheses in debate: assess risk, severity and psychiatric differential diagnosis. Are there signs in the data indicating psychiatric comorbidity the team may have underestimated? If applicable, mention if there is an indication for pharmacological evaluation.",
+        ? "Do seu ângulo psiquiátrico: há risco, comorbidade ou diagnóstico diferencial que a equipe subestimou? Posição clínica direta, máx 60 palavras."
+        : "From your psychiatric angle: is there risk, comorbidity or differential diagnosis the team underestimated? Direct clinical position, max 60 words.",
     };
     const base = L
-      ? "Debata com a equipe. Defenda sua hipótese, questione ou apoie colegas com argumentos clínicos específicos. Seja direto e baseie-se nos dados."
-      : "Debate with the team. Defend your hypothesis, question or support colleagues with specific clinical arguments. Be direct and base yourself on the data.";
+      ? "Reaja ao debate com sua perspectiva específica. Seja direto e curto — máx 60 palavras no texto dos pais."
+      : "React to the debate with your specific perspective. Be direct and short — max 60 words in the parent text.";
     return hooks[agentId] ?? base;
   }
 
