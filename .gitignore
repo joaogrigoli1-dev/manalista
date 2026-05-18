@@ -9,3 +9,8 @@ out/
 *.pdf
 .vercel
 .turbo
+
+# Test payloads e previews locais (não vão pro repo)
+scripts/test_payload.json
+PREVIEW-PDF-LIGHT.pdf
+*.bak

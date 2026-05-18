@@ -227,7 +227,6 @@ function DebateKPIPanel({
           </div>
         )}
 
-
       </div>
     </div>
   );
@@ -468,6 +467,13 @@ export default function AnalisePage() {
           lang,
           qualityScore,
           detectedPathologies,
+          // Inclui o debate completo para a Seção 8 do PDF (Síntese do Debate Multiprofissional)
+          debateMessages: messages.map(m => ({
+            agentId: m.agentId,
+            content: m.content,
+            type: m.type,
+            timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp,
+          })),
         }),
       });
       if (!res.ok) {

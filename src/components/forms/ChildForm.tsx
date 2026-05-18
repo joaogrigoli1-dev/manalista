@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import type { ChildData, Lang } from "@/types";
+import { useInfoScore } from "@/hooks/useInfoScore";
+import { InfoScoreGauge } from "./InfoScoreGauge";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function calcAge(birthdate: string) {
@@ -189,42 +191,6 @@ function RadioItem({ label, selected, onChange, color = "var(--accent-brand)" }:
         {label}
       </span>
     </label>
-  );
-}
-
-// ── Step indicator ─────────────────────────────────────────────────────────
-function StepBar({ step, total, pt }: { step: number; total: number; pt: boolean }) {
-  const labels = pt
-    ? ["Identificação", "Desenvolvimento", "Histórico"]
-    : ["Identification", "Development", "History"];
-  return (
-    <div style={{ display: "flex", gap: "0.35rem", marginBottom: "1.75rem", alignItems: "center" }}>
-      {Array.from({ length: total }, (_, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.35rem", flex: i < total - 1 ? 1 : undefined }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: "0.35rem",
-            opacity: i <= step ? 1 : 0.35,
-          }}>
-            <div style={{
-              width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-              background: i < step ? "#10B981" : i === step ? "var(--accent-brand)" : "rgba(255,255,255,0.08)",
-              border: `2px solid ${i < step ? "#10B981" : i === step ? "var(--accent-brand)" : "rgba(255,255,255,0.12)"}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "0.62rem", fontWeight: 800, color: "#fff",
-              transition: "all 0.3s ease",
-            }}>
-              {i < step ? "✓" : i + 1}
-            </div>
-            <span style={{ fontSize: "0.65rem", fontWeight: 600, color: i === step ? "var(--text-primary)" : "var(--text-muted)", whiteSpace: "nowrap" }}>
-              {labels[i]}
-            </span>
-          </div>
-          {i < total - 1 && (
-            <div style={{ flex: 1, height: 1, background: i < step ? "#10B981" : "rgba(255,255,255,0.08)", transition: "background 0.3s ease" }} />
-          )}
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -649,17 +615,21 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
 
   const steps = [step0, step1, step2];
 
-  // ── Summary of what's been filled ──
-  const filled = [
-    form.concerns.length > 0 ? `${form.concerns.length} preocupações` : null,
-    form.walked ? "Marcos motores" : null,
-    form.previousDiagnoses.length > 0 ? "Diagnósticos" : null,
-    form.therapies.length > 0 ? "Acompanhamentos" : null,
-  ].filter(Boolean);
+  // ── Score em tempo real ──
+  const scoreInfo = useInfoScore(form);
+  const canSkipToAnalysis = scoreInfo.total >= 30 && !!form.name.trim() && !!form.birthdate && form.concerns.length >= 1;
 
   return (
     <div style={{ maxWidth: 660, margin: "0 auto" }}>
-      <StepBar step={step} total={3} pt={pt} />
+      <InfoScoreGauge
+        score={scoreInfo.total}
+        tier={scoreInfo.tier}
+        tierMessage={pt ? scoreInfo.tierMessage : scoreInfo.tierMessageEn}
+        nextSuggestion={pt ? scoreInfo.nextSuggestion : scoreInfo.nextSuggestion}
+        step={step}
+        totalSteps={3}
+        lang={lang}
+      />
 
       {steps[step]}
 
@@ -680,45 +650,61 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
           </button>
         ) : <div />}
 
-        {step < 2 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            style={{
-              padding: "0.75rem 2rem", borderRadius: "9999px", border: "none",
-              background: canAdvance() ? "var(--accent-brand)" : "var(--border-subtle)",
-              color: canAdvance() ? "#fff" : "var(--text-muted)",
-              fontFamily: "inherit", fontWeight: 700, fontSize: "0.95rem",
-              cursor: canAdvance() ? "pointer" : "not-allowed",
-              boxShadow: canAdvance() ? "var(--shadow-button)" : "none",
-              transition: "all 0.3s ease",
-              opacity: canAdvance() ? 1 : 0.7,
-            }}
-          >
-            {pt ? "Continuar →" : "Continue →"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSubmit}
-            style={{
-              padding: "0.75rem 2.2rem", borderRadius: "9999px", border: "none",
-              background: "var(--accent-brand)", color: "#fff",
-              fontFamily: "inherit", fontWeight: 700, fontSize: "0.95rem",
-              cursor: "pointer", boxShadow: "var(--shadow-button)", transition: "all 0.3s ease",
-            }}
-          >
-            🔬 {pt ? "Iniciar Análise" : "Start Analysis"}
-          </button>
-        )}
-      </div>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          {/* Botão "Pular para análise" — disponível a partir de 30% e obrigatórios preenchidos */}
+          {step < 2 && canSkipToAnalysis && (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              title={pt
+                ? "Você já tem informação suficiente para iniciar — mas quanto mais responder, melhor."
+                : "You already have enough info to start — but the more you answer, the better."}
+              style={{
+                padding: "0.6rem 1.1rem", borderRadius: "9999px",
+                border: "1px solid var(--border-subtle)",
+                background: "transparent", color: "var(--text-secondary)",
+                fontFamily: "inherit", fontWeight: 600, fontSize: "0.78rem", cursor: "pointer",
+                transition: "all 0.2s ease",
+                whiteSpace: "nowrap",
+              }}
+            >
+              ⚡ {pt ? "Analisar agora" : "Analyze now"}
+            </button>
+          )}
 
-      {/* Progress summary */}
-      {filled.length > 0 && step < 2 && (
-        <p style={{ textAlign: "center", fontSize: "0.68rem", color: "var(--text-muted)", marginTop: "1rem" }}>
-          ✓ {filled.join(" · ")}
-        </p>
-      )}
+          {step < 2 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              style={{
+                padding: "0.75rem 2rem", borderRadius: "9999px", border: "none",
+                background: canAdvance() ? "var(--accent-brand)" : "var(--border-subtle)",
+                color: canAdvance() ? "#fff" : "var(--text-muted)",
+                fontFamily: "inherit", fontWeight: 700, fontSize: "0.95rem",
+                cursor: canAdvance() ? "pointer" : "not-allowed",
+                boxShadow: canAdvance() ? "var(--shadow-button)" : "none",
+                transition: "all 0.3s ease",
+                opacity: canAdvance() ? 1 : 0.7,
+              }}
+            >
+              {pt ? "Continuar →" : "Continue →"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              style={{
+                padding: "0.75rem 2.2rem", borderRadius: "9999px", border: "none",
+                background: "var(--accent-brand)", color: "#fff",
+                fontFamily: "inherit", fontWeight: 700, fontSize: "0.95rem",
+                cursor: "pointer", boxShadow: "var(--shadow-button)", transition: "all 0.3s ease",
+              }}
+            >
+              🔬 {pt ? "Iniciar Análise" : "Start Analysis"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

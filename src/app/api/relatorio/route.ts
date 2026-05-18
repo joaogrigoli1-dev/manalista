@@ -8,19 +8,21 @@ import { randomUUID } from "crypto";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { childData, results, lang, qualityScore, detectedPathologies } = body;
+    const { childData, results, lang, qualityScore, detectedPathologies, debateMessages } = body;
 
     if (!childData || !results) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Build payload for the Python script
+    // Build payload for the Python script.
+    // debateMessages é opcional — quando presente, o PDF inclui a Seção 8 (Síntese do Debate).
     const payload = {
       childData,
       results,
       lang: lang ?? "pt",
       qualityScore: qualityScore ?? 0,
       detectedPathologies: detectedPathologies ?? [],
+      debateMessages: Array.isArray(debateMessages) ? debateMessages : [],
     };
 
     // Write temp JSON input
