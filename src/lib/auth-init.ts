@@ -15,6 +15,9 @@ export async function initAuth(): Promise<void> {
     ["GOOGLE_CLIENT_SECRET", "/manalista/google-client-secret"],
     ["RESEND_API_KEY", "/manalista/resend-api-key"],
     ["AUTH_SECRET", "/manalista/auth-secret"],
+    ["STRIPE_SECRET_KEY", "/manalista/stripe-secret-key"],
+    ["STRIPE_WEBHOOK_SECRET", "/manalista/stripe-webhook-secret"],
+    ["STRIPE_PRICE_PRO_MONTHLY", "/manalista/stripe-price-pro-monthly"],
   ]
 
   await Promise.allSettled(
