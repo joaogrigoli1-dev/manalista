@@ -15,6 +15,33 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
+          // HSTS — força HTTPS por 2 anos (preload após 6 meses de estabilidade)
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
+          // Bloquear sniffing de MIME type
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          // Bloquear iframe embedding (proteção clickjacking)
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          // Referrer Policy
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          // Permissions Policy — microphone liberado para TTS futuro
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(self), geolocation=(), interest-cohort=()",
+          },
+          // CSP — provisório com unsafe-eval/inline até Bloco 1 remover CSS-in-JS
+          // TODO (Bloco 1): migrar para nonce-based CSP ao remover CSS inline
           {
             key: "Content-Security-Policy",
             value: [
@@ -23,8 +50,10 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: blob:",
-              "connect-src 'self'",
+              "connect-src 'self' https://api.anthropic.com",
               "frame-ancestors 'none'",
+              "form-action 'self'",
+              "base-uri 'self'",
             ].join("; "),
           },
         ],

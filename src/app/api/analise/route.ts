@@ -1,11 +1,57 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { z } from "zod";
 import { getClaudeApiKey } from "@/lib/aws-ssm";
 import { buildSystemPrompt, buildChildDataPrompt, buildTaskInstruction } from "@/lib/agents/prompts";
-import type { AgentId, ChildData } from "@/types";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { validateOrigin } from "@/lib/csrf";
+import type { AgentId } from "@/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
+
+// ── Schema de validação (zod) ──────────────────────────────────────────────
+const DebateMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().max(20_000),
+});
+
+const ChildDataSchema = z.object({
+  name: z.string().min(1).max(100),
+  birthdate: z.string().max(20),
+  ageYears: z.number().int().min(0).max(18),
+  ageMonths: z.number().int().min(0).max(216),
+  sex: z.enum(["M", "F", "outro"]),
+  mainComplaints: z.string().max(5_000),
+  complaintDuration: z.string().max(500),
+  gestationalAge: z.string().max(200),
+  birthComplications: z.string().max(2_000),
+  motorMilestones: z.string().max(2_000),
+  languageMilestones: z.string().max(2_000),
+  socialMilestones: z.string().max(2_000),
+  behaviorHome: z.string().max(2_000),
+  behaviorSchool: z.string().max(2_000),
+  sleepPattern: z.string().max(1_000),
+  feedingPattern: z.string().max(1_000),
+  familyHistory: z.string().max(2_000),
+  previousDiagnoses: z.string().max(2_000),
+  currentMedications: z.string().max(1_000),
+  therapiesInProgress: z.string().max(1_000),
+  familyStructure: z.string().max(1_000),
+  parentingChallenges: z.string().max(2_000),
+});
+
+const BodySchema = z.object({
+  agentId: z.enum([
+    "mediator", "psi-infantil", "psi-parentalidade",
+    "neuropediatra", "bcba", "fonoaudiologia",
+    "terapeuta-ocupacional", "psiquiatra-infantil",
+  ]),
+  childData: ChildDataSchema,
+  debateHistory: z.array(DebateMessageSchema).max(50).optional(),
+  lang: z.enum(["pt", "en"]),
+  task: z.enum(["analyze", "debate", "consolidate"]),
+});
 
 // Estratégia híbrida de modelos:
 // - Opus 4.6 para o mediador (consolidação exige síntese profunda)
@@ -22,15 +68,47 @@ function getMaxTokens(task: string): number {
 }
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json() as {
-      agentId: AgentId;
-      childData: ChildData;
-      debateHistory?: Array<{ role: "user" | "assistant"; content: string }>;
-      lang: "pt" | "en";
-      task: "analyze" | "debate" | "consolidate";
-    };
+  // ── CSRF ───────────────────────────────────────────────────────────────
+  if (!validateOrigin(req)) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
 
+  // ── Rate limit: 10 req/min por IP ──────────────────────────────────────
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rl = checkRateLimit(`analise:${ip}`, 10, 60_000);
+  if (!rl.allowed) {
+    return Response.json(
+      { error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rl.retryAfterSeconds),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(rl.resetAt),
+        },
+      }
+    );
+  }
+
+  // ── Validação zod ─────────────────────────────────────────────────────
+  let rawBody: unknown;
+  try {
+    rawBody = await req.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = BodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 422 }
+    );
+  }
+
+  const body = parsed.data;
+
+  try {
     const apiKey = await getClaudeApiKey();
     const client = new Anthropic({ apiKey });
     const systemPrompt = buildSystemPrompt(body.agentId, body.lang);

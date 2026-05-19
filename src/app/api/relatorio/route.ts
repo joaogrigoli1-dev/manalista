@@ -4,15 +4,56 @@ import { writeFile, readFile, unlink } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { validateOrigin } from "@/lib/csrf";
+
+const RelatorioBodySchema = z.object({
+  childData: z.object({
+    name: z.string().min(1).max(100),
+  }).passthrough(), // aceitar campos extras do ChildData
+  results: z.array(z.record(z.unknown())).min(1).max(20),
+  lang: z.enum(["pt", "en"]).default("pt"),
+  qualityScore: z.number().min(0).max(100).default(0),
+  detectedPathologies: z.array(z.string().max(200)).max(20).default([]),
+  debateMessages: z.array(z.record(z.unknown())).max(200).default([]),
+});
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { childData, results, lang, qualityScore, detectedPathologies, debateMessages } = body;
+  // ── CSRF ──────────────────────────────────────────────────────────────
+  if (!validateOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-    if (!childData || !results) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+  // ── Rate limit: 30 req/hora por IP ───────────────────────────────────
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rl = checkRateLimit(`relatorio:${ip}`, 30, 60 * 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds) } }
+    );
+  }
+
+  // ── Validação zod ─────────────────────────────────────────────────────
+  let rawBody: unknown;
+  try {
+    rawBody = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = RelatorioBodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 422 }
+    );
+  }
+
+  const { childData, results, lang, qualityScore, detectedPathologies, debateMessages } = parsed.data;
+
+  try {
 
     // Build payload for the Python script.
     // debateMessages é opcional — quando presente, o PDF inclui a Seção 8 (Síntese do Debate).
