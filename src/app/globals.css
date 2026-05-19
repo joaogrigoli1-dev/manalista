@@ -3,6 +3,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── shadcn/ui CSS Variables (mapeados para Ethereal Glass) ─── */
+@layer base {
+  :root {
+    --background: 240 6% 4%;
+    --foreground: 270 60% 96%;
+    --card: 240 17% 5%;
+    --card-foreground: 270 60% 96%;
+    --popover: 240 17% 5%;
+    --popover-foreground: 270 60% 96%;
+    --primary: 258 97% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 8%;
+    --secondary-foreground: 270 60% 96%;
+    --muted: 240 10% 10%;
+    --muted-foreground: 270 20% 55%;
+    --accent: 258 97% 68%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 10% 12%;
+    --input: 240 10% 12%;
+    --ring: 258 97% 68%;
+    --radius: 0.75rem;
+  }
+}
 
 /* ── Base Reset ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

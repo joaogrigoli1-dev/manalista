@@ -75,29 +75,50 @@ export async function POST(req: NextRequest) {
     // Resolve script path relative to project root
     const scriptPath = join(process.cwd(), "scripts", "generate_pdf.py");
 
-    // Spawn Python and wait
-    const pdf = await new Promise<Buffer>((resolve, reject) => {
-      const py = spawn("python3", [scriptPath, inputPath, outputPath]);
-      let stderr = "";
-      py.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
-      py.on("close", async (code) => {
-        if (code !== 0) {
-          reject(new Error(`Python exited ${code}: ${stderr}`));
-          return;
-        }
-        try {
-          const buf = await readFile(outputPath);
-          resolve(buf);
-        } catch (e) {
-          reject(e);
-        }
-      });
-      py.on("error", reject);
-    });
+    const PYTHON_TIMEOUT_MS = 30_000;
 
-    // Clean up temp files (fire-and-forget)
-    unlink(inputPath).catch(() => {});
-    unlink(outputPath).catch(() => {});
+    // Spawn Python and wait
+    let pdf: Buffer;
+    try {
+      pdf = await new Promise<Buffer>((resolve, reject) => {
+        const py = spawn("python3", [scriptPath, inputPath, outputPath]);
+        let stderr = "";
+
+        // Timeout: kill the process if it takes longer than 30s
+        const timer = setTimeout(() => {
+          py.kill("SIGTERM");
+          reject(new Error("PDF generation timed out after 30s"));
+        }, PYTHON_TIMEOUT_MS);
+
+        py.stderr.on("data", (d: Buffer) => {
+          // Truncate stderr to avoid logging patient data in production
+          if (stderr.length < 500) stderr += d.toString();
+        });
+
+        py.on("close", async (code) => {
+          clearTimeout(timer);
+          if (code !== 0) {
+            reject(new Error(`PDF generator exited with code ${code}: ${stderr.slice(0, 200)}`));
+            return;
+          }
+          try {
+            const buf = await readFile(outputPath);
+            resolve(buf);
+          } catch (e) {
+            reject(e);
+          }
+        });
+
+        py.on("error", (err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+      });
+    } finally {
+      // Always clean up temp files, even on error
+      unlink(inputPath).catch(() => {});
+      unlink(outputPath).catch(() => {});
+    }
 
     // Return PDF
     const childName = (childData.name ?? "relatorio").replace(/[^a-zA-Z0-9]/g, "_");

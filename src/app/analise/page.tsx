@@ -535,22 +535,30 @@ export default function AnalisePage() {
       return [];
     };
 
-    // 1 — Each specialist analyzes independently
+    // 1 — Each specialist analyzes independently (parallel)
     const allMidQuestions: QAQuestion[] = [];
-    for (const agent of SPECIALISTS) {
+
+    // Mark all as "analyzing" simultaneously
+    SPECIALISTS.forEach(agent => {
       setStatus(agent.id, "analyzing");
-      setStreamingId(agent.id);
-      setStreamingContent("");
       updateAgentDialogText(agent.id, "");
-      try {
-        const result = await streamAgent(agent.id, childWithContext, "analyze", lang, [], (chunk) => {
-          setStreamingContent(prev => prev + chunk);
+    });
+
+    const analyzeResults = await Promise.allSettled(
+      SPECIALISTS.map(agent =>
+        streamAgent(agent.id, childWithContext, "analyze", lang, [], (chunk) => {
           updateAgentDialogText(agent.id, prev => {
             const full = prev + chunk;
             const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
             return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
           });
-        });
+        }).then(result => ({ agent, result }))
+      )
+    );
+
+    for (const settled of analyzeResults) {
+      if (settled.status === "fulfilled") {
+        const { agent, result } = settled.value;
         const displayText = extractFriendlyText(result);
         updateAgentDialogText(agent.id, displayText);
         addMessage(agent.id, result, "analysis");
@@ -558,13 +566,15 @@ export default function AnalisePage() {
         setStatus(agent.id, "ready");
         // Collect questions from this specialist
         allMidQuestions.push(...extractQuestions(result, agent.id));
-      } catch (e) {
-        setError(String(e));
-        setStatus(agent.id, "idle");
+      } else {
+        // One agent failed — log but continue
+        console.error("Agent analyze failed:", settled.reason);
       }
-      setStreamingId(undefined);
-      setStreamingContent("");
     }
+
+    // Clear streaming state
+    setStreamingId(undefined);
+    setStreamingContent("");
 
     // ── Mid-flow Q&A: show questions after analyze, before debate ──
     if (allMidQuestions.length > 0) {
