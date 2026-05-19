@@ -1,0 +1,48 @@
+{
+  "name": "MAnalista — Análise Multiprofissional",
+  "short_name": "MAnalista",
+  "description": "Sistema de sugestão diagnóstica com equipe multiprofissional de IA para neurodesenvolvimento pediátrico.",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#050508",
+  "theme_color": "#050508",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "scope": "/",
+  "categories": ["medical", "health", "education"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MAnalista — Tela principal desktop"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MAnalista — Tela principal mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova Análise",
+      "short_name": "Análise",
+      "description": "Iniciar nova análise multiprofissional",
+      "url": "/analise",
+      "icons": [{ "src": "/icons/shortcut-analise.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "iarc_rating_id": ""
+}

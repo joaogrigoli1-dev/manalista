@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#050508"/>
+  <rect x="40" y="40" width="432" height="432" rx="60" fill="none" stroke="#7C5CFC" stroke-width="8" opacity="0.3"/>
+  <!-- Cérebro estilizado com gradiente violet -->
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C5CFC"/>
+      <stop offset="100%" stop-color="#3B9BF5"/>
+    </linearGradient>
+  </defs>
+  <!-- Letra M estilizada -->
+  <text x="256" y="320" font-family="system-ui, sans-serif" font-size="260" font-weight="800"
+        text-anchor="middle" fill="url(#g)">M</text>
+  <!-- Ponto brilhante -->
+  <circle cx="380" cy="140" r="24" fill="#3B9BF5" opacity="0.8"/>
+</svg>
