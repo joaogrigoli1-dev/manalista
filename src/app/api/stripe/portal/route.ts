@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { auth } from "@/auth"
 import { initAuth } from "@/lib/auth-init"
 import { stripe } from "@/lib/stripe"
