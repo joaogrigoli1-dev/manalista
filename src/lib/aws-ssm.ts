@@ -2,6 +2,29 @@ import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
 const SSM_PARAM_NAME = "/IA_Equipe_P/claude-api-key";
 
+/**
+ * Busca qualquer parâmetro do AWS SSM por nome completo.
+ * Cache de 5 minutos por chave.
+ */
+const ssmCache = new Map<string, { value: string; ts: number }>();
+
+export async function getSsmParam(name: string): Promise<string> {
+  const cached = ssmCache.get(name);
+  if (cached && Date.now() - cached.ts < 5 * 60_000) return cached.value;
+
+  const envKey = name.split("/").pop()?.toUpperCase().replace(/-/g, "_");
+  if (envKey && process.env[envKey]) return process.env[envKey]!;
+
+  const client = new SSMClient({ region: process.env.AWS_REGION ?? "us-east-1" });
+  const cmd = new GetParameterCommand({ Name: name, WithDecryption: true });
+  const resp = await client.send(cmd);
+  const value = resp.Parameter?.Value;
+  if (!value) throw new Error(`SSM param not found: ${name}`);
+
+  ssmCache.set(name, { value, ts: Date.now() });
+  return value;
+}
+
 let cachedKey: string | null = null;
 let cacheTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
