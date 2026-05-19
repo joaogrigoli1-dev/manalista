@@ -403,6 +403,11 @@ export function DebateRoom({
         gap: "0.65rem",
       }}
     >
+      {/* Anunciar novas mensagens do debate */}
+      <div role="log" aria-live="polite" aria-label="Debate multiprofissional" className="sr-only">
+        {messages.length > 0 && `${messages.length} mensagens no debate`}
+      </div>
+
       {messages.map((msg) => (
         <CompactMessageCard key={msg.id} msg={msg} pt={pt} />
       ))}

@@ -302,6 +302,7 @@ export default function LandingPage() {
 
   return (
     <div
+      id="main-content"
       style={{
         minHeight: "100dvh",
         background: "var(--bg-base)",

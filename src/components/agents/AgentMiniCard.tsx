@@ -156,6 +156,12 @@ export function AgentMiniCard({ agent, lang, status, isStreaming, onInfoClick }:
               <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {pt ? statusLabel.pt : statusLabel.en}
               </span>
+              {/* Screen reader status announcement */}
+              <span className="sr-only" aria-live="polite">
+                {status === "analyzing" ? `${pt ? agent.namePt : agent.nameEn} está analisando` :
+                 status === "ready"     ? `${pt ? agent.namePt : agent.nameEn} concluiu análise` :
+                 status === "debating"  ? `${pt ? agent.namePt : agent.nameEn} está debatendo` : ""}
+              </span>
             </div>
             <div style={{ fontSize: "0.56rem", color: "var(--text-muted)", marginTop: "0.08rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {pt ? agent.rolePt : agent.roleEn}

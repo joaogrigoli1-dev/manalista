@@ -775,8 +775,28 @@ export default function AnalisePage() {
   const currentScientificRefs = results[0]?.scientificRefs;
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg-base)" }}>
+    <div id="main-content" style={{ minHeight: "100dvh", background: "var(--bg-base)" }}>
       <div className="bg-mesh" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
+
+      {/* ── Screen reader announcer ── */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {phase === "analyzing" && "Analisando dados com equipe multiprofissional. Aguarde."}
+        {phase === "debating" && "Especialistas em debate. Aguarde."}
+        {phase === "consolidating" && "Mediador sintetizando conclusões. Quase pronto."}
+        {phase === "complete" && "Análise concluída. Relatório disponível abaixo."}
+      </div>
+
+      {/* Para erros — aria-live="assertive" interrompe leitura atual */}
+      {error && (
+        <div role="alert" aria-live="assertive" className="sr-only">
+          {`Erro na análise: ${error}`}
+        </div>
+      )}
       {/* ── Lang toggle — visible only outside form phase ── */}
       {phase !== "form" && (
         <button

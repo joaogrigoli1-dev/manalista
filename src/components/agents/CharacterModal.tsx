@@ -21,6 +21,7 @@ interface CharacterModalProps {
 
 export function CharacterModal({ agent, backstory, lang, onClose }: CharacterModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const pt = lang === "pt";
 
   useEffect(() => {
@@ -28,6 +29,11 @@ export function CharacterModal({ agent, backstory, lang, onClose }: CharacterMod
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
+
+  // Focus the modal container when it opens (WCAG 2.4.3)
+  useEffect(() => {
+    containerRef.current?.focus();
+  }, []);
 
   return (
     <div
@@ -42,39 +48,55 @@ export function CharacterModal({ agent, backstory, lang, onClose }: CharacterMod
       }}
     >
       {/* Double-Bezel modal */}
-      <div style={{
-        maxWidth: 520, width: "100%", maxHeight: "85vh", overflowY: "auto",
-        padding: "0.5rem", borderRadius: "2rem",
-        background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-      }}>
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="character-modal-title"
+        tabIndex={-1}
+        style={{
+          maxWidth: 520, width: "100%", maxHeight: "85vh", overflowY: "auto",
+          padding: "0.5rem", borderRadius: "2rem",
+          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+          outline: "none",
+        }}
+      >
         <div style={{
           borderRadius: "calc(2rem - 0.5rem)", padding: "2rem",
           background: "rgba(10,10,14,0.95)",
           boxShadow: "inset 0 1px 1px rgba(255,255,255,0.08)",
         }}>
           {/* Close */}
-          <button onClick={onClose} style={{
-            float: "right", width: 28, height: 28, borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-            color: "var(--text-muted)", fontSize: "0.75rem", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "all 0.3s cubic-bezier(0.32,0.72,0,1)",
-          }}
-          onMouseEnter={(e) => {
-            (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.12)";
-            (e.target as HTMLButtonElement).style.color = "var(--text-primary)";
-          }}
-          onMouseLeave={(e) => {
-            (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
-            (e.target as HTMLButtonElement).style.color = "var(--text-muted)";
-          }}
+          <button
+            onClick={onClose}
+            aria-label="Fechar modal"
+            style={{
+              float: "right", width: 28, height: 28, borderRadius: "50%",
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              color: "var(--text-muted)", fontSize: "0.75rem", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.3s cubic-bezier(0.32,0.72,0,1)",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.12)";
+              (e.target as HTMLButtonElement).style.color = "var(--text-primary)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
+              (e.target as HTMLButtonElement).style.color = "var(--text-muted)";
+            }}
           >✕</button>
 
           {/* Name + Especialidades button */}
           <div style={{ marginBottom: "1.5rem", clear: "both" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
               <div>
-                <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.25rem" }}>{pt ? agent.namePt : agent.nameEn}</h3>
+                <h3
+                  id="character-modal-title"
+                  style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.25rem" }}
+                >
+                  {pt ? agent.namePt : agent.nameEn}
+                </h3>
                 <p style={{ fontSize: "0.78rem", color: agent.color, fontWeight: 600 }}>{pt ? agent.rolePt : agent.roleEn}</p>
               </div>
               <div style={{

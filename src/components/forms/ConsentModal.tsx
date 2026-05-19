@@ -44,11 +44,16 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
   ];
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 200,
-      background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)",
-      display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
-    }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="consent-modal-title"
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
+      }}
+    >
       <div className="card" style={{ maxWidth: 560, width: "calc(100% - 1rem)", padding: "0.375rem" }}>
         <div style={{
           borderRadius: "calc(var(--radius-card) - 0.375rem)",
@@ -58,8 +63,8 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
         }}>
           {/* Header */}
           <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-            <span style={{ fontSize: "2rem" }}>🔒</span>
-            <h2 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.5rem" }}>
+            <span style={{ fontSize: "2rem" }} aria-hidden="true">🔒</span>
+            <h2 id="consent-modal-title" style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.5rem" }}>
               {pt ? "Termos de Uso & Proteção de Dados" : "Terms of Use & Data Protection"}
             </h2>
             <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "0.4rem", lineHeight: 1.6 }}>
@@ -82,13 +87,17 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
               }}
               onClick={() => setChecked(c => ({ ...c, [term.key]: !c[term.key] }))}
               >
-                <div style={{
-                  width: 20, height: 20, borderRadius: "0.35rem", flexShrink: 0, marginTop: 2,
-                  background: checked[term.key] ? "var(--accent-brand)" : "var(--bg-input)",
-                  border: `2px solid ${checked[term.key] ? "var(--accent-brand)" : "var(--border-input)"}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.25s ease",
-                }}>
+                <div
+                  role="checkbox"
+                  aria-checked={checked[term.key]}
+                  style={{
+                    width: 20, height: 20, borderRadius: "0.35rem", flexShrink: 0, marginTop: 2,
+                    background: checked[term.key] ? "var(--accent-brand)" : "var(--bg-input)",
+                    border: `2px solid ${checked[term.key] ? "var(--accent-brand)" : "var(--border-input)"}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "all 0.25s ease",
+                  }}
+                >
                   {checked[term.key] && <span style={{ color: "#fff", fontSize: "0.7rem", fontWeight: 800 }}>✓</span>}
                 </div>
                 <div>
@@ -117,23 +126,33 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
 
           {/* Buttons */}
           <div style={{ display: "flex", gap: "0.75rem" }}>
-            <button onClick={onDecline} style={{
-              flex: 1, padding: "0.75rem", borderRadius: "9999px",
-              border: "1px solid var(--border-input)", background: "var(--bg-glass)",
-              color: "var(--text-secondary)", fontFamily: "inherit", fontWeight: 600,
-              fontSize: "0.85rem", cursor: "pointer",
-            }}>
+            <button
+              onClick={onDecline}
+              aria-label={pt ? "Cancelar e fechar" : "Cancel and close"}
+              style={{
+                flex: 1, padding: "0.75rem", borderRadius: "9999px",
+                border: "1px solid var(--border-input)", background: "var(--bg-glass)",
+                color: "var(--text-secondary)", fontFamily: "inherit", fontWeight: 600,
+                fontSize: "0.85rem", cursor: "pointer",
+              }}
+            >
               {pt ? "Cancelar" : "Cancel"}
             </button>
-            <button onClick={onAccept} disabled={!allChecked} style={{
-              flex: 2, padding: "0.75rem", borderRadius: "9999px", border: "none",
-              background: allChecked ? "var(--accent-brand)" : "var(--border-subtle)",
-              color: allChecked ? "#fff" : "var(--text-muted)",
-              fontFamily: "inherit", fontWeight: 700, fontSize: "0.85rem",
-              cursor: allChecked ? "pointer" : "not-allowed",
-              boxShadow: allChecked ? "var(--shadow-button)" : "none",
-              transition: "all 0.4s cubic-bezier(0.32,0.72,0,1)",
-            }}>
+            <button
+              onClick={onAccept}
+              disabled={!allChecked}
+              aria-label={pt ? "Aceitar termos e iniciar análise" : "Accept terms and start analysis"}
+              aria-disabled={!allChecked}
+              style={{
+                flex: 2, padding: "0.75rem", borderRadius: "9999px", border: "none",
+                background: allChecked ? "var(--accent-brand)" : "var(--border-subtle)",
+                color: allChecked ? "#fff" : "var(--text-muted)",
+                fontFamily: "inherit", fontWeight: 700, fontSize: "0.85rem",
+                cursor: allChecked ? "pointer" : "not-allowed",
+                boxShadow: allChecked ? "var(--shadow-button)" : "none",
+                transition: "all 0.4s cubic-bezier(0.32,0.72,0,1)",
+              }}
+            >
               {pt ? "Aceitar e Iniciar Análise →" : "Accept and Start Analysis →"}
             </button>
           </div>

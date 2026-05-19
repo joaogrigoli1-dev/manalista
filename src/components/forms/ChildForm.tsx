@@ -367,8 +367,11 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
           {/* Name */}
           <div>
-            <label style={S.label}>{pt ? "Nome da criança *" : "Child's name *"}</label>
+            <label htmlFor="child-name" style={S.label}>{pt ? "Nome da criança *" : "Child's name *"}</label>
             <input
+              id="child-name"
+              required
+              aria-required="true"
               value={form.name}
               onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               placeholder={pt ? "Nome completo" : "Full name"}
@@ -380,9 +383,12 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
           {/* Birthdate + Sex */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
-              <label style={S.label}>{pt ? "Data de nascimento *" : "Date of birth *"}</label>
+              <label htmlFor="child-birthdate" style={S.label}>{pt ? "Data de nascimento *" : "Date of birth *"}</label>
               <input
+                id="child-birthdate"
                 type="date"
+                required
+                aria-required="true"
                 value={form.birthdate}
                 onChange={e => setForm(p => ({ ...p, birthdate: e.target.value }))}
                 style={inputStyle(showErrors && !form.birthdate)}
@@ -395,8 +401,8 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
               {showErrors && !form.birthdate && <p style={S.error}>⚠ {pt ? "Data obrigatória" : "Date required"}</p>}
             </div>
             <div>
-              <label style={S.label}>{pt ? "Sexo biológico" : "Biological sex"}</label>
-              <select value={form.sex} onChange={e => setForm(p => ({ ...p, sex: e.target.value as "M" | "F" | "outro" }))}>
+              <label htmlFor="child-sex" style={S.label}>{pt ? "Sexo biológico" : "Biological sex"}</label>
+              <select id="child-sex" value={form.sex} onChange={e => setForm(p => ({ ...p, sex: e.target.value as "M" | "F" | "outro" }))}>
                 <option value="M">{pt ? "Masculino" : "Male"}</option>
                 <option value="F">{pt ? "Feminino" : "Female"}</option>
                 <option value="outro">{pt ? "Outro / Não informado" : "Other / Not informed"}</option>
@@ -426,7 +432,7 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
         )}
         {form.concerns.length > 0 && (
           <div style={{ marginTop: "1.1rem" }}>
-            <label style={S.label}>{pt ? "Há quanto tempo essas preocupações existem?" : "How long have these concerns existed?"}</label>
+            <label htmlFor="complaint-duration-group" style={S.label}>{pt ? "Há quanto tempo essas preocupações existem?" : "How long have these concerns existed?"}</label>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.4rem" }}>
               {DURATION.map(d => (
                 <RadioItem
@@ -602,7 +608,9 @@ export function ChildForm({ lang, onSubmit }: ChildFormProps) {
             ? "Acrescente qualquer informação importante não contemplada acima: episódios marcantes, contexto familiar, escola, tratamentos tentados, etc."
             : "Add any important information not covered above: notable episodes, family context, school, treatments tried, etc."}
         </p>
+        <label htmlFor="child-freetext" className="sr-only">{pt ? "Observações adicionais" : "Additional notes"}</label>
         <textarea
+          id="child-freetext"
           rows={5}
           value={form.freeText}
           onChange={e => setForm(p => ({ ...p, freeText: e.target.value }))}
