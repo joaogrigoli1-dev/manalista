@@ -5,6 +5,10 @@ import { getClaudeApiKey } from "@/lib/aws-ssm";
 import { buildSystemPrompt, buildChildDataPrompt, buildTaskInstruction } from "@/lib/agents/prompts";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
+import { auth } from "@/auth";
+import { db } from "@/lib/db-server";
+import { users } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import type { AgentId } from "@/types";
 
 export const runtime = "nodejs";
@@ -107,6 +111,36 @@ export async function POST(req: NextRequest) {
   }
 
   const body = parsed.data;
+
+  // ── Sessão + cota (C-04) ───────────────────────────────────────────────
+  // Bloqueia a geração de quem já excedeu a cota ANTES de qualquer chamada
+  // paga à Anthropic. O middleware já exige sessão nesta rota; aqui
+  // reconfirmamos e lemos a cota atual direto do banco (fonte da verdade,
+  // não a sessão, que pode estar defasada). Usuário sem cota recebe 402 com
+  // upgradeUrl — este é o momento de paywall, não um erro genérico.
+  const session = await auth();
+  if (!session?.user?.id) {
+    return Response.json({ error: "Não autenticado" }, { status: 401 });
+  }
+  const [quota] = await db
+    .select({ used: users.analysesUsed, limit: users.analysesLimit })
+    .from(users)
+    .where(eq(users.id, session.user.id as string))
+    .limit(1);
+  if (!quota) {
+    return Response.json({ error: "Não autenticado" }, { status: 401 });
+  }
+  if (quota.used >= quota.limit) {
+    return Response.json(
+      {
+        error: "quota_exceeded",
+        analysesUsed: quota.used,
+        analysesLimit: quota.limit,
+        upgradeUrl: "/planos",
+      },
+      { status: 402 }
+    );
+  }
 
   try {
     const apiKey = await getClaudeApiKey();

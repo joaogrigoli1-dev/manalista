@@ -33,16 +33,6 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = session.user.id;
-  const analysesUsed: number = (session.user as any).analysesUsed ?? 0;
-  const analysesLimit: number = (session.user as any).analysesLimit ?? 5;
-
-  // Verifica quota
-  if (analysesUsed >= analysesLimit) {
-    return Response.json(
-      { error: "Quota atingida", upgrade: true },
-      { status: 429 }
-    );
-  }
 
   let rawBody: unknown;
   try {
@@ -70,27 +60,62 @@ export async function POST(req: NextRequest) {
     debateMessagesJson,
   } = parsed.data;
 
-  const [inserted] = await db
-    .insert(analyses)
-    .values({
-      userId: userId as any,
-      childName,
-      childAge,
-      lang,
-      qualityScore: qualityScore ?? 0,
-      detectedPathologies: detectedPathologies ?? [],
-      status: "complete",
-      childDataJson: childDataJson ?? null,
-      resultsJson: resultsJson ?? null,
-      debateMessagesJson: debateMessagesJson ?? null,
-    })
-    .returning({ id: analyses.id });
+  // Persiste a análise e debita a cota em UMA ÚNICA transação (B.5):
+  // - SELECT ... FOR UPDATE na linha do usuário evita corrida/contagem dupla.
+  // - A cota é lida do banco (fonte da verdade), não da sessão (defasada).
+  // - Se estourou a cota, aborta sem inserir e retorna 402 (paywall).
+  const result = await db.transaction(async (tx) => {
+    const [u] = await tx
+      .select({ used: users.analysesUsed, limit: users.analysesLimit })
+      .from(users)
+      .where(eq(users.id, userId as any))
+      .for("update")
+      .limit(1);
 
-  // Incrementa analyses_used na tabela users
-  await db
-    .update(users)
-    .set({ analysesUsed: sql`analyses_used + 1` })
-    .where(eq(users.id, userId as any));
+    if (!u) {
+      return { status: 401 as const };
+    }
+    if (u.used >= u.limit) {
+      return {
+        status: 402 as const,
+        body: {
+          error: "quota_exceeded",
+          analysesUsed: u.used,
+          analysesLimit: u.limit,
+          upgradeUrl: "/planos",
+        },
+      };
+    }
 
-  return Response.json({ id: inserted.id }, { status: 201 });
+    const [inserted] = await tx
+      .insert(analyses)
+      .values({
+        userId: userId as any,
+        childName,
+        childAge,
+        lang,
+        qualityScore: qualityScore ?? 0,
+        detectedPathologies: detectedPathologies ?? [],
+        status: "complete",
+        childDataJson: childDataJson ?? null,
+        resultsJson: resultsJson ?? null,
+        debateMessagesJson: debateMessagesJson ?? null,
+      })
+      .returning({ id: analyses.id });
+
+    await tx
+      .update(users)
+      .set({ analysesUsed: sql`analyses_used + 1` })
+      .where(eq(users.id, userId as any));
+
+    return { status: 201 as const, body: { id: inserted.id } };
+  });
+
+  if (result.status === 401) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (result.status === 402) {
+    return Response.json(result.body, { status: 402 });
+  }
+  return Response.json(result.body, { status: 201 });
 }
