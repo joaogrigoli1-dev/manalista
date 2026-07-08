@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe"
 import { db } from "@/lib/db-server"
 import { users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
+import { internalErrorResponse } from "@/lib/api-error"
 
 export async function POST() {
   await initAuth()
@@ -19,26 +20,30 @@ export async function POST() {
     return Response.json({ error: "ID do usuário não encontrado" }, { status: 400 })
   }
 
-  const dbUser = await db
-    .select({ stripeCustomerId: users.stripeCustomerId })
-    .from(users)
-    .where(eq(users.id, userId as string))
-    .limit(1)
-    .then((r) => r[0])
+  try {
+    const dbUser = await db
+      .select({ stripeCustomerId: users.stripeCustomerId })
+      .from(users)
+      .where(eq(users.id, userId as string))
+      .limit(1)
+      .then((r) => r[0])
 
-  if (!dbUser?.stripeCustomerId) {
-    return Response.json(
-      { error: "Nenhuma assinatura encontrada. Faça upgrade primeiro." },
-      { status: 400 }
-    )
+    if (!dbUser?.stripeCustomerId) {
+      return Response.json(
+        { error: "Nenhuma assinatura encontrada. Faça upgrade primeiro." },
+        { status: 400 }
+      )
+    }
+
+    const baseUrl = process.env.NEXTAUTH_URL ?? process.env.AUTH_URL ?? ""
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: dbUser.stripeCustomerId,
+      return_url: `${baseUrl}/perfil`,
+    })
+
+    return Response.json({ url: portalSession.url })
+  } catch (err) {
+    return internalErrorResponse(err, "stripe:portal")
   }
-
-  const baseUrl = process.env.NEXTAUTH_URL ?? process.env.AUTH_URL ?? ""
-
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: dbUser.stripeCustomerId,
-    return_url: `${baseUrl}/perfil`,
-  })
-
-  return Response.json({ url: portalSession.url })
 }

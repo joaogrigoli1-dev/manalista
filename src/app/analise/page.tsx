@@ -45,12 +45,26 @@ async function streamAgent(
   lang: Lang,
   history: Array<{ role: "user" | "assistant"; content: string }>,
   onChunk: (text: string) => void,
+  runId: string,
 ): Promise<string> {
   const res = await fetch("/api/analise", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // C-04: todas as chamadas da mesma análise compartilham o runId; a cota
+      // é reservada uma única vez, na primeira chamada com este Idempotency-Key.
+      "Idempotency-Key": runId,
+    },
     body: JSON.stringify({ agentId, childData, task, lang, debateHistory: history }),
   });
+  // C-04: 402 = cota esgotada. Propaga um erro tipado para o paywall tratar.
+  if (res.status === 402) {
+    const payload = await res.json().catch(() => ({}));
+    const err = new Error("quota_exceeded") as Error & { code?: string; payload?: unknown };
+    err.code = "quota_exceeded";
+    err.payload = payload;
+    throw err;
+  }
   if (!res.body) throw new Error("No stream");
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -450,7 +464,26 @@ export default function AnalisePage() {
   const qaCallbackRef = useRef<((answers: string[]) => void) | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  // C-04: runId estável por análise (reusado através das re-execuções de Q&A),
+  // para que a cota seja reservada/debitada uma única vez por análise completa.
+  const runIdRef = useRef<string | null>(null);
+  const [quotaExceeded, setQuotaExceeded] = useState(false);
   const pt = lang === "pt";
+
+  // C-04: encerra a "run" no servidor (marca done/failed; failed estorna a cota).
+  const finalizeRun = useCallback(async (outcome: "done" | "failed") => {
+    const runId = runIdRef.current;
+    if (!runId) return;
+    try {
+      await fetch("/api/analise/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ runId, outcome }),
+      });
+    } catch {
+      /* best-effort: a run pode ser reconciliada depois */
+    }
+  }, []);
 
   // ── Lifted PDF download ──────────────────────────────────────
   const handleDownload = useCallback(async () => {
@@ -514,6 +547,10 @@ export default function AnalisePage() {
   const runAnalysis = useCallback(async (data: ChildData, extraContext = "") => {
     setPhase("analyzing");
     setError(null);
+    setQuotaExceeded(false);
+    // C-04: garante um runId para esta análise (reusado nas re-execuções de Q&A).
+    if (!runIdRef.current) runIdRef.current = uuid();
+    const runId = runIdRef.current;
 
     const childWithContext: ChildData = extraContext
       ? { ...data, mainComplaints: data.mainComplaints + "\n\n[Informações adicionais dos pais]\n" + extraContext }
@@ -552,9 +589,20 @@ export default function AnalisePage() {
             const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
             return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
           });
-        }).then(result => ({ agent, result }))
+        }, runId).then(result => ({ agent, result }))
       )
     );
+
+    // C-04: se a cota estourou, o servidor devolve 402 ANTES de qualquer
+    // chamada paga — nenhuma "run" foi reservada. Abre o paywall e encerra.
+    const quotaHit = analyzeResults.some(
+      s => s.status === "rejected" && (s.reason as { code?: string })?.code === "quota_exceeded"
+    );
+    if (quotaHit) {
+      setQuotaExceeded(true);
+      setPhase("form");
+      return;
+    }
 
     for (const settled of analyzeResults) {
       if (settled.status === "fulfilled") {
@@ -631,7 +679,7 @@ export default function AnalisePage() {
             const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
             return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
           });
-        });
+        }, runId);
         const displayText = extractFriendlyText(result);
         updateAgentDialogText(agent.id, displayText);
         addMessage(agent.id, result, "debate");
@@ -658,7 +706,7 @@ export default function AnalisePage() {
           const sepIdx = full.indexOf(CLINICAL_SEPARATOR);
           return sepIdx >= 0 ? full.substring(0, sepIdx).trim() : full;
         });
-      });
+      }, runId);
       const displayText = extractFriendlyText(consolidation);
       updateAgentDialogText("mediator", displayText);
       addMessage("mediator", consolidation, "summary");
@@ -754,14 +802,31 @@ export default function AnalisePage() {
         return; // don't proceed to setPhase("complete") again
       }
     } catch (e) {
+      const code = (e as { code?: string })?.code;
+      if (code === "quota_exceeded") {
+        // Cota estourou em plena geração (raro: a reserva já existia). Encerra
+        // com paywall; o servidor não estorna aqui pois a run permanece válida.
+        setQuotaExceeded(true);
+        setPhase("form");
+        return;
+      }
+      // Falha real do pipeline (ex.: API indisponível) → estorna a cota.
       setError(String(e));
+      void finalizeRun("failed");
+      setStreamingId(undefined);
+      setStreamingContent("");
+      setStatus("mediator", "ready");
+      setPhase("complete");
+      return;
     }
 
+    // Geração concluída com sucesso — encerra a run (cota permanece debitada).
+    void finalizeRun("done");
     setStreamingId(undefined);
     setStreamingContent("");
     setStatus("mediator", "ready");
     setPhase("complete");
-  }, [lang, addMessage, setStatus, updateAgentDialogText, pt]);
+  }, [lang, addMessage, setStatus, updateAgentDialogText, pt, finalizeRun]);
 
   const handleFormSubmit = (data: ChildData) => {
     setChildData(data);
@@ -769,6 +834,10 @@ export default function AnalisePage() {
   };
 
   const handleConsentAccept = () => {
+    // C-04: nova análise → novo runId (nova reserva de cota). O id só é
+    // preservado dentro de uma mesma análise (re-execuções de Q&A).
+    runIdRef.current = null;
+    setQuotaExceeded(false);
     if (childData) runAnalysis(childData);
   };
 
@@ -816,6 +885,54 @@ export default function AnalisePage() {
         >
           {lang === "pt" ? "EN" : "PT"}
         </button>
+      )}
+
+      {/* ── C-04: Paywall — cota de análises esgotada ── */}
+      {quotaExceeded && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 250,
+          background: "rgba(0,0,0,0.78)", backdropFilter: "blur(14px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: "1.25rem",
+        }}>
+          <div className="card" style={{ maxWidth: 460, width: "100%", padding: "0.375rem" }}>
+            <div style={{
+              borderRadius: "calc(var(--radius-card) - 0.375rem)", padding: "2rem",
+              background: "var(--bg-card)", textAlign: "center",
+            }}>
+              <span style={{ fontSize: "2rem" }} aria-hidden="true">✨</span>
+              <h2 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
+                {pt ? "Você usou todas as análises do seu plano" : "You've used all analyses in your plan"}
+              </h2>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                {pt
+                  ? "Faça upgrade para o plano Pro e continue acompanhando o desenvolvimento da criança com a equipe multiprofissional."
+                  : "Upgrade to Pro to keep following the child's development with the multiprofessional team."}
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <button
+                  onClick={() => setQuotaExceeded(false)}
+                  style={{
+                    flex: 1, padding: "0.75rem", borderRadius: "9999px",
+                    border: "1px solid var(--border-input)", background: "var(--bg-glass)",
+                    color: "var(--text-secondary)", fontFamily: "inherit", fontWeight: 600,
+                    fontSize: "0.85rem", cursor: "pointer",
+                  }}
+                >
+                  {pt ? "Fechar" : "Close"}
+                </button>
+                <Link href="/planos" style={{
+                  flex: 2, padding: "0.75rem", borderRadius: "9999px", border: "none",
+                  background: "var(--accent-brand)", color: "#fff", fontFamily: "inherit",
+                  fontWeight: 700, fontSize: "0.85rem", cursor: "pointer",
+                  boxShadow: "var(--shadow-button)", textDecoration: "none",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {pt ? "Ver planos →" : "See plans →"}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {phase === "consent" && childData && (
@@ -1082,6 +1199,7 @@ export default function AnalisePage() {
                     setDetectedPathologies([]); setQualityScore(0);
                     setNeedsMoreInfo(false); setPendingQuestions([]);
                     setDownloadError(null); setConfidence("moderada");
+                    runIdRef.current = null; setQuotaExceeded(false);
                   }}
                   style={{
                     padding: "0.7rem 1.5rem", borderRadius: "9999px",

@@ -4,8 +4,8 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db-server";
-import { analyses, users } from "@/lib/schema";
-import { eq, sql } from "drizzle-orm";
+import { analyses } from "@/lib/schema";
+import { internalErrorResponse } from "@/lib/api-error";
 import { validateOrigin } from "@/lib/csrf";
 
 export const runtime = "nodejs";
@@ -60,34 +60,13 @@ export async function POST(req: NextRequest) {
     debateMessagesJson,
   } = parsed.data;
 
-  // Persiste a análise e debita a cota em UMA ÚNICA transação (B.5):
-  // - SELECT ... FOR UPDATE na linha do usuário evita corrida/contagem dupla.
-  // - A cota é lida do banco (fonte da verdade), não da sessão (defasada).
-  // - Se estourou a cota, aborta sem inserir e retorna 402 (paywall).
-  const result = await db.transaction(async (tx) => {
-    const [u] = await tx
-      .select({ used: users.analysesUsed, limit: users.analysesLimit })
-      .from(users)
-      .where(eq(users.id, userId as any))
-      .for("update")
-      .limit(1);
-
-    if (!u) {
-      return { status: 401 as const };
-    }
-    if (u.used >= u.limit) {
-      return {
-        status: 402 as const,
-        body: {
-          error: "quota_exceeded",
-          analysesUsed: u.used,
-          analysesLimit: u.limit,
-          upgradeUrl: "/planos",
-        },
-      };
-    }
-
-    const [inserted] = await tx
+  // C-04 completo: o /save NÃO debita mais cota. O débito já ocorreu no
+  // início da geração (POST /api/analise, reserva por "run"), de modo que
+  // salvar o resultado não conta uma segunda vez. Aqui apenas persistimos a
+  // análise. Salvar é opcional para o usuário; a cobrança é pelo custo de
+  // geração, que já aconteceu independentemente de salvar ou não.
+  try {
+    const [inserted] = await db
       .insert(analyses)
       .values({
         userId: userId as any,
@@ -103,19 +82,8 @@ export async function POST(req: NextRequest) {
       })
       .returning({ id: analyses.id });
 
-    await tx
-      .update(users)
-      .set({ analysesUsed: sql`analyses_used + 1` })
-      .where(eq(users.id, userId as any));
-
-    return { status: 201 as const, body: { id: inserted.id } };
-  });
-
-  if (result.status === 401) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ id: inserted.id }, { status: 201 });
+  } catch (err) {
+    return internalErrorResponse(err, "analise:save");
   }
-  if (result.status === 402) {
-    return Response.json(result.body, { status: 402 });
-  }
-  return Response.json(result.body, { status: 201 });
 }

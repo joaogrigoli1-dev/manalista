@@ -21,15 +21,19 @@ async function checkDatabase(): Promise<{ status: string; latencyMs?: number; er
     await withTimeout(getDb().execute(sql`select 1`), 3000);
     return { status: "ok", latencyMs: Date.now() - start };
   } catch (err) {
-    return { status: "unreachable", error: err instanceof Error ? err.message : "unknown_error" };
+    // A-03: não vazar a mensagem crua do driver (pode conter host/credenciais
+    // parciais) no payload público — reporta apenas uma categoria segura.
+    const category =
+      err instanceof Error && err.message.startsWith("timeout") ? "timeout" : "connection_error";
+    return { status: "unreachable", error: category };
   }
 }
 
-// Não há cliente Redis implementado no código-fonte hoje (achado de auditoria:
-// REDIS_URL existe como env var, mas não é consumida por nenhum módulo). Reportamos
-// isso honestamente em vez de simular uma checagem de conexão que não existe.
+// REDIS_URL é consumida pelo rate limiter (src/lib/rate-limit.ts, função
+// `rateLimit`) com fallback em memória; aqui reportamos apenas se está
+// configurada, sem abrir conexão adicional só para o healthcheck.
 function checkRedisConfig(): { status: string } {
-  return { status: process.env.REDIS_URL ? "configured_but_unused" : "not_configured" };
+  return { status: process.env.REDIS_URL ? "configured" : "not_configured" };
 }
 
 // Verifica só o FORMATO da chave Stripe (nunca o valor) — detecta o cenário de

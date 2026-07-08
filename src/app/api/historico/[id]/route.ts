@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db-server";
 import { analyses } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { internalErrorResponse } from "@/lib/api-error";
 
 export const runtime = "nodejs";
 
@@ -20,21 +21,25 @@ export async function GET(
 
   const { id } = await params;
 
-  const rows = await db
-    .select()
-    .from(analyses)
-    .where(eq(analyses.id, id))
-    .limit(1);
+  try {
+    const rows = await db
+      .select()
+      .from(analyses)
+      .where(eq(analyses.id, id))
+      .limit(1);
 
-  if (rows.length === 0) {
-    return Response.json({ error: "Not found" }, { status: 404 });
+    if (rows.length === 0) {
+      return Response.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const analysis = rows[0];
+
+    if (analysis.userId !== session.user.id) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    return Response.json(analysis);
+  } catch (err) {
+    return internalErrorResponse(err, "historico:get-by-id");
   }
-
-  const analysis = rows[0];
-
-  if (analysis.userId !== session.user.id) {
-    return Response.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  return Response.json(analysis);
 }

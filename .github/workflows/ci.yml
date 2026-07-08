@@ -30,6 +30,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests (Vitest)
+        run: npm run test
+
       - name: Build
         run: npm run build
         env:
@@ -42,9 +45,11 @@ jobs:
           REDIS_URL: redis://localhost:6379
           AWS_REGION: us-east-1
 
-      - name: Security audit
-        run: npm audit --omit=dev --audit-level=high
-        continue-on-error: true
+      # C.1/C.2 (Frente C): sem continue-on-error — uma vulnerabilidade
+      # alta/crítica (ou um teste quebrado, no passo acima) agora bloqueia o
+      # merge. `--audit-level=high` cobre "high" e "critical".
+      - name: Security audit (falha em high/critical)
+        run: npm audit --audit-level=high
 
   deploy:
     name: Deploy via Coolify

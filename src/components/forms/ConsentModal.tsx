@@ -13,7 +13,7 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
     {
       key: "lgpd" as const,
       title: "Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)",
-      text: "Os dados inseridos são utilizados exclusivamente para gerar a sugestão diagnóstica desta sessão. Não são armazenados em banco de dados, não são compartilhados com terceiros e são descartados ao encerrar a sessão.",
+      text: "Os dados inseridos são utilizados para gerar a sugestão desta sessão e, caso você opte por salvar o resultado, ficam armazenados de forma segura, associados à sua conta, para permitir consulta ao seu histórico. Não são compartilhados com terceiros. Para solicitar exclusão ou exportação dos seus dados, entre em contato pelo suporte.",
     },
     {
       key: "test" as const,
@@ -29,7 +29,7 @@ export function ConsentModal({ lang, onAccept, onDecline }: ConsentModalProps) {
     {
       key: "lgpd" as const,
       title: "General Data Protection Law (LGPD — Law 13.709/2018)",
-      text: "Data entered is used exclusively to generate the diagnostic suggestion for this session. It is not stored in a database, not shared with third parties, and is discarded when the session ends.",
+      text: "Data entered is used to generate the suggestion for this session and, if you choose to save the result, is stored securely, associated with your account, so you can access your history. It is not shared with third parties. To request deletion or export of your data, contact support.",
     },
     {
       key: "test" as const,

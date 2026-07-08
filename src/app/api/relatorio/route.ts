@@ -7,11 +7,44 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { validateOrigin } from "@/lib/csrf";
+import { internalErrorResponse } from "@/lib/api-error";
+import { detectRedFlags, buildRedFlagBlock } from "@/lib/red-flags";
+import type { ChildData } from "@/types";
+
+// A-04: schema explícito e forte para `childData`, coerente com o tipo
+// `ChildData` (src/types/index.ts). Campos textuais têm limite de tamanho
+// para mitigar payloads abusivos; `.passthrough()` é mantido apenas para
+// tolerar campos futuros do `ChildData` que ainda não tenham sido
+// adicionados aqui, sem servir de escape hatch para `z.unknown()` genérico.
+const ChildDataSchema = z
+  .object({
+    name: z.string().min(1).max(200),
+    birthdate: z.string().max(50).default(""),
+    ageYears: z.number().int().min(0).max(25).default(0),
+    ageMonths: z.number().int().min(0).max(11).default(0),
+    sex: z.enum(["M", "F", "outro"]).default("outro"),
+    mainComplaints: z.string().max(5000).default(""),
+    complaintDuration: z.string().max(500).default(""),
+    gestationalAge: z.string().max(200).default(""),
+    birthComplications: z.string().max(5000).default(""),
+    motorMilestones: z.string().max(5000).default(""),
+    languageMilestones: z.string().max(5000).default(""),
+    socialMilestones: z.string().max(5000).default(""),
+    behaviorHome: z.string().max(5000).default(""),
+    behaviorSchool: z.string().max(5000).default(""),
+    sleepPattern: z.string().max(5000).default(""),
+    feedingPattern: z.string().max(5000).default(""),
+    familyHistory: z.string().max(5000).default(""),
+    previousDiagnoses: z.string().max(5000).default(""),
+    currentMedications: z.string().max(5000).default(""),
+    therapiesInProgress: z.string().max(5000).default(""),
+    familyStructure: z.string().max(5000).default(""),
+    parentingChallenges: z.string().max(5000).default(""),
+  })
+  .passthrough();
 
 const RelatorioBodySchema = z.object({
-  childData: z.object({
-    name: z.string().min(1).max(100),
-  }).passthrough(), // aceitar campos extras do ChildData
+  childData: ChildDataSchema,
   results: z.array(z.record(z.unknown())).min(1).max(20),
   lang: z.enum(["pt", "en"]).default("pt"),
   qualityScore: z.number().min(0).max(100).default(0),
@@ -53,10 +86,24 @@ export async function POST(req: NextRequest) {
 
   const { childData, results, lang, qualityScore, detectedPathologies, debateMessages } = parsed.data;
 
+  // A-05: Protocolo de Red Flag — SEMPRE calculado e SEMPRE exposto,
+  // independentemente do plano do usuário. Esta rota não faz nenhuma
+  // checagem de plano/paywall; nenhuma lógica futura de gating (Frente E)
+  // pode envolver este bloco. Ver src/lib/red-flags.ts para o aviso
+  // completo sobre a natureza heurística (não clínica validada) do
+  // detector.
+  const redFlags = detectRedFlags(childData as unknown as ChildData);
+  const redFlagBlockText = buildRedFlagBlock(redFlags, lang);
+
   try {
 
     // Build payload for the Python script.
     // debateMessages é opcional — quando presente, o PDF inclui a Seção 8 (Síntese do Debate).
+    // redFlags/redFlagBlockText: campos aditivos — o gerador de PDF atual
+    // (scripts/generate_pdf.py) pode ignorá-los sem quebrar; ficam
+    // disponíveis para renderização futura do bloco de red flag no PDF.
+    // TODO(Frente E / PDF template): renderizar `redFlagBlockText` como
+    // seção sempre visível do PDF, nunca atrás de paywall.
     const payload = {
       childData,
       results,
@@ -64,6 +111,8 @@ export async function POST(req: NextRequest) {
       qualityScore: qualityScore ?? 0,
       detectedPathologies: detectedPathologies ?? [],
       debateMessages: Array.isArray(debateMessages) ? debateMessages : [],
+      redFlags,
+      redFlagBlockText,
     };
 
     // Write temp JSON input
@@ -124,17 +173,24 @@ export async function POST(req: NextRequest) {
     const childName = (childData.name ?? "relatorio").replace(/[^a-zA-Z0-9]/g, "_");
     const filename = `MAnalista_${childName}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
+    // A-05: expõe o bloco de red flag também via header (base64) — o
+    // frontend deve exibi-lo SEMPRE que presente, independentemente de
+    // plano, mesmo enquanto o template do PDF não o renderiza nativamente.
+    const responseHeaders: Record<string, string> = {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Length": String(pdf.length),
+      "X-Red-Flags-Count": String(redFlags.length),
+    };
+    if (redFlags.length > 0) {
+      responseHeaders["X-Red-Flags-Block-B64"] = Buffer.from(redFlagBlockText, "utf-8").toString("base64");
+    }
+
     return new NextResponse(new Uint8Array(pdf), {
       status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length": String(pdf.length),
-      },
+      headers: responseHeaders,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[/api/relatorio] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return internalErrorResponse(err, "relatorio:pdf");
   }
 }

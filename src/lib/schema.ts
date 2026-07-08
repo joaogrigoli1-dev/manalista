@@ -2,12 +2,14 @@ import {
   pgTable, text, integer, boolean, timestamp,
   uuid, jsonb, pgEnum, index, uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ── Enums ────────────────────────────────────────────────────────
 export const planEnum = pgEnum("plan", ["free", "pro", "enterprise"]);
 export const langEnum = pgEnum("lang", ["pt", "en"]);
 export const analysisStatusEnum = pgEnum("analysis_status", ["pending", "complete", "error"]);
+// C-04: estados de uma "run" de análise (reserva de cota).
+export const analysisRunStatusEnum = pgEnum("analysis_run_status", ["running", "done", "failed"]);
 
 // ── Users ────────────────────────────────────────────────────────
 export const users = pgTable("users", {
@@ -32,6 +34,8 @@ export const users = pgTable("users", {
 }, (t) => [
   uniqueIndex("users_email_idx").on(t.email),
   index("users_stripe_customer_idx").on(t.stripeCustomerId),
+  // LGPD (Frente A): acelera o worker de anonimização que varre contas excluídas.
+  index("users_deleted_idx").on(t.deletedAt),
 ]);
 
 // ── Auth.js tables (required by DrizzleAdapter) ──────────────────
@@ -92,6 +96,26 @@ export const analyses = pgTable("analyses", {
   index("analyses_user_idx").on(t.userId),
   index("analyses_created_idx").on(t.createdAt),
   index("analyses_status_idx").on(t.status),
+  // LGPD (Frente A): índice parcial para o worker de anonimização —
+  // só indexa linhas ainda NÃO anonimizadas, mantendo a varredura barata.
+  index("analyses_anon_idx").on(t.createdAt).where(sql`anonymized_at IS NULL`),
+]);
+
+// ── Analysis Runs (C-04: reserva de cota por geração) ────────────
+// Cada "run" reserva 1 unidade de cota no INÍCIO da sequência de ~15
+// chamadas pagas à Anthropic (7 analyze + 7 debate + 1 consolidate).
+// O id é fornecido pelo cliente (Idempotency-Key/runId), de modo que as
+// 15 chamadas da mesma análise compartilham a mesma reserva e debitam a
+// cota UMA única vez. Estorno em caso de falha do pipeline.
+export const analysisRuns = pgTable("analysis_runs", {
+  id:          uuid("id").primaryKey(), // = Idempotency-Key enviado pelo cliente
+  userId:      uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status:      analysisRunStatusEnum("status").default("running").notNull(),
+  createdAt:   timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}, (t) => [
+  index("analysis_runs_user_idx").on(t.userId),
+  index("analysis_runs_status_idx").on(t.status),
 ]);
 
 // ── Audit Log (LGPD) ─────────────────────────────────────────────
@@ -111,10 +135,11 @@ export const auditLogs = pgTable("audit_logs", {
 
 // ── Relations ────────────────────────────────────────────────────
 export const usersRelations = relations(users, ({ many }) => ({
-  accounts:   many(accounts),
-  sessions:   many(sessions),
-  analyses:   many(analyses),
-  auditLogs:  many(auditLogs),
+  accounts:      many(accounts),
+  sessions:      many(sessions),
+  analyses:      many(analyses),
+  analysisRuns:  many(analysisRuns),
+  auditLogs:     many(auditLogs),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -127,6 +152,10 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 
 export const analysesRelations = relations(analyses, ({ one }) => ({
   user: one(users, { fields: [analyses.userId], references: [users.id] }),
+}));
+
+export const analysisRunsRelations = relations(analysisRuns, ({ one }) => ({
+  user: one(users, { fields: [analysisRuns.userId], references: [users.id] }),
 }));
 
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({

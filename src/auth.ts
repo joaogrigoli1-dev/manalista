@@ -79,6 +79,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/auth/error",
   },
   callbacks: {
+    // LGPD (C-01): bloqueia login em contas excluídas (soft-delete). Sem isto,
+    // uma conta com `deletedAt` setado poderia ser reacessada via Google/magic
+    // link (a linha em `accounts` continua existinde durante o período de
+    // graça), reidentificando dados que deveriam estar em processo de exclusão.
+    async signIn({ user }) {
+      const userId = (user as { id?: string })?.id;
+      if (!userId) return true; // primeiro login (createUser) — ainda não há registro para checar
+      try {
+        const { getDb } = await import("@/lib/db-server");
+        const dbUser = await getDb().query.users.findFirst({
+          where: (u, { eq }) => eq(u.id, userId as any),
+          columns: { deletedAt: true },
+        });
+        if (dbUser?.deletedAt) return false; // conta excluída → nega login
+      } catch (e) {
+        // Fail-open em erro de consulta para não derrubar TODO o login numa
+        // instabilidade transitória do banco (disponibilidade). O risco
+        // residual é pequeno: a conta excluída já teve sessões revogadas e
+        // dados em anonimização. Loga para investigação.
+        console.error("[auth] Falha ao verificar deletedAt no signIn:", e);
+      }
+      return true;
+    },
     async session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id
@@ -94,6 +117,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             ;(session.user as any).analysesLimit = dbUser.analysesLimit
           }
         } catch (e) {
+          // A-06: NUNCA rebaixar um usuário pago para "free" por falha de
+          // consulta. Não definimos plan="free" como fallback; sinalizamos o
+          // erro para a UI tratar (ex.: pedir refresh) e o enforcement real de
+          // cota continua sendo feito direto do banco em /api/analise, não a
+          // partir deste campo de sessão (que é apenas informativo para a UI).
+          ;(session.user as any).planError = true
           console.error("[auth] Erro ao buscar dados do usuário:", e)
         }
       }
