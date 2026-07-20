@@ -12,7 +12,11 @@ function getStripeInstance(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error("STRIPE_SECRET_KEY não configurada")
 
-  const instance = new Stripe(key, { apiVersion: "2026-04-22.dahlia" })
+  // apiVersion precisa bater exatamente com o literal aceito pelos types da
+  // versão instalada do SDK "stripe" (^22.1.1 resolve para 22.3.0 no lock
+  // atual, que só aceita "2026-06-24.dahlia" — usar uma string desatualizada
+  // quebra o build do Next.js em "npm run build" com erro de tipo).
+  const instance = new Stripe(key, { apiVersion: "2026-06-24.dahlia" })
   if (process.env.NODE_ENV !== "production") globalThis._stripe = instance
   return instance
 }
