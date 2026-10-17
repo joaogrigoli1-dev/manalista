@@ -2,3 +2,9 @@ node_modules
 .next
 .git
 *.md
+# Documentação e lixeira não entram no contexto de build (*.md já estava
+# coberto, mas docs/ também tem .html de mockup e .docx de auditoria).
+docs
+lixo
+*.docx
+*.pdf

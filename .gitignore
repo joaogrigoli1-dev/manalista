@@ -17,3 +17,14 @@ tsconfig.tsbuildinfo
 scripts/test_payload.json
 PREVIEW-PDF-LIGHT.pdf
 *.bak
+
+# Lixeira da limpeza de repositório: o conteúdo movido e o backup .tar.gz não
+# vão para o git (os arquivos versionados que foram movidos já têm histórico
+# próprio). O registro da limpeza — MANIFESTO.md, movimentos.tsv e
+# restaurar.py — fica versionado, por isso as exceções abaixo.
+lixo/*
+!lixo/MANIFESTO.md
+!lixo/*/
+lixo/*/**
+!lixo/*/movimentos.tsv
+!lixo/*/restaurar.py

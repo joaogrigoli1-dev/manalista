@@ -493,7 +493,7 @@ PARA SÍNTESE DE VOZ (TTS):
 - `src/app/api/relatorio/route.ts` (77 linhas — Python spawn OK)
 - `scripts/generate_pdf.py` (544 linhas — fonte de todos os problemas do PDF)
 - `src/types/index.ts` (137 linhas — tipos consistentes)
-- `PLAN.md` (349 linhas — planejamento técnico original)
+- `docs/planos/PLAN.md` (349 linhas — planejamento técnico original)
 
 ---
 
