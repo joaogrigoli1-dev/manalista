@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MAnalista — Mesa de Debate Clínico</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+<style>
+:root {
+  --bg:#050505;--bg2:#0A0A0A;--card-bg:rgba(255,255,255,0.035);--cb:rgba(255,255,255,0.07);
+  --hl:rgba(255,255,255,0.10);
+  --purple:#7C3AED;--purple-s:rgba(167,139,250,0.15);
+  --emerald:#059669;--emerald-s:rgba(52,211,153,0.15);
+  --amber:#D97706;--amber-s:rgba(217,119,6,0.15);
+  --rose:#E11D48;--rose-s:rgba(225,29,72,0.15);
+  --t1:#F8F8F8;--t2:rgba(255,255,255,0.55);--t3:rgba(255,255,255,0.30);
+  --ease:cubic-bezier(0.32,0.72,0,1);
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+  --topbar-h:48px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t1);height:100dvh;overflow:hidden}
+
+.bg-ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 8% 12%,rgba(124,58,237,0.09) 0%,transparent 50%),
+  radial-gradient(ellipse at 90% 85%,rgba(5,150,105,0.06) 0%,transparent 50%),var(--bg)}
+
+/* LAYOUT */
+.layout{position:relative;z-index:2;display:grid;grid-template-columns:260px 1fr 280px;height:100dvh;padding-top:calc(var(--topbar-h) + var(--sat))}
+
+/* TOPBAR */
+.topbar{position:fixed;top:calc(6px + var(--sat));left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;align-items:center;gap:12px;background:rgba(5,5,5,0.88);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+  border:1px solid rgba(255,255,255,0.09);border-radius:9999px;padding:5px 18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 8px 32px rgba(0,0,0,0.5);max-width:calc(100vw - 32px);white-space:nowrap}
+.topbar-logo{font-weight:700;font-size:.88rem;background:linear-gradient(135deg,var(--purple),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.topbar-live{display:flex;align-items:center;gap:4px;background:var(--emerald-s);border:1px solid rgba(52,211,153,0.25);border-radius:9999px;padding:3px 9px;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#34D399}
+.dot-pulse{width:5px;height:5px;border-radius:50%;background:#34D399;animation:pd 1.5s ease infinite}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.topbar-case{font-size:.70rem;color:var(--t2)}.topbar-sep{color:var(--t3)}
+.topbar-timer{display:flex;align-items:center;gap:4px;font-size:.70rem;color:var(--t2);font-variant-numeric:tabular-nums}
+.topbar-end{display:flex;align-items:center;gap:4px;background:var(--rose-s);border:1px solid rgba(225,29,72,0.25);border-radius:9999px;padding:4px 11px;font-size:.60rem;font-weight:600;color:#FB7185;cursor:pointer;transition:all 400ms var(--ease)}
+.topbar-end:hover{background:rgba(225,29,72,0.25)}
+
+/* SIDEBAR ESQUERDA */
+.sidebar-left{height:calc(100dvh - var(--topbar-h) - var(--sat));display:flex;flex-direction:column;padding:12px 10px;border-right:1px solid var(--cb);overflow-y:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sidebar-left::-webkit-scrollbar{display:none}
+.section-label{font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:var(--t3);margin-bottom:3px}
+.section-title{font-size:.84rem;font-weight:700;margin-bottom:1px}
+.section-sub{font-size:.60rem;color:var(--t3);margin-bottom:10px}
+
+/* Prof card */
+.prof-card{background:rgba(255,255,255,0.02);border:1px solid var(--cb);border-radius:14px;padding:3px;margin-bottom:6px;transition:all 500ms var(--ease)}
+.prof-card:hover{border-color:rgba(255,255,255,0.14)}
+.prof-card.speaking{border-color:rgba(52,211,153,0.35);box-shadow:0 0 20px rgba(52,211,153,0.08)}
+.prof-inner{background:var(--card-bg);border-radius:11px;box-shadow:inset 0 1px 1px var(--hl);padding:10px}
+.prof-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.prof-avatar{width:44px;height:44px;border-radius:12px;flex-shrink:0;overflow:hidden;background:rgba(5,5,5,0.9);border:1px solid rgba(255,255,255,0.08);position:relative}
+.prof-avatar svg{width:100%;height:100%;display:block}
+.prof-avatar .mic-indicator{position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:var(--emerald);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;animation:mp .8s ease infinite alternate}
+@keyframes mp{0%{opacity:.6}100%{opacity:1}}
+.prof-name{font-size:.74rem;font-weight:600;line-height:1.2}
+.prof-role{font-size:.58rem;color:var(--t3);font-style:italic}
+.specialty-label{font-size:.48rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:2px}
+.specialty-value{font-size:.68rem;font-weight:600;line-height:1.3;margin-bottom:6px}
+.expand-btn{display:flex;align-items:center;gap:4px;width:100%;background:none;border:none;font-family:inherit;font-size:.56rem;font-weight:600;color:var(--t3);cursor:pointer;padding:3px 0;transition:color 300ms var(--ease)}
+.expand-btn:hover{color:var(--t2)}
+.expand-btn i{font-size:9px;transition:transform 300ms var(--ease)}
+.expand-btn.open i{transform:rotate(45deg)}
+.expand-content{max-height:0;overflow:hidden;transition:max-height 500ms var(--ease)}
+.expand-content.open{max-height:400px}
+.expand-text{padding:4px 0 6px;font-size:.62rem;color:var(--t2);line-height:1.55}
+.participation-bar{height:2px;background:rgba(255,255,255,0.05);border-radius:9999px;overflow:hidden;margin-top:5px;margin-bottom:2px}
+.participation-fill{height:100%;border-radius:9999px;transition:width 800ms var(--ease)}
+.participation-count{font-size:.50rem;color:var(--t3)}
+
+/* CENTRO */
+.center{height:calc(100dvh - var(--topbar-h) - var(--sat));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;position:relative;overflow:hidden}
+.mesa-container{position:relative;width:100%;max-width:760px;flex:1;display:flex;align-items:center;justify-content:center}
+.mesa{width:380px;height:180px;border-radius:90px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at center,rgba(255,255,255,0.035) 0%,rgba(255,255,255,0.01) 60%,transparent 100%);
+  border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 1px rgba(255,255,255,0.05),0 0 60px rgba(124,58,237,0.04),0 0 100px rgba(5,150,105,0.03);pointer-events:none}
+
+/* Oracle */
+.oracle-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
+.oracle{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 38% 38%,rgba(124,58,237,0.28),rgba(5,150,105,0.20),rgba(124,58,237,0.06));border:1.5px solid rgba(167,139,250,0.20);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(124,58,237,0.15),0 0 80px rgba(5,150,105,0.07),inset 0 0 20px rgba(255,255,255,0.03);animation:og 4s ease-in-out infinite alternate;position:relative}
+.oracle::before{content:'';position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(167,139,250,0.08);animation:orb 8s linear infinite}
+.oracle::after{content:'';position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(52,211,153,0.05);animation:orb 12s linear infinite reverse}
+@keyframes og{0%{box-shadow:0 0 40px rgba(124,58,237,0.15),0 0 80px rgba(5,150,105,0.07)}100%{box-shadow:0 0 50px rgba(5,150,105,0.18),0 0 90px rgba(124,58,237,0.09)}}
+@keyframes orb{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.oracle i{font-size:22px;color:rgba(255,255,255,0.65)}
+.oracle-name{font-size:.58rem;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.oracle-tag{font-size:.42rem;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;display:flex;align-items:center;gap:3px}
+
+/* AGENTES */
+.agent{position:absolute;display:flex;align-items:flex-start;gap:0;z-index:8;cursor:grab;user-select:none;-webkit-user-select:none}
+.agent:active{cursor:grabbing}
+.agent.dragging{z-index:20;opacity:.85}
+.agent-col{display:flex;flex-direction:column;align-items:center}
+.agent-card{width:78px;height:90px;border-radius:14px;overflow:hidden;flex-shrink:0;background:rgba(5,5,5,0.92);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 1px rgba(255,255,255,0.05);position:relative;transition:border-color 400ms var(--ease),box-shadow 400ms var(--ease)}
+.agent-card svg{width:100%;height:100%;display:block}
+.agent-card.speaking-active{border-color:rgba(52,211,153,0.4);box-shadow:inset 0 1px 1px rgba(255,255,255,0.05),0 0 18px rgba(52,211,153,0.1);animation:sp 1.5s ease infinite}
+@keyframes sp{0%{box-shadow:0 0 0 0 rgba(52,211,153,0.35),inset 0 1px 1px rgba(255,255,255,0.05)}70%{box-shadow:0 0 0 7px rgba(52,211,153,0),inset 0 1px 1px rgba(255,255,255,0.05)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0),inset 0 1px 1px rgba(255,255,255,0.05)}}
+.agent-card .mic-badge{position:absolute;bottom:3px;right:3px;width:14px;height:14px;border-radius:50%;background:var(--emerald);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center}
+.agent-name{font-size:.64rem;font-weight:600;text-align:center;white-space:nowrap;margin-top:3px}
+.agent-specialty{font-size:.48rem;color:var(--t3);font-style:italic}
+.drag-hint{font-size:.40rem;color:var(--t3);opacity:.4;margin-top:1px;text-align:center;transition:opacity 300ms}
+.agent:hover .drag-hint{opacity:1}
+
+/* BALÕES */
+.bubble{width:175px;border-radius:12px;padding:8px 10px;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);opacity:.35;transition:all 500ms var(--ease)}
+.bubble.active{opacity:1}
+.bubble-label{display:inline-block;font-size:.46rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;padding:2px 6px;border-radius:9999px;margin-bottom:3px}
+.bubble-text{font-size:.66rem;color:var(--t1);line-height:1.42}
+.bubble-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.bubble-time{font-size:.46rem;color:var(--t3)}
+.bubble-expand{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 300ms var(--ease)}
+.bubble-expand:hover{background:rgba(255,255,255,0.12);transform:scale(1.1)}
+.bubble.purple{background:rgba(139,92,246,0.09);border:1px solid rgba(139,92,246,0.16)}
+.bubble.purple .bubble-label{background:var(--purple-s);color:#A78BFA}
+.bubble.amber{background:rgba(217,119,6,0.09);border:1px solid rgba(217,119,6,0.16)}
+.bubble.amber .bubble-label{background:var(--amber-s);color:#FBBF24}
+.bubble.emerald{background:rgba(5,150,105,0.09);border:1px solid rgba(5,150,105,0.16)}
+.bubble.emerald .bubble-label{background:var(--emerald-s);color:#34D399}
+.bubble.rose{background:rgba(225,29,72,0.09);border:1px solid rgba(225,29,72,0.16)}
+.bubble.rose .bubble-label{background:var(--rose-s);color:#FB7185}
+
+/* Posição dos agentes: esquerda = balão ESQUERDA, avatar DIREITA */
+.agent.pos-left{flex-direction:row}
+.agent.pos-left .bubble{margin-right:8px}
+/* Posição dos agentes: direita = avatar ESQUERDA, balão DIREITA */
+.agent.pos-right{flex-direction:row}
+.agent.pos-right .bubble{margin-left:8px}
+
+/* MANALISTA CARD */
+.manalista-dialog{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:15;width:min(460px,80%);border-radius:14px;padding:3px;background:rgba(255,255,255,0.02);border:1px solid rgba(167,139,250,0.16);box-shadow:0 0 24px rgba(124,58,237,0.07)}
+.manalista-inner{background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(5,150,105,0.03));border-radius:11px;padding:9px 14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.05);display:flex;align-items:center;gap:10px}
+.manalista-icon{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle,rgba(124,58,237,0.25),rgba(5,150,105,0.18));border:1px solid rgba(167,139,250,0.18);display:flex;align-items:center;justify-content:center}
+.manalista-icon i{font-size:14px;color:rgba(255,255,255,0.65)}
+.manalista-content{flex:1;min-width:0}
+.manalista-label-text{font-size:.46rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#A78BFA;margin-bottom:2px;display:flex;align-items:center;gap:4px}
+.manalista-label-text .dot-pulse{width:4px;height:4px}
+.manalista-dialog-text{font-size:.70rem;color:var(--t1);line-height:1.4}
+
+/* SPEAKING BAR */
+.speaking-bar{position:absolute;bottom:calc(8px + var(--sab));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(5,5,5,0.90);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(52,211,153,0.16);border-radius:9999px;padding:4px 12px;box-shadow:0 0 20px rgba(52,211,153,0.05);white-space:nowrap;z-index:20}
+.speaking-avatar{width:22px;height:22px;border-radius:6px;overflow:hidden;flex-shrink:0;background:rgba(5,5,5,0.9);border:1px solid rgba(255,255,255,0.08)}
+.speaking-avatar svg{width:100%;height:100%}
+.speaking-name{font-size:.62rem;font-weight:600;color:#34D399}
+.speaking-status{font-size:.48rem;color:var(--t3)}
+.waveform{display:flex;align-items:center;gap:1.5px;height:14px}
+.wave-bar{width:2px;border-radius:9999px;background:var(--emerald);animation:wv .8s ease-in-out infinite alternate}
+@keyframes wv{0%{height:2px;opacity:.3}100%{height:11px;opacity:1}}
+
+/* PAINEL DIREITO */
+.sidebar-right{height:calc(100dvh - var(--topbar-h) - var(--sat));display:flex;flex-direction:column;padding:10px 10px;border-left:1px solid var(--cb);overflow:hidden}
+.right-scroll{flex:1;overflow-y:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-height:0}
+.right-scroll::-webkit-scrollbar{display:none}
+.right-title{font-size:.80rem;font-weight:700;margin-bottom:2px}
+.gauge-svg{width:72px;height:40px;margin-bottom:1px}
+.gauge-value{font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums;transition:color 600ms var(--ease)}
+.gauge-value.high{color:var(--rose)}.gauge-value.med{color:var(--amber)}.gauge-value.low{color:var(--emerald)}
+.gauge-label{font-size:.62rem;font-weight:600;text-align:center;margin-bottom:1px}
+.gauge-sub{font-size:.48rem;text-align:center;color:var(--t3);margin-bottom:3px}
+.gauge-badge{font-size:.46rem;font-weight:600;padding:2px 6px;border-radius:9999px}
+.gauge-badge.high{background:var(--rose-s);color:#FB7185}.gauge-badge.med{background:var(--amber-s);color:#FBBF24}.gauge-badge.low{background:var(--emerald-s);color:#34D399}
+.gauge-card.animating .gauge-value{animation:gf 2s ease infinite}
+@keyframes gf{0%,100%{opacity:1}50%{opacity:.6}}
+.gauge-live{font-size:.42rem;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;display:flex;align-items:center;gap:2px}
+.gauge-live .dot-pulse{width:3px;height:3px;background:var(--amber)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px}
+.stat-item{background:var(--card-bg);border:1px solid var(--cb);border-radius:9px;padding:6px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03)}
+.stat-value{font-size:.92rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat-label{font-size:.46rem;color:var(--t3);margin-top:1px}
+.timeline-dots{display:flex;align-items:center;gap:0;margin-bottom:2px;padding:0 4px}
+.tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tl-dot.done{background:var(--emerald)}.tl-dot.active{background:var(--purple);animation:tp 1.5s ease infinite}
+@keyframes tp{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.4)}50%{box-shadow:0 0 0 4px rgba(124,58,237,0)}}
+.tl-dot.pending{background:rgba(255,255,255,0.12)}
+.tl-line{flex:1;height:2px;background:rgba(255,255,255,0.06)}.tl-line.done{background:var(--emerald);opacity:.4}
+.timeline-labels{display:flex;justify-content:space-between;padding:0 2px;margin-bottom:6px}
+.timeline-labels span{font-size:.44rem;color:var(--t3)}.timeline-labels span.active-label{color:#A78BFA;font-weight:600}
+.laudo-status{display:inline-flex;align-items:center;gap:4px;font-size:.48rem;font-weight:600;padding:2px 7px;border-radius:9999px;background:linear-gradient(135deg,var(--purple-s),var(--emerald-s));color:#A78BFA;margin-bottom:4px}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.right-footer{flex-shrink:0;padding-top:6px;border-top:1px solid var(--cb)}
+.btn-download{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px 12px;border-radius:9999px;border:1px solid rgba(255,255,255,0.10);background:linear-gradient(135deg,rgba(124,58,237,0.14),rgba(5,150,105,0.10));color:var(--t1);font-size:.66rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 400ms var(--ease)}
+.btn-download:hover{background:linear-gradient(135deg,rgba(124,58,237,0.28),rgba(5,150,105,0.22));transform:scale(1.02);box-shadow:0 0 20px rgba(124,58,237,0.12)}
+.btn-download:active{transform:scale(.97)}
+.btn-icon{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center}
+
+/* MOBILE */
+.mobile-nav{display:none;position:fixed;bottom:calc(8px + var(--sab));left:50%;transform:translateX(-50%);z-index:60;gap:8px}
+.mobile-btn{padding:6px 13px;border-radius:9999px;border:1px solid var(--cb);background:rgba(5,5,5,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:var(--t2);font-size:.62rem;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all 300ms var(--ease)}
+.mobile-btn:hover{background:rgba(255,255,255,0.07);color:var(--t1)}
+.panel-close-btn{display:none;position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid var(--cb);align-items:center;justify-content:center;cursor:pointer;z-index:60}
+@media(max-width:1100px){.layout{grid-template-columns:230px 1fr 260px}}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;padding-top:calc(46px + var(--sat))}
+  .sidebar-left,.sidebar-right{display:none}
+  .sidebar-left.show,.sidebar-right.show{display:flex;position:fixed;top:calc(46px + var(--sat));bottom:0;width:290px;z-index:50;background:rgba(5,5,5,0.97);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);animation:slin 400ms var(--ease)}
+  .sidebar-left.show{left:0;border-right:1px solid var(--cb)}
+  .sidebar-right.show{right:0;border-left:1px solid var(--cb)}
+  @keyframes slin{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+  .mobile-nav{display:flex!important}
+  .panel-close-btn{display:flex}
+  .manalista-dialog{bottom:44px;width:90%}
+}
+@media(max-width:640px){
+  .topbar{padding:4px 11px;gap:6px}.topbar-case,.topbar-sep{display:none}
+  .mesa{width:220px;height:110px;border-radius:55px}
+  .oracle{width:40px;height:40px}.oracle i{font-size:18px}
+  .agent-card{width:58px;height:68px;border-radius:11px}
+  .bubble{width:120px;padding:6px 7px}.bubble-text{font-size:.58rem}
+  .manalista-dialog{width:95%;bottom:40px}
+}
+</style>
+</head>
+<body>
+<div class="bg-ambient"></div>
+
+<nav class="topbar">
+  <span class="topbar-logo">MAnalista</span>
+  <div class="topbar-live"><span class="dot-pulse"></span>Ao Vivo</div>
+  <span class="topbar-case">Caso #2847 — Neuropsicopediatria</span>
+  <span class="topbar-sep">|</span>
+  <span class="topbar-timer"><i class="ph-light ph-timer" style="font-size:12px"></i>23:41</span>
+  <button class="topbar-end"><i class="ph-light ph-x" style="font-size:9px"></i>Encerrar</button>
+</nav>
+
+<div class="layout">
+
+<!-- SIDEBAR ESQUERDA — SEM Coord. MAnalista -->
+<aside class="sidebar-left" id="sidePanel">
+  <div class="panel-close-btn" onclick="togglePanel('side')"><i class="ph-light ph-x" style="font-size:12px;color:var(--t2)"></i></div>
+  <div class="section-label">Equipe</div>
+  <div class="section-title">Profissionais</div>
+  <div class="section-sub">4 especialistas na sessão</div>
+
+  <!-- Dra. Sofia -->
+  <div class="prof-card speaking"><div class="prof-inner">
+    <div class="prof-header">
+      <div class="prof-avatar">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.95)"/><path d="M24 38c2-18 13-28 26-28s24 10 26 28" stroke="rgba(255,255,255,0.18)" stroke-width="1.2" fill="none"/><path d="M24 38c-3 12-2 24 3 36" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M76 38c3 12 2 24-3 36" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1.1" fill="none"/><ellipse cx="41" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><ellipse cx="59" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><circle cx="41" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><circle cx="59" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><path d="M36 40c2-1.5 6-2 8-1" stroke="rgba(255,255,255,0.14)" stroke-width=".6" fill="none"/><path d="M56 39c2-1 6-.5 8 1" stroke="rgba(255,255,255,0.14)" stroke-width=".6" fill="none"/><path d="M44 58c3 2 8 2 12 0" stroke="rgba(255,255,255,0.16)" stroke-width=".7" fill="none"/><ellipse cx="30" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><ellipse cx="70" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><path d="M30 90c6-10 10-12 20-12s14 2 20 12" stroke="rgba(255,255,255,0.12)" stroke-width=".8" fill="none"/></svg>
+        <div class="mic-indicator"><i class="ph-fill ph-microphone" style="font-size:5px;color:#fff"></i></div>
+      </div>
+      <div><div class="prof-name">Dra. Sofia Vygotski</div><div class="prof-role">Psicóloga Infantil</div></div>
+    </div>
+    <div class="specialty-label">Especialidade</div>
+    <div class="specialty-value" style="color:#A78BFA">Desenvolvimento Sociocultural e Cognição Infantil</div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="expand-content"><div class="expand-text">Psicóloga clínica com CRP ativo e 12 anos de experiência em neuropsicologia infantil. Doutora em Psicologia do Desenvolvimento pela USP com foco em teoria sociocultural de Vygotski. Especialista em avaliação cognitiva de crianças com suspeita de TEA e TDAH, utilizando protocolos WISC-V, NEPSY-II e SON-R. Experiência com mediação da aprendizagem e Zona de Desenvolvimento Proximal aplicada ao diagnóstico diferencial.</div></div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="expand-content"><div class="expand-text">Responsável por avaliar como a criança constrói conhecimento, interage socialmente e desenvolve funções psicológicas superiores. Analisa padrões de brincadeira simbólica, linguagem internalizada e capacidade de regulação emocional para identificar desvios no desenvolvimento cognitivo e socioemocional.</div></div>
+    <div class="participation-bar"><div class="participation-fill" style="width:72%;background:var(--purple)"></div></div>
+    <div class="participation-count">14 falas · 72% participação</div>
+  </div></div>
+
+  <!-- Dr. Victor -->
+  <div class="prof-card"><div class="prof-inner">
+    <div class="prof-header">
+      <div class="prof-avatar">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.95)"/><path d="M28 36c3-14 11-24 22-24s19 10 22 24" stroke="rgba(255,255,255,0.18)" stroke-width="1.2" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1.1" fill="none"/><ellipse cx="41" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><ellipse cx="59" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><circle cx="41" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><circle cx="59" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><path d="M35 39c3-2 7-2 10 0" stroke="rgba(255,255,255,0.16)" stroke-width=".8" fill="none"/><path d="M55 39c3-2 7-2 10 0" stroke="rgba(255,255,255,0.16)" stroke-width=".8" fill="none"/><path d="M40 58c0 8 5 12 10 12s10-4 10-12" stroke="rgba(255,255,255,0.12)" stroke-width=".7" fill="none"/><path d="M45 58c3 1.5 6 1.5 10 0" stroke="rgba(255,255,255,0.16)" stroke-width=".7" fill="none"/><ellipse cx="30" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><ellipse cx="70" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><path d="M30 90c6-10 10-12 20-12s14 2 20 12" stroke="rgba(255,255,255,0.12)" stroke-width=".8" fill="none"/><path d="M44 78l6 4 6-4" stroke="rgba(255,255,255,0.09)" stroke-width=".6" fill="none"/></svg>
+      </div>
+      <div><div class="prof-name">Dr. Victor Winnicott</div><div class="prof-role">Parentalidade</div></div>
+    </div>
+    <div class="specialty-label">Especialidade</div>
+    <div class="specialty-value" style="color:#FBBF24">Vínculos Afetivos e Dinâmica Familiar</div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="expand-content"><div class="expand-text">Psicólogo clínico especializado em teoria do apego e relações objetais, com 15 anos de atuação em clínica da parentalidade. Mestre em Psicologia Clínica pela PUC-SP com dissertação sobre o papel do ambiente facilitador no desenvolvimento emocional. Formação em Terapia Familiar Sistêmica pelo Instituto Familiae. Certificado em Circle of Security Parenting e Theraplay. Experiência em avaliação vincular mãe-bebê e dinâmicas familiares disfuncionais.</div></div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="expand-content"><div class="expand-text">Analisa a qualidade dos vínculos afetivos primários, o ambiente familiar facilitador, padrões de apego e a capacidade dos cuidadores de oferecer holding emocional. Identifica como rupturas vinculares e dinâmicas parentais podem potencializar ou mascarar sintomas do neurodesenvolvimento da criança.</div></div>
+    <div class="participation-bar"><div class="participation-fill" style="width:45%;background:var(--amber)"></div></div>
+    <div class="participation-count">9 falas · 45% participação</div>
+  </div></div>
+
+  <!-- Dr. Marco -->
+  <div class="prof-card"><div class="prof-inner">
+    <div class="prof-header">
+      <div class="prof-avatar">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.95)"/><path d="M30 36c2-14 10-24 20-24s18 10 20 24" stroke="rgba(255,255,255,0.18)" stroke-width="1.2" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1.1" fill="none"/><ellipse cx="41" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><ellipse cx="59" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><circle cx="41" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><circle cx="59" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><path d="M36 40c2-1 6-1.5 8 0" stroke="rgba(255,255,255,0.14)" stroke-width=".6" fill="none"/><path d="M56 40c2-1.5 6-1 8 0" stroke="rgba(255,255,255,0.14)" stroke-width=".6" fill="none"/><path d="M50 46v7" stroke="rgba(255,255,255,0.12)" stroke-width=".7"/><path d="M47 53l3 1 3-1" stroke="rgba(255,255,255,0.10)" stroke-width=".5" fill="none"/><path d="M44 59c3 1 8 1 12 0" stroke="rgba(255,255,255,0.16)" stroke-width=".7" fill="none"/><ellipse cx="30" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><ellipse cx="70" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><path d="M28 92c6-12 10-14 22-14s16 2 22 14" stroke="rgba(255,255,255,0.12)" stroke-width=".8" fill="none"/><circle cx="50" cy="84" r="4" stroke="rgba(255,255,255,0.09)" stroke-width=".6" fill="none"/></svg>
+      </div>
+      <div><div class="prof-name">Dr. Marco Cajal</div><div class="prof-role">Neuropediatra</div></div>
+    </div>
+    <div class="specialty-label">Especialidade</div>
+    <div class="specialty-value" style="color:#34D399">Neurologia do Desenvolvimento e Neuroimagem</div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="expand-content"><div class="expand-text">Médico neuropediatra com CRM ativo e 18 anos de experiência clínica. Doutor em Neurociências pela UNIFESP, com pós-doutorado em Neuroimagem Funcional Pediátrica no Hospital for Sick Children (Toronto). Especialista em TDAH, Transtorno do Espectro Autista e Epilepsia infantil. Domínio em eletroencefalografia, ressonância magnética funcional e avaliação de maturação neurológica. Membro titular da Sociedade Brasileira de Neurologia Infantil e da Child Neurology Society.</div></div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="expand-content"><div class="expand-text">Traz a perspectiva neurológica essencial ao diagnóstico: avalia maturação cerebral, reflexos primitivos persistentes, marcadores neurológicos de TEA/TDAH, padrões eletroencefalográficos e correlações neuroanatômicas. Diferencia quadros neurológicos puros de condições psiquiátricas comórbidas.</div></div>
+    <div class="participation-bar"><div class="participation-fill" style="width:58%;background:var(--emerald)"></div></div>
+    <div class="participation-count">11 falas · 58% participação</div>
+  </div></div>
+
+  <!-- Dra. Íris -->
+  <div class="prof-card"><div class="prof-inner">
+    <div class="prof-header">
+      <div class="prof-avatar">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.95)"/><path d="M26 38c2-14 10-26 24-28s22 14 24 28" stroke="rgba(255,255,255,0.18)" stroke-width="1.2" fill="none"/><path d="M24 42c-2 8-1 18 4 28" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M76 42c2 8 1 18-4 28" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/><path d="M24 50c-2 4 0 8 2 10" stroke="rgba(255,255,255,0.08)" stroke-width=".7" fill="none"/><path d="M76 50c2 4 0 8-2 10" stroke="rgba(255,255,255,0.08)" stroke-width=".7" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1.1" fill="none"/><ellipse cx="41" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><ellipse cx="59" cy="44" rx="3" ry="2" fill="rgba(255,255,255,0.28)"/><circle cx="41" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><circle cx="59" cy="44" r="1" fill="rgba(255,255,255,0.4)"/><path d="M43 58c3 2.5 10 2.5 14 0" stroke="rgba(255,255,255,0.16)" stroke-width=".7" fill="none"/><ellipse cx="30" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><ellipse cx="70" cy="48" rx="3" ry="5" stroke="rgba(255,255,255,0.08)" stroke-width=".6" fill="none"/><path d="M30 92c5-12 9-14 20-14s15 2 20 14" stroke="rgba(255,255,255,0.12)" stroke-width=".8" fill="none"/></svg>
+      </div>
+      <div><div class="prof-name">Dra. Íris Skinner</div><div class="prof-role">BCBA</div></div>
+    </div>
+    <div class="specialty-label">Especialidade</div>
+    <div class="specialty-value" style="color:#FB7185">Análise do Comportamento Aplicada (ABA)</div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="expand-content"><div class="expand-text">Board Certified Behavior Analyst (BCBA) com certificação internacional pelo BACB. Mestre em Análise do Comportamento Aplicada pela University of North Texas. 10 anos de experiência clínica em intervenção comportamental intensiva para crianças com TEA níveis 1, 2 e 3. Especialista em avaliação funcional do comportamento (FBA), protocolos VB-MAPP e ABLLS-R. Supervisora de programas ABA em clínicas multidisciplinares. Publicações em Journal of Applied Behavior Analysis.</div></div>
+    <button class="expand-btn" onclick="toggleExpand(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="expand-content"><div class="expand-text">Responsável pela análise objetiva e mensurável dos comportamentos da criança. Quantifica frequência de estereotipias, ecolalia, comportamentos repetitivos e restritos. Define intervenções baseadas em evidência com metas mensuráveis. Diferencia comportamentos funcionais de comportamentos indicativos de TEA através de análise funcional rigorosa.</div></div>
+    <div class="participation-bar"><div class="participation-fill" style="width:52%;background:var(--rose)"></div></div>
+    <div class="participation-count">10 falas · 52% participação</div>
+  </div></div>
+</aside>
+
+<!-- CENTRO -->
+<main class="center">
+  <div class="mesa-container">
+    <div class="mesa"></div>
+    <div class="oracle-wrap"><div class="oracle"><i class="ph-light ph-brain"></i></div><span class="oracle-name">Coord. MAnalista</span><span class="oracle-tag"><span class="dot-pulse"></span>Processando</span></div>
+
+    <!-- Sofia: ESQUERDA SUP — balão ESQUERDA, avatar DIREITA -->
+    <div class="agent pos-left" id="ag-sofia" style="top:15%;left:2%">
+      <div class="bubble purple active">
+        <span class="bubble-label">Dra. Sofia</span>
+        <div class="bubble-text">A criança apresenta interação simbólica atípica. O brincar não segue o padrão esperado para a faixa etária — há ausência de jogo de faz-de-conta e rigidez na manipulação de objetos.</div>
+        <div class="bubble-footer"><span class="bubble-time">agora</span><div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:8px;color:var(--t2)"></i></div></div>
+      </div>
+      <div class="agent-col">
+        <div class="agent-card speaking-active">
+          <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.94)"/><path d="M24 42c2-18 13-30 26-30s24 12 26 30" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/><path d="M24 42c-3 10-2 20 3 30" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/><path d="M76 42c3 10 2 20-3 30" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1" fill="none"/><ellipse cx="42" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><ellipse cx="58" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><path d="M45 56c3 2 7 2 10 0" stroke="rgba(255,255,255,0.16)" stroke-width=".7" fill="none"/><path d="M50 68v8" stroke="rgba(255,255,255,0.10)" stroke-width=".7"/><path d="M32 105c6-16 10-20 18-20s12 4 18 20" stroke="rgba(255,255,255,0.14)" stroke-width=".8" fill="none"/></svg>
+          <div class="mic-badge"><i class="ph-fill ph-microphone" style="font-size:6px;color:#fff"></i></div>
+        </div>
+        <span class="agent-name" style="color:#A78BFA">Dra. Sofia</span>
+        <span class="agent-specialty">Psicóloga</span>
+        <span class="drag-hint">arrastar</span>
+      </div>
+    </div>
+
+    <!-- Victor: ESQUERDA INF — balão ESQUERDA, avatar DIREITA -->
+    <div class="agent pos-left" id="ag-victor" style="bottom:22%;left:2%">
+      <div class="bubble amber">
+        <span class="bubble-label">Dr. Victor</span>
+        <div class="bubble-text">Os vínculos primários estão fragilizados. A mãe relata dificuldade em estabelecer contato visual durante amamentação. Isso potencializa os sintomas observados.</div>
+        <div class="bubble-footer"><span class="bubble-time">há 3min</span><div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:8px;color:var(--t2)"></i></div></div>
+      </div>
+      <div class="agent-col">
+        <div class="agent-card">
+          <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.94)"/><path d="M28 38c3-14 11-24 22-24s19 10 22 24" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1" fill="none"/><ellipse cx="42" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><ellipse cx="58" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><path d="M35 40c3-2 7-2 10 0" stroke="rgba(255,255,255,0.14)" stroke-width=".7" fill="none"/><path d="M55 40c3-2 7-2 10 0" stroke="rgba(255,255,255,0.14)" stroke-width=".7" fill="none"/><path d="M40 60c0 7 5 10 10 10s10-3 10-10" stroke="rgba(255,255,255,0.10)" stroke-width=".6" fill="none"/><path d="M45 58c3 1 6 1 10 0" stroke="rgba(255,255,255,0.14)" stroke-width=".7" fill="none"/><path d="M50 68v8" stroke="rgba(255,255,255,0.10)" stroke-width=".7"/><path d="M32 105c6-14 10-18 18-18s12 4 18 18" stroke="rgba(255,255,255,0.14)" stroke-width=".8" fill="none"/><path d="M44 88l6 4 6-4" stroke="rgba(255,255,255,0.08)" stroke-width=".5" fill="none"/></svg>
+        </div>
+        <span class="agent-name">Dr. Victor</span>
+        <span class="agent-specialty">Parentalidade</span>
+        <span class="drag-hint">arrastar</span>
+      </div>
+    </div>
+
+    <!-- Marco: DIREITA SUP — avatar ESQUERDA, balão DIREITA -->
+    <div class="agent pos-right" id="ag-marco" style="top:15%;right:2%">
+      <div class="agent-col">
+        <div class="agent-card">
+          <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.94)"/><path d="M30 38c2-14 10-26 20-26s18 12 20 26" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1" fill="none"/><ellipse cx="42" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><ellipse cx="58" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><path d="M50 48v6" stroke="rgba(255,255,255,0.10)" stroke-width=".6"/><path d="M45 59c3 1 7 1 10 0" stroke="rgba(255,255,255,0.14)" stroke-width=".7" fill="none"/><path d="M50 68v8" stroke="rgba(255,255,255,0.10)" stroke-width=".7"/><path d="M32 105c6-14 10-18 18-18s12 4 18 18" stroke="rgba(255,255,255,0.14)" stroke-width=".8" fill="none"/><circle cx="50" cy="88" r="3.5" stroke="rgba(255,255,255,0.08)" stroke-width=".5" fill="none"/></svg>
+        </div>
+        <span class="agent-name">Dr. Marco</span>
+        <span class="agent-specialty">Neuropediatra</span>
+        <span class="drag-hint">arrastar</span>
+      </div>
+      <div class="bubble emerald">
+        <span class="bubble-label">Dr. Marco</span>
+        <div class="bubble-text">Reflexos primitivos persistentes confirmados no exame. Hipersensibilidade tátil e auditiva consistente com disfunção de integração sensorial.</div>
+        <div class="bubble-footer"><span class="bubble-time">há 1min</span><div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:8px;color:var(--t2)"></i></div></div>
+      </div>
+    </div>
+
+    <!-- Íris: DIREITA INF — avatar ESQUERDA, balão DIREITA -->
+    <div class="agent pos-right" id="ag-iris" style="bottom:22%;right:2%">
+      <div class="agent-col">
+        <div class="agent-card">
+          <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.94)"/><path d="M26 40c2-14 10-26 24-28s22 14 24 28" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/><path d="M24 44c-2 8-1 16 4 24" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/><path d="M76 44c2 8 1 16-4 24" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/><ellipse cx="50" cy="48" rx="20" ry="22" stroke="rgba(255,255,255,0.20)" stroke-width="1" fill="none"/><ellipse cx="42" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><ellipse cx="58" cy="45" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.28)"/><path d="M43 57c3 2.5 10 2.5 14 0" stroke="rgba(255,255,255,0.16)" stroke-width=".7" fill="none"/><path d="M50 68v8" stroke="rgba(255,255,255,0.10)" stroke-width=".7"/><path d="M34 105c5-14 9-18 16-18s11 4 16 18" stroke="rgba(255,255,255,0.14)" stroke-width=".8" fill="none"/></svg>
+        </div>
+        <span class="agent-name">Dra. Íris</span>
+        <span class="agent-specialty">BCBA</span>
+        <span class="drag-hint">arrastar</span>
+      </div>
+      <div class="bubble rose">
+        <span class="bubble-label">Dra. Íris</span>
+        <div class="bubble-text">Ecolalia tardia e estereotipias motoras consistentes com TEA nível 2. Frequência de hand-flapping: 12x em sessão de 30 minutos.</div>
+        <div class="bubble-footer"><span class="bubble-time">há 5min</span><div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:8px;color:var(--t2)"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAnalista dialog — inferior central -->
+  <div class="manalista-dialog">
+    <div class="manalista-inner">
+      <div class="manalista-icon"><i class="ph-light ph-brain"></i></div>
+      <div class="manalista-content">
+        <div class="manalista-label-text"><span class="dot-pulse"></span>Coord. MAnalista</div>
+        <div class="manalista-dialog-text">Dra. Sofia, detalhe o padrão de interação social observado durante o brincar livre. Dr. Victor, correlacione com o relato materno sobre as rotinas de alimentação.</div>
+      </div>
+      <div><div class="bubble-expand"><i class="ph-light ph-plus" style="font-size:8px;color:var(--t2)"></i></div></div>
+    </div>
+  </div>
+
+  <!-- Speaking bar -->
+  <div class="speaking-bar">
+    <div class="speaking-avatar"><svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/><ellipse cx="50" cy="48" rx="18" ry="20" stroke="rgba(255,255,255,0.25)" stroke-width="1.2" fill="none"/><ellipse cx="42" cy="45" rx="2" ry="1.5" fill="rgba(255,255,255,0.3)"/><ellipse cx="58" cy="45" rx="2" ry="1.5" fill="rgba(255,255,255,0.3)"/></svg></div>
+    <div><span class="speaking-name">Dra. Sofia Vygotski</span><br><span class="speaking-status">falando agora</span></div>
+    <div class="waveform"><div class="wave-bar" style="animation-delay:0s"></div><div class="wave-bar" style="animation-delay:.1s"></div><div class="wave-bar" style="animation-delay:.2s"></div><div class="wave-bar" style="animation-delay:.05s"></div><div class="wave-bar" style="animation-delay:.15s"></div><div class="wave-bar" style="animation-delay:.25s"></div><div class="wave-bar" style="animation-delay:.08s"></div><div class="wave-bar" style="animation-delay:.18s"></div><div class="wave-bar" style="animation-delay:.12s"></div><div class="wave-bar" style="animation-delay:.22s"></div><div class="wave-bar" style="animation-delay:.03s"></div><div class="wave-bar" style="animation-delay:.13s"></div><div class="wave-bar" style="animation-delay:.07s"></div><div class="wave-bar" style="animation-delay:.17s"></div></div>
+  </div>
+</main>
+
+<!-- PAINEL DIREITO -->
+<aside class="sidebar-right" id="rightPanel">
+  <div class="panel-close-btn" onclick="togglePanel('right')"><i class="ph-light ph-x" style="font-size:12px;color:var(--t2)"></i></div>
+  <div class="right-scroll">
+    <div class="section-label" style="margin-bottom:1px">Análise em Tempo Real</div>
+    <div class="right-title" style="margin-bottom:6px">Probabilidade Diagnóstica</div>
+
+    <div class="prof-card gauge-card animating"><div class="prof-inner" style="padding:7px;display:flex;flex-direction:column;align-items:center">
+      <svg class="gauge-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#gr)" stroke-width="5" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="35.18"/><defs><linearGradient id="gr"><stop offset="0%" stop-color="#E11D48"/><stop offset="100%" stop-color="#FB7185"/></linearGradient></defs></svg>
+      <div class="gauge-value high">72%</div><div class="gauge-label">TEA</div><div class="gauge-sub">CID-11: 6A02</div>
+      <span class="gauge-badge high">Alta probabilidade</span><div class="gauge-live"><span class="dot-pulse"></span>Atualizando</div>
+    </div></div>
+
+    <div class="prof-card gauge-card animating"><div class="prof-inner" style="padding:7px;display:flex;flex-direction:column;align-items:center">
+      <svg class="gauge-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#ga)" stroke-width="5" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="52.78"/><defs><linearGradient id="ga"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient></defs></svg>
+      <div class="gauge-value med">58%</div><div class="gauge-label">TDAH</div><div class="gauge-sub">CID-11: 6A05</div>
+      <span class="gauge-badge med">Média probabilidade</span><div class="gauge-live"><span class="dot-pulse"></span>Atualizando</div>
+    </div></div>
+
+    <div class="prof-card gauge-card animating"><div class="prof-inner" style="padding:7px;display:flex;flex-direction:column;align-items:center">
+      <svg class="gauge-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#ga2)" stroke-width="5" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="74.14"/><defs><linearGradient id="ga2"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient></defs></svg>
+      <div class="gauge-value med">41%</div><div class="gauge-label">Ansiedade Sep.</div><div class="gauge-sub">CID-11: 6B05</div>
+      <span class="gauge-badge med">Média</span><div class="gauge-live"><span class="dot-pulse"></span>Atualizando</div>
+    </div></div>
+
+    <div class="prof-card gauge-card"><div class="prof-inner" style="padding:7px;display:flex;flex-direction:column;align-items:center">
+      <svg class="gauge-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#ge)" stroke-width="5" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="82.93"/><defs><linearGradient id="ge"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs></svg>
+      <div class="gauge-value low">34%</div><div class="gauge-label">Atraso Desenv.</div><div class="gauge-sub">CID-11: 6A00</div>
+      <span class="gauge-badge low">Baixa</span>
+    </div></div>
+
+    <div style="margin-top:6px">
+      <div class="section-label" style="margin-bottom:1px">Progresso</div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value" style="color:#34D399">23:41</div><div class="stat-label">Duração</div></div>
+        <div class="stat-item"><div class="stat-value">47</div><div class="stat-label">Contribuições</div></div>
+        <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Agentes</div></div>
+        <div class="stat-item"><div class="stat-value" style="color:#A78BFA">2<span style="font-size:.55rem;color:var(--t3)">/4</span></div><div class="stat-label">Fase</div></div>
+      </div>
+      <div class="timeline-dots"><div class="tl-dot done"></div><div class="tl-line done"></div><div class="tl-dot active"></div><div class="tl-line"></div><div class="tl-dot pending"></div><div class="tl-line"></div><div class="tl-dot pending"></div></div>
+      <div class="timeline-labels"><span>Abertura</span><span class="active-label">Análise</span><span>Hipótese</span><span>Laudo</span></div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:1px">Laudo</div>
+      <div class="right-title" style="margin-bottom:3px">Em elaboração...</div>
+      <div class="laudo-status"><i class="ph-light ph-arrows-clockwise" style="font-size:8px;animation:spin 2s linear infinite"></i>Tempo real</div>
+    </div>
+  </div>
+  <div class="right-footer">
+    <button class="btn-download"><span class="btn-icon"><i class="ph-light ph-file-pdf" style="font-size:11px"></i></span>Baixar Laudo PDF</button>
+  </div>
+</aside>
+</div>
+
+<div class="mobile-nav">
+  <button class="mobile-btn" onclick="togglePanel('side')"><i class="ph-light ph-users-three" style="font-size:12px"></i>Equipe</button>
+  <button class="mobile-btn" onclick="togglePanel('right')"><i class="ph-light ph-chart-bar" style="font-size:12px"></i>Diagnóstico</button>
+</div>
+
+<script>
+function toggleExpand(btn){btn.classList.toggle('open');btn.nextElementSibling.classList.toggle('open')}
+function togglePanel(p){
+  const s=document.getElementById('sidePanel'),r=document.getElementById('rightPanel');
+  if(p==='side'){s.classList.toggle('show');r.classList.remove('show')}
+  else{r.classList.toggle('show');s.classList.remove('show')}
+}
+document.querySelectorAll('.agent').forEach(ag=>{
+  let sx,sy,ox,oy,d=false;
+  function gp(){const r=ag.getBoundingClientRect(),p=ag.parentElement.getBoundingClientRect();return{x:r.left-p.left,y:r.top-p.top}}
+  function st(cx,cy){const p=gp();ox=p.x;oy=p.y;sx=cx;sy=cy;d=true;ag.classList.add('dragging');ag.style.position='absolute';ag.style.left=ox+'px';ag.style.top=oy+'px';ag.style.right='auto';ag.style.bottom='auto'}
+  function mv(cx,cy){if(!d)return;ag.style.left=(ox+cx-sx)+'px';ag.style.top=(oy+cy-sy)+'px'}
+  function en(){if(d){d=false;ag.classList.remove('dragging')}}
+  ag.addEventListener('mousedown',e=>{e.preventDefault();st(e.clientX,e.clientY)});
+  window.addEventListener('mousemove',e=>mv(e.clientX,e.clientY));
+  window.addEventListener('mouseup',en);
+  ag.addEventListener('touchstart',e=>{const t=e.touches[0];st(t.clientX,t.clientY)},{passive:true});
+  window.addEventListener('touchmove',e=>{const t=e.touches[0];mv(t.clientX,t.clientY)},{passive:true});
+  window.addEventListener('touchend',en);
+});
+</script>
+</body>
+</html>

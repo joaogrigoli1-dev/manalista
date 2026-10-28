@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MAnalista — Mesa de Debate Clínico v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+<style>
+:root{
+  --bg:#050505;--bg2:#0A0A0A;--card-bg:rgba(255,255,255,0.04);--cb:rgba(255,255,255,0.08);
+  --hl:rgba(255,255,255,0.12);
+  --purple:#7C3AED;--purple-s:rgba(167,139,250,0.15);
+  --emerald:#059669;--emerald-s:rgba(52,211,153,0.15);
+  --amber:#D97706;--amber-s:rgba(217,119,6,0.15);
+  --rose:#E11D48;--rose-s:rgba(225,29,72,0.15);
+  --t1:#F8F8F8;--t2:rgba(255,255,255,0.55);--t3:rgba(255,255,255,0.30);
+  --ease:cubic-bezier(0.32,0.72,0,1);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t1);
+  height:100dvh;overflow:hidden;overscroll-behavior:none}
+
+/* BG */
+.bg-a{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 10% 15%,rgba(124,58,237,0.10) 0%,transparent 50%),
+  radial-gradient(ellipse at 88% 82%,rgba(5,150,105,0.07) 0%,transparent 50%),var(--bg)}
+
+/* ═══ LAYOUT ═══ */
+.layout{position:relative;z-index:2;display:grid;grid-template-columns:280px 1fr 320px;height:100dvh;
+  padding-top:calc(60px + var(--safe-top))}
+
+/* ═══ TOPBAR ═══ */
+.top{position:fixed;top:calc(12px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;align-items:center;gap:14px;
+  background:rgba(5,5,5,0.90);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+  border:1px solid rgba(255,255,255,0.10);border-radius:9999px;padding:8px 22px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06),0 8px 32px rgba(0,0,0,0.5);
+  max-width:calc(100vw - 32px);white-space:nowrap}
+.top-logo{font-weight:700;font-size:1rem;background:linear-gradient(135deg,var(--purple),var(--emerald));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.top-live{display:flex;align-items:center;gap:5px;background:var(--emerald-s);border:1px solid rgba(52,211,153,0.25);
+  border-radius:9999px;padding:4px 11px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#34D399}
+.dot{width:6px;height:6px;border-radius:50%;background:#34D399;animation:pd 1.5s ease infinite}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.top-case{font-size:.78rem;color:var(--t2)}
+.top-sep{color:var(--t3)}
+.top-timer{display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--t2);font-variant-numeric:tabular-nums}
+.top-end{display:flex;align-items:center;gap:5px;background:var(--rose-s);border:1px solid rgba(225,29,72,0.25);
+  border-radius:9999px;padding:6px 14px;font-size:.7rem;font-weight:600;color:#FB7185;cursor:pointer;
+  transition:all 400ms var(--ease)}
+.top-end:hover{background:rgba(225,29,72,0.25)}
+
+/* ═══ SIDEBAR ═══ */
+.side{height:calc(100dvh - 60px - var(--safe-top));overflow-y:auto;padding:20px 14px;
+  border-right:1px solid var(--cb);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.side::-webkit-scrollbar{display:none}
+.ey{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--t3);margin-bottom:6px}
+.side-t{font-size:1rem;font-weight:700;margin-bottom:3px}
+.side-s{font-size:.7rem;color:var(--t3);margin-bottom:16px}
+
+/* CARD */
+.sh{background:rgba(255,255,255,0.025);border:1px solid var(--cb);border-radius:1.5rem;padding:4px;margin-bottom:10px;
+  transition:all 500ms var(--ease)}
+.sh:hover{border-color:rgba(255,255,255,0.15)}
+.sh.spk{border-color:rgba(52,211,153,0.35);box-shadow:0 0 24px rgba(52,211,153,0.10)}
+.co{background:var(--card-bg);border-radius:calc(1.5rem - 4px);box-shadow:inset 0 1px 1px var(--hl);padding:14px}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+
+/* SIDEBAR AVATAR — rect card matching the design */
+.s-av{width:48px;height:48px;border-radius:14px;flex-shrink:0;overflow:hidden;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.06);position:relative}
+.s-av svg{width:100%;height:100%}
+.s-av .mic{position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;
+  background:var(--emerald);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;
+  animation:mp .8s ease infinite alternate}
+@keyframes mp{0%{opacity:.7}100%{opacity:1}}
+.cn{font-size:.82rem;font-weight:600;line-height:1.2}
+.cs{font-size:.68rem;color:var(--t3);font-style:italic}
+.bd{display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:600;padding:3px 9px;border-radius:9999px;margin-bottom:8px}
+.bd.p{background:var(--purple-s);color:#A78BFA}.bd.a{background:var(--amber-s);color:#FBBF24}
+.bd.e{background:var(--emerald-s);color:#34D399}.bd.r{background:var(--rose-s);color:#FB7185}
+.bd.g{background:linear-gradient(135deg,var(--purple-s),var(--emerald-s));color:#A78BFA}
+.xb{display:flex;align-items:center;gap:5px;width:100%;background:none;border:none;font-family:inherit;
+  font-size:.62rem;font-weight:600;color:var(--t3);cursor:pointer;padding:5px 0;transition:color 300ms var(--ease)}
+.xb:hover{color:var(--t2)}
+.xb i{font-size:11px;transition:transform 300ms var(--ease)}
+.xb.open i{transform:rotate(45deg)}
+.xc{max-height:0;overflow:hidden;transition:max-height 500ms var(--ease)}
+.xc.open{max-height:200px}
+.xi{padding:4px 0 6px;font-size:.68rem;color:var(--t2);line-height:1.5}
+.cb-bg{height:2px;background:rgba(255,255,255,0.06);border-radius:9999px;overflow:hidden;margin-top:8px;margin-bottom:3px}
+.cb-f{height:100%;border-radius:9999px;transition:width 800ms var(--ease)}
+.cb-c{font-size:.58rem;color:var(--t3)}
+
+/* ═══ CENTRO ═══ */
+.center{height:calc(100dvh - 60px - var(--safe-top));display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:20px;position:relative;overflow:hidden}
+
+/* MESA RETANGULAR */
+.mesa-wrap{position:relative;width:100%;max-width:720px;height:100%;max-height:520px;display:flex;align-items:center;justify-content:center}
+.mesa{width:460px;height:220px;border-radius:110px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at center,rgba(255,255,255,0.045) 0%,rgba(255,255,255,0.012) 60%,transparent 100%);
+  border:1px solid rgba(255,255,255,0.09);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.06),0 0 80px rgba(124,58,237,0.05),0 0 120px rgba(5,150,105,0.03)}
+
+/* ORÁCULO */
+.orb-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;
+  display:flex;flex-direction:column;align-items:center;gap:8px}
+.orb{width:88px;height:88px;border-radius:50%;
+  background:radial-gradient(circle at 38% 38%,rgba(124,58,237,0.35),rgba(5,150,105,0.25),rgba(124,58,237,0.08));
+  border:1.5px solid rgba(167,139,250,0.25);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 50px rgba(124,58,237,0.2),0 0 100px rgba(5,150,105,0.1),inset 0 0 30px rgba(255,255,255,0.04);
+  animation:ob 4s ease-in-out infinite alternate;position:relative}
+.orb::before{content:'';position:absolute;inset:-12px;border-radius:50%;
+  border:1px solid rgba(167,139,250,0.12);animation:or 8s linear infinite}
+.orb::after{content:'';position:absolute;inset:-22px;border-radius:50%;
+  border:1px dashed rgba(52,211,153,0.08);animation:or 12s linear infinite reverse}
+@keyframes ob{0%{box-shadow:0 0 50px rgba(124,58,237,0.2),0 0 100px rgba(5,150,105,0.1)}
+  100%{box-shadow:0 0 60px rgba(5,150,105,0.25),0 0 110px rgba(124,58,237,0.12)}}
+@keyframes or{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.orb i{font-size:36px;color:rgba(255,255,255,0.75)}
+.orb-n{font-size:.72rem;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--emerald));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+.orb-tag{font-size:.55rem;color:var(--t3);text-transform:uppercase;letter-spacing:.15em;
+  display:flex;align-items:center;gap:4px}
+.orb-tag .dot{width:5px;height:5px}
+
+/* ═══ AGENTES NA MESA — AVATARES GRANDES RECT ═══ */
+.agent{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:8;
+  transition:transform 300ms var(--ease)}
+.agent:hover{transform:scale(1.04);cursor:pointer}
+
+/* Avatar card retangular, sem círculo, face grande */
+.a-card{width:80px;height:90px;border-radius:18px;overflow:hidden;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.06);position:relative}
+.a-card svg{width:100%;height:100%;display:block}
+.a-card.spk-active{border-color:rgba(52,211,153,0.4);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.06),0 0 20px rgba(52,211,153,0.15);
+  animation:sp 1.5s ease infinite}
+@keyframes sp{0%{box-shadow:0 0 0 0 rgba(52,211,153,0.4),inset 0 1px 1px rgba(255,255,255,0.06)}
+  70%{box-shadow:0 0 0 10px rgba(52,211,153,0),inset 0 1px 1px rgba(255,255,255,0.06)}
+  100%{box-shadow:0 0 0 0 rgba(52,211,153,0),inset 0 1px 1px rgba(255,255,255,0.06)}}
+.a-card .mic{position:absolute;bottom:4px;right:4px;width:16px;height:16px;border-radius:50%;
+  background:var(--emerald);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center}
+.a-n{font-size:.7rem;font-weight:600;text-align:center;white-space:nowrap;margin-top:5px}
+.a-s{font-size:.55rem;color:var(--t3);font-style:italic}
+
+/* Posições: 2 esq, 2 dir, colados na borda da mesa */
+.agent.tl{top:calc(50% - 190px);left:calc(50% - 310px)}
+.agent.bl{top:calc(50% + 60px);left:calc(50% - 310px)}
+.agent.tr{top:calc(50% - 190px);right:calc(50% - 310px)}
+.agent.br{top:calc(50% + 60px);right:calc(50% - 310px)}
+
+/* ═══ BALÕES ═══ */
+.bub{position:absolute;max-width:210px;min-width:130px;border-radius:16px;padding:10px 13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);opacity:.4;transition:all 500ms var(--ease);z-index:14}
+.bub.act{opacity:1}
+.bub-ey{display:inline-block;font-size:.52rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+  padding:2px 7px;border-radius:9999px;margin-bottom:5px}
+.bub-tx{font-size:.72rem;color:var(--t1);line-height:1.45}
+.bub-ft{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.bub-tm{font-size:.55rem;color:var(--t3)}
+.bub-ex{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 300ms var(--ease)}
+.bub-ex:hover{background:rgba(255,255,255,0.14);transform:scale(1.1)}
+.bub.pu{background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.18)}
+.bub.pu .bub-ey{background:var(--purple-s);color:#A78BFA}
+.bub.am{background:rgba(217,119,6,0.10);border:1px solid rgba(217,119,6,0.18)}
+.bub.am .bub-ey{background:var(--amber-s);color:#FBBF24}
+.bub.em{background:rgba(5,150,105,0.10);border:1px solid rgba(5,150,105,0.18)}
+.bub.em .bub-ey{background:var(--emerald-s);color:#34D399}
+.bub.ro{background:rgba(225,29,72,0.10);border:1px solid rgba(225,29,72,0.18)}
+.bub.ro .bub-ey{background:var(--rose-s);color:#FB7185}
+
+/* Balão oráculo */
+.bub-orb{position:absolute;top:calc(50% - 145px);left:50%;transform:translateX(-50%);z-index:15;
+  max-width:280px;border-radius:16px;padding:10px 14px;
+  background:linear-gradient(135deg,rgba(124,58,237,0.10),rgba(5,150,105,0.08));
+  border:1px solid rgba(167,139,250,0.18);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05)}
+.bub-orb .bub-ey{background:linear-gradient(135deg,var(--purple-s),var(--emerald-s));color:#A78BFA}
+
+/* Balão posições relativas aos agentes */
+.bub.b-tl{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%)}
+.bub.b-bl{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%)}
+.bub.b-tr{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%)}
+.bub.b-br{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%)}
+
+/* ═══ SPEAKING BAR ═══ */
+.spk-bar{position:absolute;bottom:calc(16px + var(--safe-bot));left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:10px;
+  background:rgba(5,5,5,0.90);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(52,211,153,0.18);border-radius:9999px;padding:7px 18px;
+  box-shadow:0 0 24px rgba(52,211,153,0.06);white-space:nowrap;z-index:20}
+.spk-mini{width:28px;height:28px;border-radius:8px;overflow:hidden;flex-shrink:0;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)}
+.spk-mini svg{width:100%;height:100%}
+.spk-n{font-size:.7rem;font-weight:600;color:#34D399}
+.spk-r{font-size:.55rem;color:var(--t3)}
+.wf{display:flex;align-items:center;gap:2px;height:20px}
+.wb{width:2.5px;border-radius:9999px;background:var(--emerald);animation:wv .8s ease-in-out infinite alternate}
+@keyframes wv{0%{height:3px;opacity:.4}100%{height:15px;opacity:1}}
+
+/* ═══ PAINEL DIREITO ═══ */
+.right{height:calc(100dvh - 60px - var(--safe-top));overflow-y:auto;padding:20px 14px;
+  border-left:1px solid var(--cb);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.right::-webkit-scrollbar{display:none}
+.st{font-size:.92rem;font-weight:700;margin-bottom:3px}
+.g-card{margin-bottom:10px}
+.g-card .co{padding:12px;display:flex;flex-direction:column;align-items:center}
+.g-svg{width:100px;height:55px;margin-bottom:2px}
+.g-val{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums;transition:color 600ms var(--ease)}
+.g-val.h{color:var(--rose)}.g-val.m{color:var(--amber)}.g-val.l{color:var(--emerald)}
+.g-lbl{font-size:.72rem;font-weight:600;text-align:center;margin-bottom:2px}
+.g-sub{font-size:.58rem;text-align:center;color:var(--t3);margin-bottom:6px}
+.g-bd{font-size:.55rem;font-weight:600;padding:3px 9px;border-radius:9999px}
+.g-bd.h{background:var(--rose-s);color:#FB7185}.g-bd.m{background:var(--amber-s);color:#FBBF24}.g-bd.l{background:var(--emerald-s);color:#34D399}
+.g-card.anim .g-val{animation:gf 2s ease infinite}
+@keyframes gf{0%,100%{opacity:1}50%{opacity:.65}}
+.g-tag{font-size:.5rem;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px;
+  display:flex;align-items:center;gap:3px}
+.g-tag .dot{width:4px;height:4px;background:var(--amber)}
+
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+.si{background:var(--card-bg);border:1px solid var(--cb);border-radius:12px;padding:10px;text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
+.sv{font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}
+.sl{font-size:.55rem;color:var(--t3);margin-top:2px}
+.tl-w{display:flex;align-items:center;gap:0;margin-bottom:5px;padding:0 6px}
+.td{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.td.d{background:var(--emerald)}.td.ac{background:var(--purple);animation:tp 1.5s ease infinite}
+@keyframes tp{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.4)}50%{box-shadow:0 0 0 5px rgba(124,58,237,0)}}
+.td.pe{background:rgba(255,255,255,0.15)}
+.tln{flex:1;height:2px;background:rgba(255,255,255,0.08)}.tln.d{background:var(--emerald);opacity:.4}
+.tll{display:flex;justify-content:space-between;padding:0 2px;margin-bottom:18px}
+.tll span{font-size:.52rem;color:var(--t3)}.tll span.al{color:#A78BFA;font-weight:600}
+
+.ls{display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:600;padding:3px 10px;border-radius:9999px;
+  background:linear-gradient(135deg,var(--purple-s),var(--emerald-s));color:#A78BFA;margin-bottom:10px}
+.l-sec{margin-bottom:10px}
+.l-st{font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);margin-bottom:4px}
+.l-hyp{background:rgba(255,255,255,0.03);border:1px solid var(--cb);border-radius:12px;padding:9px 11px;margin-bottom:6px}
+.l-ht{font-size:.75rem;font-weight:600;margin-bottom:1px}
+.l-hc{font-size:.58rem;color:var(--t3)}
+.l-tx{font-size:.68rem;color:var(--t2);line-height:1.5}
+.l-items{list-style:none;padding:0}
+.l-items li{font-size:.68rem;color:var(--t2);padding:3px 0;display:flex;align-items:center;gap:6px}
+.l-items li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--emerald);flex-shrink:0}
+.bp{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px 16px;border-radius:9999px;
+  border:1px solid rgba(255,255,255,0.12);background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(5,150,105,0.12));
+  color:var(--t1);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 400ms var(--ease)}
+.bp:hover{background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(5,150,105,0.25));transform:scale(1.02);
+  box-shadow:0 0 24px rgba(124,58,237,0.15)}
+.bp:active{transform:scale(.97)}
+.bp-i{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* ═══ RESPONSIVE ═══ */
+
+/* Tablet */
+@media(max-width:1100px){
+  .layout{grid-template-columns:240px 1fr 280px}
+  .mesa{width:380px;height:180px}
+  .agent.tl{left:calc(50% - 260px)}.agent.bl{left:calc(50% - 260px)}
+  .agent.tr{right:calc(50% - 260px)}.agent.br{right:calc(50% - 260px)}
+}
+
+/* Mobile landscape / small tablet */
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;grid-template-rows:1fr;padding-top:calc(56px + var(--safe-top))}
+  .side,.right{display:none}
+  .side.show,.right.show{display:block;position:fixed;top:calc(56px + var(--safe-top));bottom:0;width:300px;z-index:50;
+    background:rgba(5,5,5,0.96);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+    border:none;animation:slide-in 400ms var(--ease)}
+  .side.show{left:0;border-right:1px solid var(--cb)}
+  .right.show{right:0;border-left:1px solid var(--cb)}
+  @keyframes slide-in{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+  .mob-nav{display:flex!important}
+}
+
+/* Mobile portrait */
+@media(max-width:640px){
+  .top{padding:6px 14px;gap:8px}
+  .top-case,.top-sep{display:none}
+  .mesa{width:280px;height:140px;border-radius:70px}
+  .a-card{width:64px;height:72px;border-radius:14px}
+  .agent.tl{top:calc(50% - 155px);left:calc(50% - 200px)}
+  .agent.bl{top:calc(50% + 45px);left:calc(50% - 200px)}
+  .agent.tr{top:calc(50% - 155px);right:calc(50% - 200px)}
+  .agent.br{top:calc(50% + 45px);right:calc(50% - 200px)}
+  .orb{width:68px;height:68px}
+  .orb i{font-size:28px}
+  .bub{max-width:160px;min-width:100px;padding:8px 10px}
+  .bub-tx{font-size:.65rem}
+  .bub-orb{top:calc(50% - 125px);max-width:220px}
+  .spk-bar{padding:5px 12px;gap:8px}
+}
+
+/* Mobile nav buttons (hidden on desktop) */
+.mob-nav{display:none;position:fixed;bottom:calc(10px + var(--safe-bot));left:50%;transform:translateX(-50%);
+  z-index:60;gap:8px}
+.mob-btn{padding:8px 16px;border-radius:9999px;border:1px solid var(--cb);background:rgba(5,5,5,0.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:var(--t2);font-size:.68rem;font-weight:600;
+  font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 300ms var(--ease)}
+.mob-btn:hover,.mob-btn.active{background:rgba(255,255,255,0.08);color:var(--t1)}
+
+/* Close button for mobile panels */
+.panel-close{display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.06);border:1px solid var(--cb);align-items:center;justify-content:center;
+  cursor:pointer;z-index:60}
+@media(max-width:900px){.panel-close{display:flex}}
+</style>
+</head>
+<body>
+<div class="bg-a"></div>
+
+<!-- TOPBAR -->
+<nav class="top">
+  <span class="top-logo">MAnalista</span>
+  <div class="top-live"><span class="dot"></span>Ao Vivo</div>
+  <span class="top-case">Caso #2847 — Neuropsicopediatria</span>
+  <span class="top-sep">|</span>
+  <span class="top-timer"><i class="ph-light ph-timer" style="font-size:14px"></i>23:41</span>
+  <button class="top-end"><i class="ph-light ph-x" style="font-size:10px"></i>Encerrar</button>
+</nav>
+
+<div class="layout">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="side" id="sidePanel">
+  <div class="panel-close" onclick="togglePanel('side')"><i class="ph-light ph-x" style="font-size:14px;color:var(--t2)"></i></div>
+  <div class="ey">Equipe</div>
+  <div class="side-t">Profissionais</div>
+  <div class="side-s">4 especialistas · 1 IA mediadora</div>
+
+  <!-- Coord. MAnalista -->
+  <div class="sh"><div class="co">
+    <div class="ch">
+      <div class="s-av" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(5,150,105,0.15));border-color:rgba(167,139,250,0.2)">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="42" r="16" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none"/>
+          <path d="M34 42c0-10 7-20 16-20s16 10 16 20" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/>
+          <rect x="37" y="38" width="10" height="5" rx="2" stroke="rgba(255,255,255,0.2)" stroke-width=".7" fill="none"/>
+          <rect x="53" y="38" width="10" height="5" rx="2" stroke="rgba(255,255,255,0.2)" stroke-width=".7" fill="none"/>
+          <line x1="47" y1="40.5" x2="53" y2="40.5" stroke="rgba(255,255,255,0.12)" stroke-width=".5"/>
+          <circle cx="42" cy="40.5" r="1.8" fill="rgba(255,255,255,0.25)"/>
+          <circle cx="58" cy="40.5" r="1.8" fill="rgba(255,255,255,0.25)"/>
+          <path d="M46 49c2 1.5 6 1.5 8 0" stroke="rgba(255,255,255,0.15)" stroke-width=".7" fill="none"/>
+          <circle cx="30" cy="42" r="5" stroke="rgba(255,255,255,0.1)" stroke-width=".6" fill="none"/>
+          <circle cx="70" cy="42" r="5" stroke="rgba(255,255,255,0.1)" stroke-width=".6" fill="none"/>
+          <path d="M50 58v8" stroke="rgba(255,255,255,0.12)" stroke-width=".8"/>
+          <path d="M36 84c5-14 8-18 14-18s9 4 14 18" stroke="rgba(255,255,255,0.15)" stroke-width=".8" fill="none"/>
+        </svg>
+      </div>
+      <div><div class="cn">Coord. MAnalista</div><div class="cs">IA Mediadora</div></div>
+    </div>
+    <span class="bd g"><i class="ph-light ph-crown-simple" style="font-size:9px"></i>Oráculo</span>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Sobre a IA</button>
+    <div class="xc"><div class="xi">Sintetiza dados, arbitra posições e consolida o laudo final.</div></div>
+    <div class="cb-bg"><div class="cb-f" style="width:100%;background:linear-gradient(90deg,var(--purple),var(--emerald))"></div></div>
+    <div class="cb-c">Sempre ativa</div>
+  </div></div>
+
+  <!-- Dra. Sofia -->
+  <div class="sh spk"><div class="co">
+    <div class="ch">
+      <div class="s-av">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="40" r="16" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none"/>
+          <path d="M26 36c2-16 12-26 24-26s22 10 24 26" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+          <path d="M28 36c-2 8-1 18 2 28" stroke="rgba(255,255,255,0.10)" stroke-width="1" fill="none"/>
+          <path d="M72 36c2 8 1 18-2 28" stroke="rgba(255,255,255,0.10)" stroke-width="1" fill="none"/>
+          <ellipse cx="43" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <ellipse cx="57" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <path d="M47 46c2 1.5 5 1.5 7 0" stroke="rgba(255,255,255,0.18)" stroke-width=".7" fill="none"/>
+          <path d="M50 56v8" stroke="rgba(255,255,255,0.12)" stroke-width=".8"/>
+          <path d="M36 84c5-14 8-18 14-18s9 4 14 18" stroke="rgba(255,255,255,0.15)" stroke-width=".8" fill="none"/>
+        </svg>
+        <div class="mic"><i class="ph-fill ph-microphone" style="font-size:6px;color:#fff"></i></div>
+      </div>
+      <div><div class="cn">Dra. Sofia Vygotski</div><div class="cs">Psicóloga Infantil</div></div>
+    </div>
+    <span class="bd p"><i class="ph-light ph-brain" style="font-size:9px"></i>Desenv. Sociocultural</span>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="xc"><div class="xi">CRP ativa. Cognição infantil e aprendizagem mediada. Pós em Neuropsicologia.</div></div>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="xc"><div class="xi">Avalia como a criança constrói conhecimento e interage socialmente.</div></div>
+    <div class="cb-bg"><div class="cb-f" style="width:72%;background:var(--purple)"></div></div>
+    <div class="cb-c">14 falas</div>
+  </div></div>
+
+  <!-- Dr. Victor -->
+  <div class="sh"><div class="co">
+    <div class="ch">
+      <div class="s-av">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="40" r="16" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none"/>
+          <path d="M30 32c4-12 12-20 20-20s16 8 20 20" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+          <ellipse cx="43" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <ellipse cx="57" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <path d="M47 47c2 1 5 1 7 0" stroke="rgba(255,255,255,0.18)" stroke-width=".7" fill="none"/>
+          <path d="M50 56v8" stroke="rgba(255,255,255,0.12)" stroke-width=".8"/>
+          <path d="M36 84c4-12 8-16 14-16s10 4 14 16" stroke="rgba(255,255,255,0.15)" stroke-width=".8" fill="none"/>
+          <path d="M40 70l10 4 10-4" stroke="rgba(255,255,255,0.10)" stroke-width=".7" fill="none"/>
+        </svg>
+      </div>
+      <div><div class="cn">Dr. Victor Winnicott</div><div class="cs">Parentalidade</div></div>
+    </div>
+    <span class="bd a"><i class="ph-light ph-users" style="font-size:9px"></i>Vínculos Familiares</span>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="xc"><div class="xi">Apego, relações parentais e desenvolvimento emocional.</div></div>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="xc"><div class="xi">Analisa o ambiente familiar — fator chave na expressão de sintomas.</div></div>
+    <div class="cb-bg"><div class="cb-f" style="width:45%;background:var(--amber)"></div></div>
+    <div class="cb-c">9 falas</div>
+  </div></div>
+
+  <!-- Dr. Marco -->
+  <div class="sh"><div class="co">
+    <div class="ch">
+      <div class="s-av">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="40" r="16" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none"/>
+          <path d="M32 36c2-14 10-24 18-24s16 10 18 24" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+          <ellipse cx="43" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <ellipse cx="57" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <line x1="47" y1="43" x2="53" y2="43" stroke="rgba(255,255,255,0.15)" stroke-width=".6"/>
+          <path d="M47 47c2 1 5 1 7 0" stroke="rgba(255,255,255,0.18)" stroke-width=".7" fill="none"/>
+          <path d="M50 56v8" stroke="rgba(255,255,255,0.12)" stroke-width=".8"/>
+          <path d="M36 84c5-14 8-18 14-18s9 4 14 18" stroke="rgba(255,255,255,0.15)" stroke-width=".8" fill="none"/>
+          <circle cx="50" cy="72" r="3.5" stroke="rgba(255,255,255,0.1)" stroke-width=".7" fill="none"/>
+        </svg>
+      </div>
+      <div><div class="cn">Dr. Marco Cajal</div><div class="cs">Neuropediatra</div></div>
+    </div>
+    <span class="bd e"><i class="ph-light ph-pulse" style="font-size:9px"></i>Bases Neurológicas</span>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="xc"><div class="xi">TDAH, TEA e epilepsia infantil. Neuroimagem funcional.</div></div>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="xc"><div class="xi">Traz perspectiva neurológica: maturação cerebral e marcadores.</div></div>
+    <div class="cb-bg"><div class="cb-f" style="width:58%;background:var(--emerald)"></div></div>
+    <div class="cb-c">11 falas</div>
+  </div></div>
+
+  <!-- Dra. Íris -->
+  <div class="sh"><div class="co">
+    <div class="ch">
+      <div class="s-av">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="40" r="16" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none"/>
+          <path d="M28 34c2-10 10-20 22-22s20 12 22 22" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+          <path d="M26 40c-2-4-2-10 2-14" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/>
+          <path d="M74 40c2-4 2-10-2-14" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/>
+          <ellipse cx="43" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <ellipse cx="57" cy="38" rx="2.2" ry="1.6" fill="rgba(255,255,255,0.28)"/>
+          <path d="M46 46c2.5 1.5 6 1.5 8 0" stroke="rgba(255,255,255,0.18)" stroke-width=".7" fill="none"/>
+          <path d="M50 56v8" stroke="rgba(255,255,255,0.12)" stroke-width=".8"/>
+          <path d="M36 84c4-12 8-16 14-16s10 4 14 16" stroke="rgba(255,255,255,0.15)" stroke-width=".8" fill="none"/>
+        </svg>
+      </div>
+      <div><div class="cn">Dra. Íris Skinner</div><div class="cs">BCBA</div></div>
+    </div>
+    <span class="bd r"><i class="ph-light ph-chart-line" style="font-size:9px"></i>Análise Comportamental</span>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Currículo</button>
+    <div class="xc"><div class="xi">BCBA certificada. ABA e intervenções baseadas em evidências.</div></div>
+    <button class="xb" onclick="toggle(this)"><i class="ph-light ph-plus"></i>Por que está na equipe</button>
+    <div class="xc"><div class="xi">Mede comportamentos observáveis e define intervenções práticas.</div></div>
+    <div class="cb-bg"><div class="cb-f" style="width:52%;background:var(--rose)"></div></div>
+    <div class="cb-c">10 falas</div>
+  </div></div>
+</aside>
+
+<!-- ═══ CENTRO ═══ -->
+<main class="center">
+  <div class="mesa-wrap">
+    <div class="mesa"></div>
+    <div class="orb-wrap"><div class="orb"><i class="ph-light ph-brain"></i></div>
+      <span class="orb-n">Coord. MAnalista</span>
+      <span class="orb-tag"><span class="dot"></span>Processando</span>
+    </div>
+
+    <!-- Balão oráculo -->
+    <div class="bub-orb">
+      <span class="bub-ey">Coord. MAnalista</span>
+      <div class="bub-tx">Dra. Sofia, detalhe o padrão de interação social observado.</div>
+      <div class="bub-ft"><span class="bub-tm">agora</span><div class="bub-ex"><i class="ph-light ph-plus" style="font-size:10px;color:var(--t2)"></i></div></div>
+    </div>
+
+    <!-- Sofia (esq sup) -->
+    <div class="agent tl">
+      <div class="bub pu act b-tl"><span class="bub-ey">Dra. Sofia</span>
+        <div class="bub-tx">Interação simbólica atípica. Não segue o esperado.</div>
+        <div class="bub-ft"><span class="bub-tm">agora</span><div class="bub-ex"><i class="ph-light ph-plus" style="font-size:10px;color:var(--t2)"></i></div></div>
+      </div>
+      <div class="a-card spk-active">
+        <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="45" r="20" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" fill="none"/>
+          <path d="M24 40c2-18 13-30 26-30s24 12 26 30" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none"/>
+          <path d="M26 40c-3 10-2 22 3 34" stroke="rgba(255,255,255,0.10)" stroke-width="1" fill="none"/>
+          <path d="M74 40c3 10 2 22-3 34" stroke="rgba(255,255,255,0.10)" stroke-width="1" fill="none"/>
+          <ellipse cx="42" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <ellipse cx="58" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <path d="M38 43 a5 2 0 0 1 10 0" stroke="rgba(255,255,255,0.1)" stroke-width=".5" fill="none"/>
+          <path d="M52 43 a5 2 0 0 1 10 0" stroke="rgba(255,255,255,0.1)" stroke-width=".5" fill="none"/>
+          <line x1="48" y1="50" x2="52" y2="50" stroke="rgba(255,255,255,0.12)" stroke-width=".5"/>
+          <path d="M45 54c3 2 7 2 10 0" stroke="rgba(255,255,255,0.18)" stroke-width=".8" fill="none"/>
+          <path d="M50 65v10" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <path d="M32 105c6-16 10-22 18-22s12 6 18 22" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+        </svg>
+        <div class="mic"><i class="ph-fill ph-microphone" style="font-size:7px;color:#fff"></i></div>
+      </div>
+      <span class="a-n" style="color:#A78BFA">Dra. Sofia</span>
+      <span class="a-s">Psicóloga Infantil</span>
+    </div>
+
+    <!-- Victor (esq inf) -->
+    <div class="agent bl">
+      <div class="bub am b-bl"><span class="bub-ey">Dr. Victor</span>
+        <div class="bub-tx">Vínculos primários fragilizados. Potencializa sintomas.</div>
+        <div class="bub-ft"><span class="bub-tm">há 3min</span><div class="bub-ex"><i class="ph-light ph-plus" style="font-size:10px;color:var(--t2)"></i></div></div>
+      </div>
+      <div class="a-card">
+        <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="45" r="20" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" fill="none"/>
+          <path d="M28 36c4-14 13-24 22-24s18 10 22 24" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none"/>
+          <ellipse cx="42" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <ellipse cx="58" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <path d="M45 54c3 1.5 7 1.5 10 0" stroke="rgba(255,255,255,0.18)" stroke-width=".8" fill="none"/>
+          <path d="M50 65v10" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <path d="M32 105c6-16 10-20 18-20s12 4 18 20" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+          <path d="M40 82l10 5 10-5" stroke="rgba(255,255,255,0.10)" stroke-width=".8" fill="none"/>
+        </svg>
+      </div>
+      <span class="a-n">Dr. Victor</span>
+      <span class="a-s">Parentalidade</span>
+    </div>
+
+    <!-- Marco (dir sup) -->
+    <div class="agent tr">
+      <div class="bub em b-tr"><span class="bub-ey">Dr. Marco</span>
+        <div class="bub-tx">Reflexos persistentes e hipersensibilidade confirmados.</div>
+        <div class="bub-ft"><span class="bub-tm">há 1min</span><div class="bub-ex"><i class="ph-light ph-plus" style="font-size:10px;color:var(--t2)"></i></div></div>
+      </div>
+      <div class="a-card">
+        <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="45" r="20" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" fill="none"/>
+          <path d="M30 40c2-16 10-28 20-28s18 12 20 28" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none"/>
+          <ellipse cx="42" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <ellipse cx="58" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <line x1="47" y1="50" x2="53" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width=".6"/>
+          <path d="M45 55c3 1 7 1 10 0" stroke="rgba(255,255,255,0.18)" stroke-width=".8" fill="none"/>
+          <path d="M50 65v10" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <path d="M32 105c6-16 10-20 18-20s12 4 18 20" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+          <circle cx="50" cy="82" r="4" stroke="rgba(255,255,255,0.10)" stroke-width=".7" fill="none"/>
+        </svg>
+      </div>
+      <span class="a-n">Dr. Marco</span>
+      <span class="a-s">Neuropediatra</span>
+    </div>
+
+    <!-- Íris (dir inf) -->
+    <div class="agent br">
+      <div class="bub ro b-br"><span class="bub-ey">Dra. Íris</span>
+        <div class="bub-tx">Ecolalia e estereotipias consistentes com TEA 2.</div>
+        <div class="bub-ft"><span class="bub-tm">há 5min</span><div class="bub-ex"><i class="ph-light ph-plus" style="font-size:10px;color:var(--t2)"></i></div></div>
+      </div>
+      <div class="a-card">
+        <svg viewBox="0 0 100 112"><rect width="100" height="112" fill="rgba(5,5,5,0.9)"/>
+          <circle cx="50" cy="45" r="20" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" fill="none"/>
+          <path d="M26 38c2-12 10-22 24-24s22 12 24 24" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none"/>
+          <path d="M24 44c-2-5-2-12 3-18" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/>
+          <path d="M76 44c2-5 2-12-3-18" stroke="rgba(255,255,255,0.09)" stroke-width=".8" fill="none"/>
+          <ellipse cx="42" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <ellipse cx="58" cy="43" rx="2.8" ry="2" fill="rgba(255,255,255,0.3)"/>
+          <path d="M44 54c3 2 8 2 12 0" stroke="rgba(255,255,255,0.18)" stroke-width=".8" fill="none"/>
+          <path d="M50 65v10" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <path d="M34 105c5-14 9-18 16-18s11 4 16 18" stroke="rgba(255,255,255,0.16)" stroke-width="1" fill="none"/>
+        </svg>
+      </div>
+      <span class="a-n">Dra. Íris</span>
+      <span class="a-s">BCBA</span>
+    </div>
+  </div>
+
+  <!-- Speaking bar -->
+  <div class="spk-bar">
+    <div class="spk-mini">
+      <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="rgba(5,5,5,0.9)"/>
+        <circle cx="50" cy="42" r="16" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+        <ellipse cx="42" cy="40" rx="2" ry="1.5" fill="rgba(255,255,255,0.35)"/><ellipse cx="58" cy="40" rx="2" ry="1.5" fill="rgba(255,255,255,0.35)"/>
+      </svg>
+    </div>
+    <div><span class="spk-n">Dra. Sofia Vygotski</span><br><span class="spk-r">falando agora</span></div>
+    <div class="wf">
+      <div class="wb" style="animation-delay:0s"></div><div class="wb" style="animation-delay:.1s"></div>
+      <div class="wb" style="animation-delay:.2s"></div><div class="wb" style="animation-delay:.05s"></div>
+      <div class="wb" style="animation-delay:.15s"></div><div class="wb" style="animation-delay:.25s"></div>
+      <div class="wb" style="animation-delay:.08s"></div><div class="wb" style="animation-delay:.18s"></div>
+      <div class="wb" style="animation-delay:.12s"></div><div class="wb" style="animation-delay:.22s"></div>
+      <div class="wb" style="animation-delay:.03s"></div><div class="wb" style="animation-delay:.13s"></div>
+      <div class="wb" style="animation-delay:.07s"></div><div class="wb" style="animation-delay:.17s"></div>
+      <div class="wb" style="animation-delay:.23s"></div><div class="wb" style="animation-delay:.01s"></div>
+      <div class="wb" style="animation-delay:.11s"></div><div class="wb" style="animation-delay:.21s"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══ PAINEL DIREITO ═══ -->
+<aside class="right" id="rightPanel">
+  <div class="panel-close" onclick="togglePanel('right')"><i class="ph-light ph-x" style="font-size:14px;color:var(--t2)"></i></div>
+  <div class="ey">Análise em Tempo Real</div>
+  <div class="st" style="margin-bottom:14px">Probabilidade Diagnóstica</div>
+
+  <div class="sh g-card anim"><div class="co">
+    <svg class="g-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#gr)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="35.18"/><defs><linearGradient id="gr"><stop offset="0%" stop-color="#E11D48"/><stop offset="100%" stop-color="#FB7185"/></linearGradient></defs></svg>
+    <div class="g-val h">72%</div><div class="g-lbl">TEA</div><div class="g-sub">CID-11: 6A02</div>
+    <div class="cb-bg" style="width:100%;margin-bottom:6px"><div class="cb-f" style="width:72%;background:var(--rose)"></div></div>
+    <span class="g-bd h">Alta probabilidade</span><div class="g-tag"><span class="dot"></span>Atualizando</div>
+  </div></div>
+
+  <div class="sh g-card anim"><div class="co">
+    <svg class="g-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#ga)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="52.78"/><defs><linearGradient id="ga"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient></defs></svg>
+    <div class="g-val m">58%</div><div class="g-lbl">TDAH</div><div class="g-sub">CID-11: 6A05</div>
+    <div class="cb-bg" style="width:100%;margin-bottom:6px"><div class="cb-f" style="width:58%;background:var(--amber)"></div></div>
+    <span class="g-bd m">Média probabilidade</span><div class="g-tag"><span class="dot"></span>Atualizando</div>
+  </div></div>
+
+  <div class="sh g-card anim"><div class="co">
+    <svg class="g-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#ga2)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="74.14"/><defs><linearGradient id="ga2"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient></defs></svg>
+    <div class="g-val m">41%</div><div class="g-lbl">Ansiedade de Separação</div><div class="g-sub">CID-11: 6B05</div>
+    <div class="cb-bg" style="width:100%;margin-bottom:6px"><div class="cb-f" style="width:41%;background:var(--amber)"></div></div>
+    <span class="g-bd m">Média probabilidade</span><div class="g-tag"><span class="dot"></span>Atualizando</div>
+  </div></div>
+
+  <div class="sh g-card"><div class="co">
+    <svg class="g-svg" viewBox="0 0 100 55"><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" stroke-linecap="round"/><path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="url(#ge)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="82.93"/><defs><linearGradient id="ge"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs></svg>
+    <div class="g-val l">34%</div><div class="g-lbl">Atraso no Desenvolvimento</div><div class="g-sub">CID-11: 6A00</div>
+    <div class="cb-bg" style="width:100%;margin-bottom:6px"><div class="cb-f" style="width:34%;background:var(--emerald)"></div></div>
+    <span class="g-bd l">Baixa probabilidade</span>
+  </div></div>
+
+  <div style="margin-top:12px">
+    <div class="ey">Progresso</div>
+    <div class="sg">
+      <div class="si"><div class="sv" style="color:#34D399">23:41</div><div class="sl">Duração</div></div>
+      <div class="si"><div class="sv">47</div><div class="sl">Contribuições</div></div>
+      <div class="si"><div class="sv">4</div><div class="sl">Agentes</div></div>
+      <div class="si"><div class="sv" style="color:#A78BFA">2<span style="font-size:.65rem;color:var(--t3)">/4</span></div><div class="sl">Fase</div></div>
+    </div>
+    <div class="tl-w"><div class="td d"></div><div class="tln d"></div><div class="td ac"></div><div class="tln"></div><div class="td pe"></div><div class="tln"></div><div class="td pe"></div></div>
+    <div class="tll"><span>Abertura</span><span class="al">Análise</span><span>Hipótese</span><span>Laudo</span></div>
+  </div>
+
+  <div>
+    <div class="ey">Laudo</div>
+    <div class="st" style="margin-bottom:8px">Em elaboração...</div>
+    <div class="ls"><i class="ph-light ph-arrows-clockwise" style="font-size:10px;animation:spin 2s linear infinite"></i>Tempo real</div>
+    <div class="sh"><div class="co">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+        <i class="ph-light ph-first-aid-kit" style="font-size:18px;color:#A78BFA"></i>
+        <div><div style="font-size:.78rem;font-weight:700">Relatório Preliminar</div>
+          <div style="font-size:.58rem;color:var(--t3)">Caso #2847 · 11 abr 2026</div></div>
+      </div>
+      <div class="l-sec"><div class="l-st">Hipótese Principal</div>
+        <div class="l-hyp"><div class="l-ht">TEA — grau moderado</div><div class="l-hc">CID-11: 6A02.1 · DSM-5: 299.00</div></div></div>
+      <div class="l-sec"><div class="l-st">Encaminhamentos</div>
+        <ul class="l-items"><li>Avaliação neurológica</li><li>Intervenção ABA</li><li>Suporte parental</li></ul></div>
+      <div style="margin-top:12px"><button class="bp"><span class="bp-i"><i class="ph-light ph-file-pdf" style="font-size:13px"></i></span>Baixar Laudo PDF</button></div>
+    </div></div>
+  </div>
+</aside>
+</div>
+
+<!-- Mobile nav -->
+<div class="mob-nav">
+  <button class="mob-btn" onclick="togglePanel('side')"><i class="ph-light ph-users-three" style="font-size:14px"></i>Equipe</button>
+  <button class="mob-btn" onclick="togglePanel('right')"><i class="ph-light ph-chart-bar" style="font-size:14px"></i>Diagnóstico</button>
+</div>
+
+<script>
+function toggle(b){b.classList.toggle('open');b.nextElementSibling.classList.toggle('open')}
+function togglePanel(p){
+  const side=document.getElementById('sidePanel'),right=document.getElementById('rightPanel');
+  if(p==='side'){side.classList.toggle('show');right.classList.remove('show')}
+  else{right.classList.toggle('show');side.classList.remove('show')}
+}
+</script>
+</body>
+</html>
